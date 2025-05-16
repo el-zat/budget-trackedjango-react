@@ -1,0 +1,118 @@
+body {
+  background: #101b3a;
+  color: #fff;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: Arial, sans-serif;
+}
+
+h1 {
+  font-size: 2.5rem;
+  letter-spacing: 2px;
+}
+
+.filters {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 32px;
+  /* box-shadow: 0 4px 20px rgba(0,0,0,0.2); */
+  justify-content: space-between;
+  
+}
+
+.balance {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #263b7a;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 6px;
+  font-weight: bold;
+  line-height: 1.5;
+  border: 2px solid black;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+  
+#date-filter {
+  background: #22306b;
+  padding: 10px;
+  font-size: 18px;
+  color: #fff;
+  text-align:left;
+  font-weight: bold;
+  border: 2px solid black;
+  border-radius: 5px;
+  height: 50px;
+}
+
+.interval {
+  display: flex;
+  flex-direction: column;
+  width: 130px;
+}
+
+.interval p {
+  margin: 0 0 10px 20px;
+  
+}
+
+.interval > input {
+  background: #2d458f;
+  color: #fff;
+  height: 30px;
+  font-size: 15px;
+  padding: 0 10px;
+  width: 120px;
+  
+}
+
+
+.categories {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+  height: 60px;
+  border-radius: 5px;
+}
+  
+.categories select, .categories input[type="date"] {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: #22306b;
+  color: #fff;
+  font-weight: bold;
+  border: 2px solid black;
+}
+
+#category-filter {
+  font-weight: bold;
+}
+
+.date-table {
+  background: #22306b;
+  border-radius: 5px;
+  border: 2px solid black;
+  margin-bottom: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 10px;
+  line-height: 1.5;
+}
+
+th, td {
+  text-align: left;
+  /* padding: 0 15px; */
+}
+  
+
+
+
