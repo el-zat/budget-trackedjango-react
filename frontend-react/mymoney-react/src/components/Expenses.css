@@ -20,9 +20,10 @@
 }
 
 .categories-input select,
-.expenses-input select,
+.expenses-select select,
 .euro-input #euro-input,
-.date-input input {
+.date-input input,
+.expenses-input input {
   height: 40px;
   border:solid 1px black;
   background: #22306b;
@@ -41,6 +42,7 @@
   caret-color: #fff !important;
   transition: background-color 5000s ease-in-out 0s !important;
 }
+
 
 .euro-input input:-webkit-autofill:focus {
   border-color: #fff !important;

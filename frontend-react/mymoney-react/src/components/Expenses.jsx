@@ -1,7 +1,6 @@
 import React, {useState, useEffect} from "react"
 import  './Expenses.css'
 import CurrencyInput from 'react-currency-input-field';
-import ReactTooltip from 'react-tooltip';
 
 
 const Expenses = () => {
@@ -12,7 +11,14 @@ const Expenses = () => {
     const [expenses, setExpenses] = useState([]);
     const [date, setDate] = useState(getToday());
     const [price, setPrice] = useState('');
+    const [miscExpense, setMiscExpense] = useState('');
     const [rows, setRows] = useState([]);
+    const [isEditing, setIsEditing] = useState(false);
+
+
+    const selectedCategoryObj = categories.find(
+        cat => String(cat.id) === String(selectedCategory)
+      );
 
 
     function getToday() {
@@ -23,87 +29,120 @@ const Expenses = () => {
         return `${yyyy}-${mm}-${dd}`;
     }
 
-
-    const handleSave = async (e) => {
-        e.preventDefault();
-        
-        if (
-          selectedCategory === 'all' ||
-          selectedExpense === 'all' ||
-          !price ||
-          !date
-        ) {
-          alert('Pless fill out all fields!');
-          return;
-        }
-
-        //Send user data to Django server
+    const getCleanPrice = (price) => {
         let cleanPrice = price;
         if (typeof cleanPrice === 'string') {
             cleanPrice = cleanPrice.replace(',', '.').replace(/[^\d.]/g, '');
         }
+        return cleanPrice;
+    }
+    
 
+    // Fetch expenses from django server
+    const fetchExpenses = async () => {
+        const response = await fetch('http://127.0.0.1:8000/api/myexpenses/');
+        const data = await response.json();
+        console.log("data:", data)
+        setRows(data);
+    };
+
+    useEffect(() => {
+        fetchExpenses();
+    }, []);
+    
+
+    const handleSave = async (e) => {
+        e.preventDefault();
+
+        const selectedCategoryObj = categories.find(cat => String(cat.id) === String(selectedCategory));
+        const isMisc = selectedCategoryObj?.name === "Miscellaneous";
+        const expenseName = isMisc ? miscExpense : selectedExpense;
+        
+        if (
+            selectedCategory === 'all' ||
+            (selectedCategoryObj?.name === "Miscellaneous" ? !miscExpense : selectedExpense === 'all') ||
+            !price ||
+            !date
+          ) {
+            alert('Please fill out all fields!');
+            return;
+          }
+
+        //Send new object to Django server
+        const expenseDate = date || getToday();
         const newJangoExpense = {
             category: categories.find(cat => String(cat.id) === String(selectedCategory))?.id || '',
-            name: selectedExpense,
-            price: cleanPrice,
-            date: date,
+            name: expenseName,
+            price: getCleanPrice(price),
+            date: expenseDate,
         };
 
         try {
             const response = await fetch('http://127.0.0.1:8000/api/myexpenses/', {
-            method: 'POST',
-            headers: {
+              method: 'POST',
+              headers: {
                 'Content-Type': 'application/json',
-                // 'X-CSRFToken': <token>, // if needed CSRF
-            },
-            body: JSON.stringify(newJangoExpense),
+              },
+              body: JSON.stringify(newJangoExpense),
             });
-
+        
             if (!response.ok) {
-                const errorData = await response.json();
-                alert('Error!: ' + JSON.stringify(errorData));
-                return;
+              const errorData = await response.json();
+              alert('Error!: ' + JSON.stringify(errorData));
+              return;
             }
-        } catch (error) {
+
+            // After post object, update the table from django server
+            await fetchExpenses();
+
+            console.log("date:", date)
+
+            // Reset input fields            
+            setSelectedCategory('all');
+            setSelectedExpense('all');
+            setPrice('');
+            setDate(getToday());
+        } 
+        catch (error) {
             alert(error.message);
         }
-
-        // Save user data in the table as a string row
-        setRows([
-            ...rows,
-            {
-                category: categories.find(cat => String(cat.id) === String(selectedCategory))?.name || '',
-                expense: selectedExpense,
-                price,
-                date,
-            },
-            ]);
-            
-        // Reset input fields
-        setSelectedCategory('all');
-        setSelectedExpense('all');
-        setPrice('');
-        setDate(getToday());
-
     };
 
 
-    
-    const handleAddDetails = () => {
-    
-    }
-    const handleDeleteExpense = () => {
-    
-    }
+    const deleteExpense = async (id) => {
+        if (!id) {
+          alert('Error: id undefined!');
+          return;
+        }
+        try {
+          const response = await fetch(`http://127.0.0.1:8000/api/myexpenses/${id}/`, {
+            method: 'DELETE',
+          });
+      
+          if (!response.ok) {
+            const errorText = await response.text();
+            alert(`Delete error on server! Status: ${response.status}, Message: ${errorText}`);
+            return;
+          }      
+          setRows(rows => rows.filter(row => row.id !== id));
+        } 
+        catch (error) {
+          alert('Error: ' + error.message);
+        }
+
+        // Update the table from django server
+        await fetchExpenses();
+    };
+
+
     const handlEditExpense = () => {
-    
-    }
-    const handleSaveExpense = () => {
-    
+        setIsEditing(!isEditing)
     }
 
-    // Get data from Django server
+    const handleAddDetails = () => {  
+    }
+
+
     useEffect(() => {
         fetch('http://127.0.0.1:8000/api/categories/')
           .then(res => res.json())
@@ -114,6 +153,7 @@ const Expenses = () => {
             console.error('Fetch error:', error);
           });
       }, []);
+
 
     useEffect(() => {
         fetch('http://127.0.0.1:8000/api/expenses/')
@@ -145,55 +185,86 @@ const Expenses = () => {
                 </thead>
                 <tbody>
                     {rows.map((row, idx) => (
-                    <tr key={idx}>
-                        <td>{row.category}</td>
-                        <td>{row.expense}
-                            {/* <button class="add-details" onClick={handleAddDetails}>Add Details?</button> */}
-                        </td> 
-                        <td>{row.date}</td>
-                        <td>€ {row.price}</td>               
-                        <td>
-                            <div class edit-delete>
-                                <button class="edit-expense" onClick={handlEditExpense}>Edit</button>
-                                <button class="delete-expense" onClick={handleDeleteExpense}>Delete</button>
-                            </div>
-                            
-                        </td>
-                    </tr>
+                        <tr key={row.id || idx}>
+                            <td>
+                                {
+                                    categories.find(cat => String(cat.id) === String(row.category))?.name 
+                                    || 'Unknown'
+                                }
+                            </td>
+                            <td>{row.name}</td>
+                            <td>{row.payment_date}</td>
+                            <td>€ {row.price}</td>
+                            <td>
+                                <div className="edit-delete">
+                                    <button className="edit-expense" onClick={handlEditExpense}>
+                                        {isEditing ? "Save" : "Edit"}
+                                    </button> 
+                                    <button
+                                        className="delete-expense"
+                                        onClick={() => deleteExpense(row.id)}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
                     ))}
                     <tr>
                         <td>
-                            <div className="categories-input">                                 
-                                <select value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)}>
-                                    <option value="all">Select Category</option>
-                                        {categories.map(cat => (
-                                            <option 
-                                                key={cat.id} 
-                                                value={cat.id}
-                                                data-tip={cat.description}
-                                                >
-                                                {cat.name}
-                                            </option>
-                                        ))}
-                                </select>    
+                            <div className="categories-input">
+                                <select
+                                    value={selectedCategory}
+                                    defaultValue=''
+                                    onChange={e => setSelectedCategory(e.target.value)}
+                                    required
+                                    >
+                                    <option value="all">Select Expense</option>  
+                                    {categories.map(cat => (
+                                        <option key={cat.id} value={cat.id}>
+                                            {cat.name}
+                                    </option>
+                                    ))}                                 
+                                </select>
                             </div>               
                         </td>
                         <td>
-                            <div className="expenses-input">                                 
-                                <select value={selectedExpense} onChange={e => setSelectedExpense(e.target.value)}>
-                                    <option value="all">Select Expense </option>
-                                        {expenses .filter(exp => selectedCategory === 'all' || 
-                                            String(exp.category) === String(selectedCategory)).map(exp => (
-                                            <option key={exp.id} value={exp.name}> {exp.name} </option>
-                                        ))}
-                                </select>    
+                        {selectedCategoryObj?.name === "Miscellaneous" ? (
+                            <div className="expenses-input">
+                                <input
+                                    type="text"
+                                    name="miscellaneous-expense"
+                                    placeholder="Enter expense"
+                                    value={miscExpense}
+                                    onChange={e => setMiscExpense(e.target.value)}
+                                />
                             </div>
+                            ) : (
+                            <div className="expenses-select">
+                                <select value={selectedExpense} onChange={e => setSelectedExpense(e.target.value)}>
+                                <option value="all">Select Expense</option>
+                                {expenses
+                                    .filter(exp =>
+                                    selectedCategory === 'all' ||
+                                    String(exp.category) === String(selectedCategory)
+                                    )
+                                    .map(exp => (
+                                    <option key={exp.id} value={exp.name}>{exp.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            )}
+
                         </td>   
                         <td>
                             <div className="date-input">
-                                <input type="date" value={date} onChange={e => setDate(e.target.value)} />
+                                <input 
+                                type="date" 
+                                value={date} 
+                                onChange={e => setDate(e.target.value)} 
+                                />
                             </div>                           
-                        </td>                                           
+                        </td>                                     
                         <td>
                             <div className="euro-input">
                                 <CurrencyInput id="euro-input"
