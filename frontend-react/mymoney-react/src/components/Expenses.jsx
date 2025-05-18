@@ -14,6 +14,8 @@ const Expenses = () => {
     const [miscExpense, setMiscExpense] = useState('');
     const [rows, setRows] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
+    const [editingId, setEditingId] = useState(null);
+    const [editPrice, setEditPrice] = useState(price);
 
 
     const selectedCategoryObj = categories.find(
@@ -54,7 +56,6 @@ const Expenses = () => {
     const handleSave = async (e) => {
         e.preventDefault();
 
-        const selectedCategoryObj = categories.find(cat => String(cat.id) === String(selectedCategory));
         const isMisc = selectedCategoryObj?.name === "Miscellaneous";
         const expenseName = isMisc ? miscExpense : selectedExpense;
         
@@ -135,9 +136,45 @@ const Expenses = () => {
     };
 
 
-    const handlEditExpense = () => {
-        setIsEditing(!isEditing)
-    }
+    const applyChanges = async (id) => {
+        if (editingId === id) {
+            // Сохранение изменений
+            const expenseToUpdate = rows.find(row => row.id === id);
+    
+            // Отправка на сервер (PATCH)
+            await fetch(`http://127.0.0.1:8000/api/myexpenses/${id}/`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ price: editPrice })
+            });
+    
+            // Обновляем таблицу локально
+            setRows(rows.map(row =>
+                row.id === id ? { ...row, price: editPrice } : row
+            ));
+    
+            setEditingId(null);
+            setEditPrice('');
+        } else {
+            // Входим в режим редактирования, подставляем текущую цену
+            const expense = rows.find(row => row.id === id);
+            setEditPrice(expense.price);
+            setEditingId(id);
+        }
+    };
+
+    const switchEditSaveExpense = (id) => {
+        if (editingId !== id) {
+            setEditingId(id);
+            const expense = rows.find(row => row.id === id);
+            setEditPrice(expense.price);
+        } else {
+            applyChanges(id);
+        }
+    };
+
 
     const handleAddDetails = () => {  
     }
@@ -194,11 +231,25 @@ const Expenses = () => {
                             </td>
                             <td>{row.name}</td>
                             <td>{row.payment_date}</td>
-                            <td>€ {row.price}</td>
+                            <td>
+                            {editingId === row.id ? (                           
+                                <CurrencyInput id="edit-price"
+                                    prefix="€ "
+                                    decimalsLimit={2} 
+                                    intlConfig={{ locale: 'de-DE', currency: 'EUR' }} 
+                                    placeholder="Enter new price"
+                                    value={editPrice}
+                                    onValueChange={value => setEditPrice(value)}
+                                />
+                            ) : (
+                                <>€ {row.price}</>
+                            )}
+                            </td>
                             <td>
                                 <div className="edit-delete">
-                                    <button className="edit-expense" onClick={handlEditExpense}>
-                                        {isEditing ? "Save" : "Edit"}
+                                    <button className="edit-expense"                                    
+                                        onClick={() => switchEditSaveExpense(row.id)}>
+                                        {editingId === row.id ? "Apply" : "Edit"}
                                     </button> 
                                     <button
                                         className="delete-expense"
