@@ -29,9 +29,9 @@ h1 {
 }
 
 .balance {
-  position: fixed;
+  /* position: fixed;
   top: 20px;
-  right: 20px;
+  right: 20px; */
   background: #263b7a;
   padding: 10px;
   font-size: 16px;

@@ -103,41 +103,6 @@
 }
 
 
-.category-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  width: 40%;
-  margin-top: 20px;
-}
-
-.category-row {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.cat-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-}
-
-.bar-container {
-  width: 100%;
-  background: #22306b;
-  border-radius: 6px;
-  height: 18px;
-  overflow: hidden;
-}
-
-.bar {
-  height: 100%;
-  border-radius: 6px 0 0 6px;
-  transition: width 0.4s;
-}
-
 .add-details {
   margin-left: 10px;
   background-color: #4e89ff;

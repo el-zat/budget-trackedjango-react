@@ -1,6 +1,6 @@
 import './App.css';
 import {Header} from "./components/Header"
-import {Expenses} from "./components/Expenses"
+import {Main} from "./components/Main"
 
 
 
@@ -9,7 +9,7 @@ function App() {
   return (
     <>
     <Header />
-    <Expenses />
+    <Main />
     </>
 
   );

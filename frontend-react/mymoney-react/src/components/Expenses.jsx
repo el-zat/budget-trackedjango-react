@@ -1,207 +1,12 @@
-import React, {useState, useEffect} from "react"
+import React, {useContext} from "react"
 import  './Expenses.css'
 import CurrencyInput from 'react-currency-input-field';
+import { ExpensesContext } from "./ExpensesContext";
 
 
 const Expenses = () => {
 
-    const [selectedCategory, setSelectedCategory] = useState('all');
-    const [categories, setCategories] = useState([]);
-    const [selectedExpense, setSelectedExpense] = useState('all');
-    const [expenses, setExpenses] = useState([]);
-    const [date, setDate] = useState(getToday());
-    const [price, setPrice] = useState('');
-    const [miscExpense, setMiscExpense] = useState('');
-    const [rows, setRows] = useState([]);
-    const [isEditing, setIsEditing] = useState(false);
-    const [editingId, setEditingId] = useState(null);
-    const [editPrice, setEditPrice] = useState(price);
-
-
-    const selectedCategoryObj = categories.find(
-        cat => String(cat.id) === String(selectedCategory)
-      );
-
-
-    function getToday() {
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        return `${yyyy}-${mm}-${dd}`;
-    }
-
-    const getCleanPrice = (price) => {
-        let cleanPrice = price;
-        if (typeof cleanPrice === 'string') {
-            cleanPrice = cleanPrice.replace(',', '.').replace(/[^\d.]/g, '');
-        }
-        return cleanPrice;
-    }
-    
-
-    // Fetch expenses from django server
-    const fetchExpenses = async () => {
-        const response = await fetch('http://127.0.0.1:8000/api/myexpenses/');
-        const data = await response.json();
-        console.log("data:", data)
-        setRows(data);
-    };
-
-    useEffect(() => {
-        fetchExpenses();
-    }, []);
-    
-
-    const handleSave = async (e) => {
-        e.preventDefault();
-
-        const isMisc = selectedCategoryObj?.name === "Miscellaneous";
-        const expenseName = isMisc ? miscExpense : selectedExpense;
-        
-        if (
-            selectedCategory === 'all' ||
-            (selectedCategoryObj?.name === "Miscellaneous" ? !miscExpense : selectedExpense === 'all') ||
-            !price ||
-            !date
-          ) {
-            alert('Please fill out all fields!');
-            return;
-          }
-
-        //Send new object to Django server
-        const expenseDate = date || getToday();
-        const newJangoExpense = {
-            category: categories.find(cat => String(cat.id) === String(selectedCategory))?.id || '',
-            name: expenseName,
-            price: getCleanPrice(price),
-            date: expenseDate,
-        };
-
-        try {
-            const response = await fetch('http://127.0.0.1:8000/api/myexpenses/', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(newJangoExpense),
-            });
-        
-            if (!response.ok) {
-              const errorData = await response.json();
-              alert('Error!: ' + JSON.stringify(errorData));
-              return;
-            }
-
-            // After post object, update the table from django server
-            await fetchExpenses();
-
-            console.log("date:", date)
-
-            // Reset input fields            
-            setSelectedCategory('all');
-            setSelectedExpense('all');
-            setPrice('');
-            setDate(getToday());
-        } 
-        catch (error) {
-            alert(error.message);
-        }
-    };
-
-
-    const deleteExpense = async (id) => {
-        if (!id) {
-          alert('Error: id undefined!');
-          return;
-        }
-        try {
-          const response = await fetch(`http://127.0.0.1:8000/api/myexpenses/${id}/`, {
-            method: 'DELETE',
-          });
-      
-          if (!response.ok) {
-            const errorText = await response.text();
-            alert(`Delete error on server! Status: ${response.status}, Message: ${errorText}`);
-            return;
-          }      
-          setRows(rows => rows.filter(row => row.id !== id));
-        } 
-        catch (error) {
-          alert('Error: ' + error.message);
-        }
-
-        // Update the table from django server
-        await fetchExpenses();
-    };
-
-
-    const applyChanges = async (id) => {
-        if (editingId === id) {
-            // Сохранение изменений
-            const expenseToUpdate = rows.find(row => row.id === id);
-    
-            // Отправка на сервер (PATCH)
-            await fetch(`http://127.0.0.1:8000/api/myexpenses/${id}/`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ price: editPrice })
-            });
-    
-            // Обновляем таблицу локально
-            setRows(rows.map(row =>
-                row.id === id ? { ...row, price: editPrice } : row
-            ));
-    
-            setEditingId(null);
-            setEditPrice('');
-        } else {
-            // Входим в режим редактирования, подставляем текущую цену
-            const expense = rows.find(row => row.id === id);
-            setEditPrice(expense.price);
-            setEditingId(id);
-        }
-    };
-
-    const switchEditSaveExpense = (id) => {
-        if (editingId !== id) {
-            setEditingId(id);
-            const expense = rows.find(row => row.id === id);
-            setEditPrice(expense.price);
-        } else {
-            applyChanges(id);
-        }
-    };
-
-
-    const handleAddDetails = () => {  
-    }
-
-
-    useEffect(() => {
-        fetch('http://127.0.0.1:8000/api/categories/')
-          .then(res => res.json())
-          .then(data => {
-            setCategories(data);
-          })
-          .catch(error => {
-            console.error('Fetch error:', error);
-          });
-      }, []);
-
-
-    useEffect(() => {
-        fetch('http://127.0.0.1:8000/api/expenses/')
-          .then(res => res.json())
-          .then(data => {
-            setExpenses(data);
-          })
-          .catch(error => {
-            console.error('Fetch error:', error);
-          });
-      }, []);
+    const expensesProviderValues = useContext(ExpensesContext)
 
 
     return  <React.Fragment>
@@ -221,25 +26,28 @@ const Expenses = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {rows.map((row, idx) => (
+                    
+                    {expensesProviderValues.rows.map((row, idx) => (                       
                         <tr key={row.id || idx}>
                             <td>
                                 {
-                                    categories.find(cat => String(cat.id) === String(row.category))?.name 
+                                    expensesProviderValues.categories.find(
+                                        cat => String(cat.id) === String(row.category))?.name 
                                     || 'Unknown'
                                 }
+                                
                             </td>
                             <td>{row.name}</td>
                             <td>{row.payment_date}</td>
                             <td>
-                            {editingId === row.id ? (                           
+                            {expensesProviderValues.editingId === row.id ? (                           
                                 <CurrencyInput id="edit-price"
                                     prefix="€ "
                                     decimalsLimit={2} 
                                     intlConfig={{ locale: 'de-DE', currency: 'EUR' }} 
                                     placeholder="Enter new price"
-                                    value={editPrice}
-                                    onValueChange={value => setEditPrice(value)}
+                                    value={expensesProviderValues.editPrice}
+                                    onValueChange={value => expensesProviderValues.setEditPrice(value)}
                                 />
                             ) : (
                                 <>€ {row.price}</>
@@ -248,12 +56,12 @@ const Expenses = () => {
                             <td>
                                 <div className="edit-delete">
                                     <button className="edit-expense"                                    
-                                        onClick={() => switchEditSaveExpense(row.id)}>
-                                        {editingId === row.id ? "Apply" : "Edit"}
+                                        onClick={() => expensesProviderValues.switchEditSaveExpense(row.id)}>
+                                        {expensesProviderValues.editingId === row.id ? "Apply" : "Edit"}
                                     </button> 
                                     <button
                                         className="delete-expense"
-                                        onClick={() => deleteExpense(row.id)}
+                                        onClick={() => expensesProviderValues.deleteExpense(row.id)}
                                     >
                                         Delete
                                     </button>
@@ -265,42 +73,44 @@ const Expenses = () => {
                         <td>
                             <div className="categories-input">
                                 <select
-                                    value={selectedCategory}
-                                    defaultValue=''
-                                    onChange={e => setSelectedCategory(e.target.value)}
+                                    value={expensesProviderValues.selectedCategory}
+                                    onChange={e => expensesProviderValues.setSelectedCategory(e.target.value)}
                                     required
                                     >
-                                    <option value="all">Select Expense</option>  
-                                    {categories.map(cat => (
-                                        <option key={cat.id} value={cat.id}>
+                                    <option value="all">Select Expense</option>
+                                    console.log('row:', row)  
+                                    {expensesProviderValues.categories.map(cat => (
+                                        <option 
+                                            key={cat.id} 
+                                            value={cat.id}>
                                             {cat.name}
-                                    </option>
+                                        </option>
                                     ))}                                 
                                 </select>
                             </div>               
                         </td>
                         <td>
-                        {selectedCategoryObj?.name === "Miscellaneous" ? (
+                        {expensesProviderValues.selectedCategoryObj?.name === "Miscellaneous" ? (
                             <div className="expenses-input">
                                 <input
                                     type="text"
                                     name="miscellaneous-expense"
                                     placeholder="Enter expense"
-                                    value={miscExpense}
-                                    onChange={e => setMiscExpense(e.target.value)}
+                                    value={expensesProviderValues.miscExpense}
+                                    onChange={e => expensesProviderValues.setMiscExpense(e.target.value)}
                                 />
                             </div>
                             ) : (
                             <div className="expenses-select">
-                                <select value={selectedExpense} onChange={e => setSelectedExpense(e.target.value)}>
-                                <option value="all">Select Expense</option>
-                                {expenses
-                                    .filter(exp =>
-                                    selectedCategory === 'all' ||
-                                    String(exp.category) === String(selectedCategory)
-                                    )
-                                    .map(exp => (
-                                    <option key={exp.id} value={exp.name}>{exp.name}</option>
+                                <select 
+                                    value={expensesProviderValues.selectedExpense} 
+                                    onChange={e => expensesProviderValues.setSelectedExpense(e.target.value)}>
+                                    <option value="all">Select Expense</option>
+                                    {expensesProviderValues.expenses.filter(
+                                        exp => expensesProviderValues.selectedCategory === 'all' ||
+                                        String(exp.category) === String(expensesProviderValues.selectedCategory)
+                                    ).map(exp => (
+                                        <option key={exp.id} value={exp.name}>{exp.name}</option>
                                     ))}
                                 </select>
                             </div>
@@ -311,8 +121,8 @@ const Expenses = () => {
                             <div className="date-input">
                                 <input 
                                 type="date" 
-                                value={date} 
-                                onChange={e => setDate(e.target.value)} 
+                                value={expensesProviderValues.date} 
+                                onChange={e => expensesProviderValues.setDate(e.target.value)} 
                                 />
                             </div>                           
                         </td>                                     
@@ -324,64 +134,25 @@ const Expenses = () => {
                                     decimalsLimit={2} 
                                     intlConfig={{ locale: 'de-DE', currency: 'EUR' }} 
                                     prefix="€ "
-                                    value={price}
-                                    onValueChange={(value) => setPrice(value)} 
+                                    value={expensesProviderValues.price}
+                                    onValueChange={(value) => expensesProviderValues.setPrice(value)} 
                                     />
                             </div>                           
-                        </td>            
-                        
+                        </td>                                    
                         <td>
                             <div className="save-btn">
-                                <button class="save-btn" onClick={handleSave}>Save</button>
+                                <button className="save-btn" 
+                                        onClick={expensesProviderValues.handleSave}>Save</button>
                             </div>                            
                         </td>                               
-                    </tr>
-                    
+                    </tr>                    
                 </tbody>
             </table>
    
-            <div className="category-summary">
-                <h2>Monthly Category Summary</h2>
-                <div className="category-row">
-                    <div className="cat-header">
-                        <span><i className="fas fa-home icon housing"></i> Housing</span>
-                        <span className="percent">60%</span>
-                    </div>
-                    <div className="bar-container">
-                        <div className="bar" style={{ width: '60%', background: '#4e89ff' }}></div>
-                    </div>
-                </div>
-                <div className="category-row">
-                    <div className="cat-header">
-                        <span><i className="fas fa-shopping-basket icon groceries"></i> Groceries</span>
-                        <span className="percent">12.5%</span>
-                    </div>
-                    <div className="bar-container">
-                        <div className="bar" style={{ width: '12.5%', background: '#43e97b' }}></div>
-                    </div>
-                </div>
-                <div className="category-row">
-                    <div className="cat-header">
-                        <span><i className="fas fa-receipt icon taxes"></i> Taxes</span>
-                        <span className="percent">15%</span>
-                    </div>
-                    <div className="bar-container">
-                        <div className="bar" style={{ width: '15%', background: '#ffb347' }}></div>
-                    </div>
-                </div>
-            </div>
-
-
+            
         </div>
-        
-   
-   
-                
+  
             </React.Fragment>
-
-                    
-
-
 }
     
 export {Expenses}
