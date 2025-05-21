@@ -17,6 +17,8 @@ function Main() {
     const [rows, setRows] = useState([]);
     const [editingId, setEditingId] = useState(null);
     const [editPrice, setEditPrice] = useState(price);
+    const [totalPrice, setTotalPrice] = useState(0);
+
 
     const [selectedInterval, setSelectedInterval] = useState("month");
     const [dateFrom, setDateFrom] = useState(getToday());
@@ -122,6 +124,13 @@ function Main() {
     }, []);
     
 
+    const getTotalPrice = (price) => {       
+        setTotalPrice(prevTotal => prevTotal + Number(price));
+    }
+
+    
+
+
     const handleSave = async (e) => {
         e.preventDefault();
 
@@ -168,7 +177,7 @@ function Main() {
             // After post object, update the table from django server
             await fetchExpenses();
 
-            console.log("payment date:", paymentDate)
+            getTotalPrice(price);
 
             // Reset input fields            
             setSelectedCategory('all');
@@ -180,6 +189,8 @@ function Main() {
             alert(error.message);
         }
     };
+
+    
 
 
     const deleteExpense = async (id) => {
@@ -372,6 +383,7 @@ function Main() {
         rows: rows,
         editingId: editingId,
         editPrice: editPrice,
+        totalPrice: totalPrice,
         getToday: getToday,
         getFirstDayOfYear: getFirstDayOfYear,
         switchEditSaveExpense: switchEditSaveExpense,

@@ -8,10 +8,18 @@ const Expenses = () => {
 
     const expensesProviderValues = useContext(ExpensesContext)
 
+    const formattedTotal =  expensesProviderValues.totalPrice.toLocaleString('ru-RU', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
+
 
     return  <React.Fragment>
         <div className="expenses-wrapper">
-            <h2>Expenses</h2>
+            <div className="expenses-header">
+                <h2>Expenses</h2>
+                <div className="total">Total: € {formattedTotal} </div>
+            </div>
             <table className="expenses-table">
                 <thead>
                     <tr>
@@ -159,8 +167,7 @@ const Expenses = () => {
                         </td>                             
                     </tr>                    
                 </tbody>
-            </table>
-      
+            </table>     
         </div>
   
             </React.Fragment>
