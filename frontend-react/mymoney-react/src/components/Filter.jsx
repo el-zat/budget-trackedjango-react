@@ -10,32 +10,52 @@ const Filter = () => {
 
     return  <React.Fragment>                
               <header>               
-                <div className="filters">       
-                  <select 
-                      id="date-filter" 
-                      value={filterProviderValues.filter} 
-                      onSelect={filterProviderValues.handleDateFilter} 
-                      onChange={e => filterProviderValues.setFilter(e.target.value)}
-                    >
-                    <option value="month">This Month</option>
-                    <option value="year" >This Year</option>
-                    <option value="day">Today</option>
-                    <option value="custom">Custom Interval</option>
-                  </select>                        
-                  {filterProviderValues.filter === "custom" && (
-                    <div className="interval"><p>Input Interval:</p>
-                      <input 
-                          type="date" 
-                          value={filterProviderValues.dateFrom} 
-                          onChange={e => filterProviderValues.setDateFrom(e.target.value)}
-                        />
-                      <input 
-                          type="date" 
-                          value={filterProviderValues.dateTo} 
-                          onChange={e => filterProviderValues.setDateTo(e.target.value)}
-                        />
+                <div className="filters">         
+                  <div className="date-filter">
+                  {filterProviderValues.selectedInterval !== "custom" ? (
+                    <div className="interval">
+                      <select
+                        id="date-filter"
+                        value={filterProviderValues.selectedInterval}
+                        onChange={e => {
+                          const val = e.target.value;
+                          filterProviderValues.setSelectedInterval(val);
+                          if (val !== "custom") {
+                            filterProviderValues.handleDateFilter(val);
+                          }
+                        }}
+                      >
+                        <option value="month">This Month</option>
+                        <option value="year">This Year</option>
+                        <option value="today">Today</option>
+                        <option value="custom">Custom Interval</option>
+                      </select>
                     </div>
-                  )}                                                                                         
+                  ) : (
+                    <div className="custom-interval">
+                      <p>Input Interval:</p>
+                      <input
+                        type="date"
+                        value={filterProviderValues.dateFrom}
+                        onChange={e => filterProviderValues.setDateFrom(e.target.value)}
+                      />
+                      <input
+                        type="date"
+                        value={filterProviderValues.dateTo}
+                        onChange={e => filterProviderValues.setDateTo(e.target.value)}
+                      />
+                      <div className="set-interval">
+                        <button
+                          className="set-interval-button"
+                          onClick={() => filterProviderValues.handleDateFilter("custom")}
+                        >
+                          Apply Interval
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                   <table className="date-table">
                     <tbody>
                       <tr>
@@ -52,12 +72,11 @@ const Filter = () => {
                   <div className="categories">                  
                     <select 
                         value={filterProviderValues.selectedCategory} 
-                        onSelect={filterProviderValues.handleDateFilter} 
-                        onChange={e => filterProviderValues.setSelectedCategory(e.target.value)}
+                        onChange={filterProviderValues.handleCategoryFilter}
                       >
                       <option value="all">All Categories</option>
                         {filterProviderValues.categories.map(cat => (
-                        <option key={cat.id} value={cat.name}>
+                        <option key={cat.id} value={cat.id}>
                           {cat.name}
                       </option>
                       ))}

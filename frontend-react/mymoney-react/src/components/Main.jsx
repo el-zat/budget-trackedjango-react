@@ -11,14 +11,14 @@ function Main() {
     const [categories, setCategories] = useState([]);
     const [selectedExpense, setSelectedExpense] = useState('all');
     const [expenses, setExpenses] = useState([]);
-    const [date, setDate] = useState(getToday());
+    const [paymentDate, setPaymentDate] = useState(getToday());
     const [price, setPrice] = useState('');
     const [miscExpense, setMiscExpense] = useState('');
     const [rows, setRows] = useState([]);
     const [editingId, setEditingId] = useState(null);
     const [editPrice, setEditPrice] = useState(price);
 
-    const [filter, setFilter] = useState("month");
+    const [selectedInterval, setSelectedInterval] = useState("month");
     const [dateFrom, setDateFrom] = useState(getToday());
     const [dateTo, setDateTo] = useState(getToday());
 
@@ -46,7 +46,7 @@ function Main() {
 
     const getStartDate = (value) => {
         switch(value) {
-          case 'day':
+          case 'today':
             return getToday();
           case 'custom':
             return dateFrom;
@@ -61,32 +61,35 @@ function Main() {
 
     const getEndDate = (value) => {
         switch(value) {
-            case 'day':
-            return getToday();
+            case 'today':
+                return getToday();
             case 'custom':
-            return dateTo; 
+                return dateTo; 
             case 'month':
-            return getToday();
+                return getToday();
             case 'year':
-            return getToday();
+                return getToday();
             default:
-            return "";
+                return "";
         }
     };
       
-    const startDate = getStartDate(filter);
-    const endDate = getEndDate(filter);
+    const startDate = getStartDate(selectedInterval);
+    const endDate = getEndDate(selectedInterval);
 
 
-    function formatDate(dateString) {
-        const [yyyy, mm, dd] = dateString.toString().split("-");
-        return `${dd}.${mm}.${yyyy}`;
+    function formatDate(value) {
+        const d = new Date(value);
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
     }
 
 
     const selectedCategoryObj = categories.find(
         cat => String(cat.id) === String(selectedCategory)
-      );
+    );
 
 
     function getToday() {
@@ -124,24 +127,27 @@ function Main() {
 
         const isMisc = selectedCategoryObj?.name === "Miscellaneous";
         const expenseName = isMisc ? miscExpense : selectedExpense;
-        
+
+        // Get value of payment date from input
+        const paymentDate = document.querySelector('input[name="paymentDate"]')?.value;
+        console.log('pyment date from input:', paymentDate)
+
         if (
             selectedCategory === 'all' ||
             (selectedCategoryObj?.name === "Miscellaneous" ? !miscExpense : selectedExpense === 'all') ||
             !price ||
-            !date
+            !paymentDate
           ) {
             alert('Please fill out all fields!');
             return;
           }
 
         // Send a new object to Django server
-        const expenseDate = date || getToday();
         const newJangoExpense = {
             category: categories.find(cat => String(cat.id) === String(selectedCategory))?.id || '',
             name: expenseName,
             price: getCleanPrice(price),
-            date: expenseDate,
+            payment_date: paymentDate ? paymentDate : getToday(),
         };
 
         try {
@@ -162,13 +168,13 @@ function Main() {
             // After post object, update the table from django server
             await fetchExpenses();
 
-            console.log("date:", date)
+            console.log("payment date:", paymentDate)
 
             // Reset input fields            
             setSelectedCategory('all');
             setSelectedExpense('all');
             setPrice('');
-            setDate(getToday());
+            setPaymentDate(getToday());
         } 
         catch (error) {
             alert(error.message);
@@ -270,28 +276,88 @@ function Main() {
       }, []);
 
 
-
-    const handleCategolyFilter = () => {
-
-
+    const handleCategoryFilter = (event) => {
+        const value = event.target.value;
+        setSelectedCategory(value)
+        console.log('selected category:', value)
+        const rows = expensesProviderValues.rows || []
+        setRows(rows => rows.filter(row =>
+            value === 'all' ||
+            String(row.category) === String(value)
+        ))
     }
 
-    const handleDateFilter = () => {
+    const handleDateFilter = (event) => {
+        let filter;
+        if (event && event.target && event.target.value) {
+            filter = event.target.value;
+            setSelectedInterval(filter);
+        } else {           
+            filter = selectedInterval;
+        }
+        console.log('selected interval:', filter);
+        
+        const rows = expensesProviderValues.rows || []
 
+        setRows(rows.filter(row => {
+            const rowDate = formatDate(row.payment_date);
+            
+            switch (filter) {
+                case "today":
+                    return rowDate === getToday()
+
+                case "month":
+                    return (
+                        rowDate >= getFirstDayOfMonth() &&
+                        rowDate <= getToday()
+                    );
+
+                case "year":
+                    return (
+                        rowDate >= getFirstDayOfYear() &&
+                        rowDate <= getToday()
+                    );
+
+                case "custom":
+                    if (!startDate || !endDate) return true;
+                    return (
+                        rowDate >= startDate &&
+                        rowDate <= endDate
+                    );
+
+                default:
+                    return true; // No filter, show all
+            }
+        }));
+    }
+
+
+    const sortAscending = () => {
+        console.log('sort ascending')
+        setRows(rows.slice().sort((a, b) => new Date(a.payment_date) - new Date(b.payment_date))); 
+    }
+
+    const sortDescending = () => {
+        console.log('sort descending')
+        setRows(rows.slice().sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date))); 
     }
 
     const filterProviderValues = {       
-        filter: filter,
+        selectedInterval: selectedInterval,
         dateFrom: dateFrom,
         dateTo: dateTo,       
         startDate: startDate,
         endDate: endDate,       
         categories: categories,
-        handleCategolyFilter: handleCategolyFilter,
+        setSelectedCategory: setSelectedCategory,
+        handleCategoryFilter: handleCategoryFilter,
         handleDateFilter: handleDateFilter,
         formatDate: formatDate,
         getToday: getToday,
         getFirstDayOfMonth: getFirstDayOfMonth,
+        setSelectedInterval: setSelectedInterval,
+        setDateFrom: setDateFrom,
+        setDateTo: setDateTo,
     }
 
     
@@ -300,7 +366,7 @@ function Main() {
         categories: categories,
         selectedExpense:selectedExpense,
         expenses: expenses,
-        date:date,
+        paymentDate: paymentDate,
         price: price,
         miscExpense: miscExpense,
         rows: rows,
@@ -316,6 +382,10 @@ function Main() {
         setSelectedExpense: setSelectedExpense,
         setPrice: setPrice,
         setEditPrice: setEditPrice,
+        setSelectedInterval: setSelectedInterval,
+        sortAscending: sortAscending,
+        sortDescending: sortDescending,
+        setPaymentDate: setPaymentDate,
     }
 
 

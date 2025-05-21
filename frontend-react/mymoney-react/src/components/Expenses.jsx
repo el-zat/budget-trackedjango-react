@@ -1,4 +1,4 @@
-import React, {useContext} from "react"
+import React, { useContext} from "react"
 import  './Expenses.css'
 import CurrencyInput from 'react-currency-input-field';
 import { ExpensesContext } from "./ExpensesContext";
@@ -18,24 +18,35 @@ const Expenses = () => {
                         <th>Category</th>
                         <th>Expense</th>                    
                         <th>Date
-                            <button className="sort-btn" title="Sort ascending"><i className="fas fa-arrow-up"></i></button>
-                            <button className="sort-btn" title="Sort descending"><i className="fas fa-arrow-down"></i></button>
+                            <button 
+                                className="sort-btn" 
+                                title="Sort ascending"
+                                onClick={expensesProviderValues.sortAscending}
+                                >
+                                    <i className="fas fa-arrow-up"></i>
+                            </button>
+                            <button 
+                                className="sort-btn" 
+                                title="Sort descending"
+                                onClick={expensesProviderValues.sortDescending}
+                                >
+                                    <i className="fas fa-arrow-down"></i>
+                            </button>
                         </th>
                         <th>Price, €</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    
-                    {expensesProviderValues.rows.map((row, idx) => (                       
+                    {expensesProviderValues.rows
+                        .map((row, idx) => (                       
                         <tr key={row.id || idx}>
                             <td>
                                 {
                                     expensesProviderValues.categories.find(
                                         cat => String(cat.id) === String(row.category))?.name 
                                     || 'Unknown'
-                                }
-                                
+                                }                                   
                             </td>
                             <td>{row.name}</td>
                             <td>{row.payment_date}</td>
@@ -69,7 +80,7 @@ const Expenses = () => {
                             </td>
                         </tr>
                     ))}
-                    <tr>
+                    <tr>                           
                         <td>
                             <div className="categories-input">
                                 <select
@@ -90,7 +101,7 @@ const Expenses = () => {
                             </div>               
                         </td>
                         <td>
-                        {expensesProviderValues.selectedCategoryObj?.name === "Miscellaneous" ? (
+                            {expensesProviderValues.selectedCategoryObj?.name === "Miscellaneous" ? (
                             <div className="expenses-input">
                                 <input
                                     type="text"
@@ -115,14 +126,14 @@ const Expenses = () => {
                                 </select>
                             </div>
                             )}
-
                         </td>   
                         <td>
                             <div className="date-input">
                                 <input 
-                                type="date" 
-                                value={expensesProviderValues.date} 
-                                onChange={e => expensesProviderValues.setDate(e.target.value)} 
+                                    type="date" 
+                                    name="paymentDate"
+                                    value={expensesProviderValues.paymentDate} 
+                                    onChange={e => {expensesProviderValues.setPaymentDate(e.target.value)}} 
                                 />
                             </div>                           
                         </td>                                     
@@ -141,15 +152,15 @@ const Expenses = () => {
                         </td>                                    
                         <td>
                             <div className="save-btn">
-                                <button className="save-btn" 
-                                        onClick={expensesProviderValues.handleSave}>Save</button>
-                            </div>                            
-                        </td>                               
+                                <button className="save-btn"
+                                        onClick={expensesProviderValues.handleSave}>Save
+                                </button>
+                            </div>                          
+                        </td>                             
                     </tr>                    
                 </tbody>
             </table>
-   
-            
+      
         </div>
   
             </React.Fragment>
