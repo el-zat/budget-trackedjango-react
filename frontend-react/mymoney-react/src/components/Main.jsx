@@ -17,12 +17,11 @@ function Main() {
     const [rows, setRows] = useState([]);
     const [editingId, setEditingId] = useState(null);
     const [editPrice, setEditPrice] = useState(price);
+    const [editDate, setEditDate] = useState(paymentDate);
 
     const [selectedInterval, setSelectedInterval] = useState('select-interval');
     const [dateFrom, setDateFrom] = useState(getToday());
     const [dateTo, setDateTo] = useState(getToday());
-    const [isFiltered, setIsFiltered] = useState(false);
-    const [monthRows, setMonthRows] = useState([]);
 
 
     function getToday() {
@@ -208,32 +207,36 @@ function Main() {
         await fetchExpenses();
     };
 
+    // Update editDate after paymentDate was updated
+    useEffect(() => {
+        setEditDate(paymentDate);
+      }, [paymentDate]);
+
 
     const applyChanges = async (id) => {
         if (editingId === id) {
-            // Save changes
-            const expenseToUpdate = rows.find(row => row.id === id);
-    
             // Send to server (PATCH)
             await fetch(`http://127.0.0.1:8000/api/myexpenses/${id}/`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ price: editPrice })
+                body: JSON.stringify({ price: editPrice,  payment_date: editDate })
             });
     
             // Update the local table
             setRows(rows.map(row =>
-                row.id === id ? { ...row, price: editPrice } : row
+                row.id === id ? { ...row, price: editPrice, payment_date: editDate } : row
             ));
     
             setEditingId(null);
             setEditPrice('');
+            setEditDate('');
         } else {
-            // Edit price
+            // Edit price and payment date
             const expense = rows.find(row => row.id === id);
             setEditPrice(expense.price);
+            setEditDate(expense.payment_date);
             setEditingId(id);
         }
     };
@@ -243,6 +246,7 @@ function Main() {
             setEditingId(id);
             const expense = rows.find(row => row.id === id);
             setEditPrice(expense.price);
+            setEditDate(expense.payment_date);
         } else {
             applyChanges(id);
         }
@@ -308,9 +312,9 @@ function Main() {
                 case "month":
                     return rowDate >= getFirstDayOfMonth() && rowDate <= getToday();
                 case "select-interval":
-                    return false; // Пусто
+                    return false; // Empty
                 default:
-                    // По умолчанию — месяц
+                    // Currrent month on default
                     return rowDate >= getFirstDayOfMonth() && rowDate <= getToday();
             }
         }));
@@ -358,6 +362,8 @@ function Main() {
         rows: rows,
         editingId: editingId,
         editPrice: editPrice,
+        editDate: editDate,
+        setEditDate: setEditDate,       
         getToday: getToday,
         getFirstDayOfYear: getFirstDayOfYear,
         switchEditSaveExpense: switchEditSaveExpense,
@@ -372,6 +378,7 @@ function Main() {
         sortAscending: sortAscending,
         sortDescending: sortDescending,
         setPaymentDate: setPaymentDate,
+        formatDate: formatDate,
     }
 
 

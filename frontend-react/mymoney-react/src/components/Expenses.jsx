@@ -11,7 +11,6 @@ const Expenses = () => {
     const totalPrice = expensesProviderValues.rows.reduce((prevTotal, row) => prevTotal + Number(row.price), 0)  
     
 
-
     return  <React.Fragment>
         <div className="expenses-wrapper">
             <div className="expenses-header">
@@ -55,7 +54,17 @@ const Expenses = () => {
                                 }                                   
                             </td>
                             <td>{row.name}</td>
-                            <td>{row.payment_date}</td>
+                            <td>
+                                {expensesProviderValues.editingId === row.id ? (                           
+                                <input
+                                type="date"
+                                value={expensesProviderValues.editDate || ""}
+                                onChange={e => expensesProviderValues.setEditDate(e.target.value)}
+                              />
+                            ) : (
+                                <>€ {row.payment_date}</>
+                            )}
+                            </td>
                             <td>
                             {expensesProviderValues.editingId === row.id ? (                           
                                 <CurrencyInput id="edit-price"
