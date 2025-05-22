@@ -8,14 +8,12 @@ const Expenses = () => {
 
     const expensesProviderValues = useContext(ExpensesContext)
 
-    const totalPrice = expensesProviderValues.rows.reduce((prevTotal, row) => prevTotal + Number(row.price), 0)  
-    
 
     return  <React.Fragment>
         <div className="expenses-wrapper">
             <div className="expenses-header">
                 <h2>Expenses</h2>
-                <div className="total">Total: € {totalPrice} </div>
+                <div className="total">Total: € {expensesProviderValues.totalPrice} </div>
             </div>
             <table className="expenses-table">
                 <thead>

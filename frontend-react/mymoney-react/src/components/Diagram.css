@@ -1,34 +1,45 @@
 .category-summary {
     display: flex;
     flex-direction: column;
-    gap: 18px;
-    width: 40%;
+    gap: 10px;
+    width: 55%;
     margin: 30px;
-  }
+}
   
-  .category-row {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
+.category-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  /* justify-content: space-between; */
+}
+
+.cat-header {
+  /* display: flex;
+  justify-content: space-between; */
+  /* align-items: center; */
+  /* gap: 12px; */
+  width: 30%;
+  font-size: 17px;
+}
   
-  .cat-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-  }
+.bar-container {
+  width: 60%;
+  height: 10px;
+  background: #22306b;
+  border-radius: 6px;
+  height: 18px;
+  overflow: hidden;
+  margin-right: 10px;
+  /* style={{ width: '60%', background: '#4e89ff' }} */
+}
   
-  .bar-container {
-    width: 100%;
-    background: #22306b;
-    border-radius: 6px;
-    height: 18px;
-    overflow: hidden;
-  }
-  
-  .bar {
-    height: 100%;
-    border-radius: 6px 0 0 6px;
-    transition: width 0.4s;
-  }
+.bar {
+  height: 100%;
+  border-radius: 6px 0 0 6px;
+  transition: width 0.4s;
+  width: 60%;
+  background: '#4e89ff';
+  /* className="bar" style={{ width: '60%', background: '#4e89ff' }} */
+}
+

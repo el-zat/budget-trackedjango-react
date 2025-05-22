@@ -1,40 +1,70 @@
-import React, {useState, useEffect} from "react"
+import React, {useState, useContext} from "react"
 import  './Diagram.css'
+import { ExpensesContext } from "./ExpensesContext";
+import { FilterContext } from "./FilterContext";
 
 
 const Diagram = () => {
-        return <React.Fragment> 
-            <div className="category-summary">
-                <h2>Monthly Category Summary</h2>
-                <div className="category-row">
-                    <div className="cat-header">
-                        <span><i className="fas fa-home icon housing"></i> Housing</span>
-                        <span className="percent">60%</span>
-                    </div>
-                    <div className="bar-container">
-                        <div className="bar" style={{ width: '60%', background: '#4e89ff' }}></div>
-                    </div>
+
+    const expensesProviderValues = useContext(ExpensesContext)
+    // const filtersProviderValues = useContext(ExpensesContext)
+
+
+    // Groupe expenses by their categories
+    const groupedByCategoryName = () => {
+        return expensesProviderValues.rows.reduce((acc, expense) => {
+          const cat = expensesProviderValues.categories.find(c => String(c.id) === String(expense.category));
+          const catName = cat?.name || 'Unknown';
+          if (!acc[catName]) acc[catName] = [];
+          acc[catName].push(expense);
+          return acc;
+        }, {});
+    };
+
+    function percentByGroup(items) {
+      return ((items.reduce((sum, item) => 
+        sum + Number(item.price || 0), 0)) * 100 / expensesProviderValues.totalPrice).toFixed(1);
+    }
+    
+    const grouped = groupedByCategoryName();
+
+    const groupArray = Object.entries(grouped).map(([name, items]) => ({
+      name,
+      items,
+      percent: percentByGroup(items)
+    }));
+
+    const sortedGroupArray = groupArray.sort((a, b) => b.percent - a.percent);
+
+      
+    function getRandomHexColor() {
+      return '#' + Math.floor(Math.random() * 0xFFFFFF)
+        .toString(16)
+        .padStart(6, '0');
+    }
+
+
+    return <React.Fragment> 
+        <div className="category-summary">
+            <h2>Category Summary</h2>
+            {sortedGroupArray.map((group) => (
+
+            <div className="category-row" key={group.name}>
+                <div className="cat-header">
+                  <span>{group.name}</span>
                 </div>
-                <div className="category-row">
-                    <div className="cat-header">
-                        <span><i className="fas fa-shopping-basket icon groceries"></i> Groceries</span>
-                        <span className="percent">12.5%</span>
-                    </div>
-                    <div className="bar-container">
-                        <div className="bar" style={{ width: '12.5%', background: '#43e97b' }}></div>
-                    </div>
+                <div className="bar-container">
+                  <div className="bar" 
+                        style={{ width: `${group.percent}%`, background: getRandomHexColor() }}>                           
+                  </div>
                 </div>
-                <div className="category-row">
-                    <div className="cat-header">
-                        <span><i className="fas fa-receipt icon taxes"></i> Taxes</span>
-                        <span className="percent">15%</span>
-                    </div>
-                    <div className="bar-container">
-                        <div className="bar" style={{ width: '15%', background: '#ffb347' }}></div>
-                    </div>
-                </div>
+                <span className="percent"> { group.percent} % </span>           
             </div>
-        </React.Fragment> 
+            ))}                                    
+        </div>
+  
+      </React.Fragment> 
+
 }
 
 export {Diagram}

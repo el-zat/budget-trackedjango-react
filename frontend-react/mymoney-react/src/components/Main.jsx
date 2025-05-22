@@ -24,6 +24,8 @@ function Main() {
     const [dateTo, setDateTo] = useState(getToday());
 
 
+    const totalPrice = rows.reduce((prevTotal, row) => prevTotal + Number(row.price), 0)
+
     function getToday() {
         const today = new Date();
         const yyyy = today.getFullYear();
@@ -351,6 +353,7 @@ function Main() {
     }
 
     
+    
     const expensesProviderValues = {       
         selectedCategory: selectedCategory,
         categories: categories,
@@ -363,6 +366,7 @@ function Main() {
         editingId: editingId,
         editPrice: editPrice,
         editDate: editDate,
+        totalPrice: totalPrice,
         setEditDate: setEditDate,       
         getToday: getToday,
         getFirstDayOfYear: getFirstDayOfYear,
@@ -389,8 +393,11 @@ function Main() {
                         <Expenses />
                     </ExpensesContext.Provider>
                 </FilterContext.Provider>
-                
-                {/* {<Diagram /> } */}
+                <FilterContext.Provider value={filterProviderValues}>
+                    <ExpensesContext.Provider value={expensesProviderValues}>
+                        <Diagram />
+                    </ExpensesContext.Provider>
+                </FilterContext.Provider>
             </main>
     
 }
