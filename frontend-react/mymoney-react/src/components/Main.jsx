@@ -17,12 +17,12 @@ function Main() {
     const [rows, setRows] = useState([]);
     const [editingId, setEditingId] = useState(null);
     const [editPrice, setEditPrice] = useState(price);
-    const [totalPrice, setTotalPrice] = useState(0);
 
-
-    const [selectedInterval, setSelectedInterval] = useState("month");
+    const [selectedInterval, setSelectedInterval] = useState('select-interval');
     const [dateFrom, setDateFrom] = useState(getToday());
     const [dateTo, setDateTo] = useState(getToday());
+    const [isFiltered, setIsFiltered] = useState(false);
+    const [monthRows, setMonthRows] = useState([]);
 
 
     function getToday() {
@@ -122,14 +122,8 @@ function Main() {
     useEffect(() => {
         fetchExpenses();
     }, []);
-    
 
-    const getTotalPrice = (price) => {       
-        setTotalPrice(prevTotal => prevTotal + Number(price));
-    }
-
-    
-
+ 
 
     const handleSave = async (e) => {
         e.preventDefault();
@@ -177,8 +171,6 @@ function Main() {
             // After post object, update the table from django server
             await fetchExpenses();
 
-            getTotalPrice(price);
-
             // Reset input fields            
             setSelectedCategory('all');
             setSelectedExpense('all');
@@ -189,8 +181,6 @@ function Main() {
             alert(error.message);
         }
     };
-
-    
 
 
     const deleteExpense = async (id) => {
@@ -298,50 +288,33 @@ function Main() {
         ))
     }
 
-    const handleDateFilter = (event) => {
-        let filter;
-        if (event && event.target && event.target.value) {
-            filter = event.target.value;
-            setSelectedInterval(filter);
-        } else {           
-            filter = selectedInterval;
-        }
-        console.log('selected interval:', filter);
-        
-        const rows = expensesProviderValues.rows || []
 
-        setRows(rows.filter(row => {
+    const handleDateFilter = (filterValue) => {
+        const filter = filterValue || selectedInterval;
+        setSelectedInterval(filter); 
+
+        const allRows = expensesProviderValues.rows || []
+    
+        setRows(allRows.filter(row => {
             const rowDate = formatDate(row.payment_date);
-            
             switch (filter) {
                 case "today":
-                    return rowDate === getToday()
-
-                case "month":
-                    return (
-                        rowDate >= getFirstDayOfMonth() &&
-                        rowDate <= getToday()
-                    );
-
+                    return rowDate === getToday();
                 case "year":
-                    return (
-                        rowDate >= getFirstDayOfYear() &&
-                        rowDate <= getToday()
-                    );
-
+                    return rowDate >= getFirstDayOfYear() && rowDate <= getToday();
                 case "custom":
                     if (!startDate || !endDate) return true;
-                    return (
-                        rowDate >= startDate &&
-                        rowDate <= endDate
-                    );
-
+                    return rowDate >= startDate && rowDate <= endDate;
+                case "month":
+                    return rowDate >= getFirstDayOfMonth() && rowDate <= getToday();
+                case "select-interval":
+                    return false; // Пусто
                 default:
-                    return true; // No filter, show all
+                    // По умолчанию — месяц
+                    return rowDate >= getFirstDayOfMonth() && rowDate <= getToday();
             }
         }));
-    }
-
+    };
 
     const sortAscending = () => {
         console.log('sort ascending')
@@ -352,6 +325,8 @@ function Main() {
         console.log('sort descending')
         setRows(rows.slice().sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date))); 
     }
+
+
 
     const filterProviderValues = {       
         selectedInterval: selectedInterval,
@@ -383,7 +358,6 @@ function Main() {
         rows: rows,
         editingId: editingId,
         editPrice: editPrice,
-        totalPrice: totalPrice,
         getToday: getToday,
         getFirstDayOfYear: getFirstDayOfYear,
         switchEditSaveExpense: switchEditSaveExpense,

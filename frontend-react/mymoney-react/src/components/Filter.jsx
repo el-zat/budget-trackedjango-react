@@ -25,9 +25,10 @@ const Filter = () => {
                           }
                         }}
                       >
+                        <option value="select-interval">Select Interval</option>
                         <option value="month">This Month</option>
-                        <option value="year">This Year</option>
-                        <option value="today">Today</option>
+                        <option value="today">Today</option>                     
+                        <option value="year">This Year</option>                  
                         <option value="custom">Custom Interval</option>
                       </select>
                     </div>
@@ -60,11 +61,23 @@ const Filter = () => {
                     <tbody>
                       <tr>
                         <th>Start Date:</th>
-                        <td>{filterProviderValues.formatDate(filterProviderValues.startDate)}</td>
+                        <td>
+                          {
+                            filterProviderValues.selectedInterval === "select-interval"
+                            ? ""                            
+                            : filterProviderValues.formatDate(filterProviderValues.startDate)
+                          }
+                        </td>
                       </tr>
                       <tr>
                         <th>End Date:</th>
-                        <td>{filterProviderValues.formatDate(filterProviderValues.endDate)}</td>
+                        <td>
+                          {
+                            filterProviderValues.selectedInterval === "select-interval"
+                            ? ""
+                            : filterProviderValues.formatDate(filterProviderValues.endDate)
+                          }
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -82,13 +95,13 @@ const Filter = () => {
                       ))}
                     </select>    
                   </div>
-                  {filterProviderValues.filter === "month" && (                           
+                  {/* {filterProviderValues.filter === "month" && (                           
                     <div className="balance">
                       <div className="total-amount"> Total for Month: € 2000 </div>
                       <div className="income">Income: € 3250</div>                      
                       <div className="rest">Rest Balance: € 3250</div>                      
                     </div>                            
-                  )}   
+                  )}    */}
                            
                 </div>                                      
               </header>

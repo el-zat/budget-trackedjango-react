@@ -102,6 +102,7 @@ h1 {
 }
 
 .date-table {
+  width: 200px;
   background: #22306b;
   border-radius: 5px;
   border-style: ridge;

@@ -1,4 +1,4 @@
-import React, { useContext} from "react"
+import React, { useState, useContext} from "react"
 import  './Expenses.css'
 import CurrencyInput from 'react-currency-input-field';
 import { ExpensesContext } from "./ExpensesContext";
@@ -8,17 +8,15 @@ const Expenses = () => {
 
     const expensesProviderValues = useContext(ExpensesContext)
 
-    const formattedTotal =  expensesProviderValues.totalPrice.toLocaleString('ru-RU', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    });
+    const totalPrice = expensesProviderValues.rows.reduce((prevTotal, row) => prevTotal + Number(row.price), 0)  
+    
 
 
     return  <React.Fragment>
         <div className="expenses-wrapper">
             <div className="expenses-header">
                 <h2>Expenses</h2>
-                <div className="total">Total: € {formattedTotal} </div>
+                <div className="total">Total: € {totalPrice} </div>
             </div>
             <table className="expenses-table">
                 <thead>
