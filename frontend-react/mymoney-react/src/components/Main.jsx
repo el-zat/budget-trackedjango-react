@@ -1,12 +1,14 @@
 import React, {useState, useEffect } from "react"
 import { Filter } from "./Filter";
 import { Login } from "./users/Login";
+import { User } from "./users/User";
 import { Expenses } from "./Expenses";
 import { Diagram } from "./Diagram";
 import {FilterContext} from './FilterContext'
 import {ExpensesContext} from './ExpensesContext'
-import {LoginContext} from './LoginContext'
+import {UserContext} from './UserContext'
 import {AuthContext} from './users/AuthContext'
+// import {RegisterationForm} from './users/RegistrationForm'
 
 
 function Main() {
@@ -384,10 +386,7 @@ function Main() {
         setIsLoginFormShow(true)
     }
 
-    const handleLoginAccount = () => {
-        setIsLoginFormShow(false)
-        setIsLoggedIn(true)
-    }
+    
 
 
     const filterProviderValues = {       
@@ -443,31 +442,32 @@ function Main() {
         setMiscExpense: setMiscExpense,
     }
 
-    const loginProviderValues = {
-        handleLogin: handleLogin,
+    const userProviderValues = {
         isLoggedIn: isLoggedIn,
-        isLoginFormShow: isLoginFormShow,
-        handleLoginAccount: handleLoginAccount,
+        setIsLoggedIn: setIsLoggedIn,
+        emptyTable: emptyTable,
+        handleLogin: handleLogin,
     }
 
     const authProviderValues = {
-        setIsLoggedIn: setIsLoggedIn,
-        emptyTable: emptyTable,
         isLoggedIn: isLoggedIn,
+        setIsLoggedIn: setIsLoggedIn,
+        emptyTable: emptyTable,       
     }
 
 
     return  <main>
             <AuthContext.Provider value={authProviderValues}>
                 <FilterContext.Provider value={filterProviderValues}>
-                    <ExpensesContext.Provider value={expensesProviderValues}>
-                        <LoginContext.Provider value={loginProviderValues}>
-                            <Login /> 
-                        </LoginContext.Provider>
+                    <ExpensesContext.Provider value={expensesProviderValues}>                       
                             <Filter />
                             <Expenses />
                     </ExpensesContext.Provider>
                 </FilterContext.Provider>
+
+                <UserContext.Provider value={userProviderValues}>
+                    <User />                         
+                </UserContext.Provider>
 
                 {isLoggedIn &&
                 <FilterContext.Provider value={filterProviderValues}>
@@ -477,7 +477,6 @@ function Main() {
                 </FilterContext.Provider>
                 }
             </AuthContext.Provider>
-                
        
             </main>
     

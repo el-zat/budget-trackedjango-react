@@ -1,35 +1,32 @@
 import React, { useContext, useState, useEffect } from "react"
 import './Login.css'
-import { LoginContext } from "../LoginContext";
 import Modal from './Modal';
 import {AuthContext} from './AuthContext'
+import { ModalContext } from "./ModalContext";
 
 
 function Login() {
 
-    const loginProviderValues = useContext(LoginContext)
-
-    const authProviderValues = useContext(AuthContext);
-
-
     const [yourName, setYourName] = useState(() => localStorage.getItem('yourName') || '');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [isModalOpen, setModalIsOpen] = useState(false);
+
+    const authProviderValues = useContext(AuthContext)
+    const modalProviderValues = useContext(ModalContext);
 
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        loginProviderValues.handleLoginAccount(email, password, yourName);
-      };
-   
-    
     const handleLogin = () => {
         authProviderValues.setIsLoggedIn(true);
-        setModalIsOpen(false);     
+        modalProviderValues.setModalLoginIsOpen(false);     
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('yourName', yourName);
     }
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        handleLogin(email, password, yourName);
+      };
+   
 
     const handleLogout = () => {
         authProviderValues.setIsLoggedIn(false);
@@ -48,29 +45,11 @@ function Login() {
             authProviderValues.setIsLoggedIn(false);
         }
     }, []);
-    
+
 
     return  <React.Fragment>
-                {!loginProviderValues.isLoggedIn && !loginProviderValues.isLoginFormShow &&
-                    <div className="login">               
-                        <button onClick={() => setModalIsOpen(true)}>Login</button>
-                    </div>
-                }
-                {loginProviderValues.isLoggedIn && 
-                <div className="loggedin">
-                    <div className="greeting">
-                        <i className="material-icons">perm_identity</i>               
-                        <span>{yourName}</span>
-                    </div>
-                    <div className="logout">               
-                        <button onClick={() => {handleLogout()}}>
-                            Logout
-                        </button>
-                    </div>
-                </div>                    
-                }
-
-                <Modal isOpen={isModalOpen} onClose={() => setModalIsOpen(false)}>
+                <Modal isOpen={modalProviderValues.isModalLoginOpen} onClose={() => 
+                        modalProviderValues.setModalLoginIsOpen(false)}>
                     <div className="container d-flex justify-content-center" >
                         <div className="login-container">
                             <h2 style = {{color: 'black', textAlign : 'center'}}>Sign in</h2>
@@ -129,11 +108,38 @@ function Login() {
                                 
                             </form>
                             <p className="mt-3 text-center" style={{ color: '#000' }}>
-                                No account? <a href="register.html"> Sign up</a>
+                                No account? 
+                                <a href="#"
+                                    onClick={e => {
+                                        e.preventDefault();
+                                        modalProviderValues.setModalLoginIsOpen(false); 
+                                        modalProviderValues.setModalRegistrationIsOpen(true); 
+                                    }}
+                                > 
+                                Sign up</a>
                             </p>
                         </div>
                     </div>
                 </Modal>
+                
+                {!authProviderValues.isLoggedIn && !authProviderValues.isLoginFormShow &&
+                    <div className="login">               
+                        <button onClick={() => modalProviderValues.setModalLoginIsOpen(true)}>Login</button>
+                    </div>
+                }
+                {authProviderValues.isLoggedIn && 
+                <div className="loggedin">
+                    <div className="greeting">
+                        <i className="material-icons">perm_identity</i>               
+                        <span>{yourName}</span>
+                    </div>
+                    <div className="logout">               
+                        <button onClick={() => {handleLogout()}}>
+                            Logout
+                        </button>
+                    </div>
+                </div>                    
+                }
 
             </React.Fragment>
        
