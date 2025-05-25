@@ -8,26 +8,68 @@ import { ModalContext } from "./ModalContext";
 function Login() {
 
     const [yourName, setYourName] = useState(() => localStorage.getItem('yourName') || '');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [loginUsername, setLoginUsername] = useState('');
+    const [loginPassword, setLoginPassword] = useState('');
+    const [message, setMessage] = useState('');
 
     const authProviderValues = useContext(AuthContext)
     const modalProviderValues = useContext(ModalContext);
 
 
-    const handleLogin = () => {
-        authProviderValues.setIsLoggedIn(true);
-        modalProviderValues.setModalLoginIsOpen(false);     
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('yourName', yourName);
-    }
-
-    const handleSubmit = (e) => {
+    const handleLogin = async (e) => {
+        console.log('handleLogin called', loginUsername, loginPassword);
         e.preventDefault();
-        handleLogin(email, password, yourName);
-      };
-   
+        setMessage('');
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/login/', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                username: loginUsername,
+                password: loginPassword,
+              }),
+            });
+      
+          if (response.ok) {
 
+            setMessage('Login successful!');
+            authProviderValues.setIsLoggedIn(true);
+            modalProviderValues.setModalLoginIsOpen(false);     
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('yourName', yourName)
+    
+          } else {
+            alert('User not found')
+            const data = await response.json();
+            if (
+              data.detail &&
+              (data.detail.includes('not found') || data.detail.includes('User not found'))
+            ) {
+              setMessage(
+                <>
+                  User not found.{' '}
+                  <span
+                    style={{ color: 'blue', cursor: 'pointer' }}
+                    onClick={() => {
+                      modalProviderValues.setModalLoginIsOpen(false);
+                      modalProviderValues.setModalRegistrationIsOpen(true);
+                      modalProviderValues.setRegistrationUsername(loginUsername); 
+                    }}
+                  >
+                    Sign up?
+                  </span>
+                </>
+              );
+            } else {
+              setMessage('Login failed: ' + (data.detail || JSON.stringify(data)));
+            }
+          }
+        } catch (error) {
+          setMessage('Server error: ' + error.message);
+        }
+      };
+
+  
     const handleLogout = () => {
         authProviderValues.setIsLoggedIn(false);
         authProviderValues.emptyTable(); 
@@ -53,19 +95,16 @@ function Login() {
                     <div className="container d-flex justify-content-center" >
                         <div className="login-container">
                             <h2 style = {{color: 'black', textAlign : 'center'}}>Sign in</h2>
-                            <form onSubmit={handleSubmit} 
+                            <form onSubmit={handleLogin}
                                     style={{ display: 'flex', flexDirection: 'column', gap:'15px' }}
-                            >                                   
-                                <div className="form-group">
-                                    <label htmlFor="email">E-mail</label>
+                                >                               
+                                <div>
+                                    <label>Username:</label>
                                     <input
-                                        type="email"
-                                        className="form-control"
-                                        id="email"
-                                        name="email"
-                                        placeholder="Input e-mail" required
-                                        value={email}
-                                        onChange={e => setEmail(e.target.value)}
+                                        type="text"
+                                        value={loginUsername}
+                                        onChange={e => setLoginUsername(e.target.value)}
+                                        required
                                     />
                                 </div>
                                 <div className="form-group">
@@ -76,8 +115,8 @@ function Login() {
                                         id="password"
                                         name="password"
                                         placeholder="Input password" required
-                                        value={password}
-                                        onChange={e => setPassword(e.target.value)}
+                                        value={loginPassword}
+                                        onChange={e => setLoginPassword(e.target.value)}
                                     />
                                 </div>
                                 <div className="form-group">
@@ -100,7 +139,6 @@ function Login() {
                                         type="submit"
                                         className="btn btn-primary btn-block"
                                         style={{ fontSize: '15px', padding: '5px 15px' }}
-                                        onClick={() => {handleLogin()}}
                                     >
                                         Login
                                     </button>

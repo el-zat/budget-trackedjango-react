@@ -7,14 +7,16 @@ import {ModalContext} from './ModalContext'
 function User() {
 
     const [isModalLoginOpen, setModalLoginIsOpen] = useState(false);
-
     const [isModalRegistrationOpen, setModalRegistrationIsOpen] = useState(false);
+    const [registrationUsername, setRegistrationUsername] = useState('');
 
     const modalProviderValues = {
-        isModalLoginOpen,
-        setModalLoginIsOpen,
+        isModalLoginOpen,     
         isModalRegistrationOpen,
+        registrationUsername: registrationUsername,
+        setModalLoginIsOpen,
         setModalRegistrationIsOpen,
+        setRegistrationUsername: setRegistrationUsername,
       };
 
 
