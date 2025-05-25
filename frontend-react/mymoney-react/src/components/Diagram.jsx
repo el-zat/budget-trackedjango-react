@@ -1,14 +1,11 @@
-import React, {useState, useContext} from "react"
+import React, {useContext} from "react"
 import  './Diagram.css'
 import { ExpensesContext } from "./ExpensesContext";
-import { FilterContext } from "./FilterContext";
 
 
 const Diagram = () => {
 
     const expensesProviderValues = useContext(ExpensesContext)
-    // const filtersProviderValues = useContext(ExpensesContext)
-
 
     // Groupe expenses by their categories
     const groupedByCategoryName = () => {
@@ -21,9 +18,11 @@ const Diagram = () => {
         }, {});
     };
 
+
     function percentByGroup(items) {
-      return ((items.reduce((sum, item) => 
-        sum + Number(item.price || 0), 0)) * 100 / expensesProviderValues.totalPrice).toFixed(1);
+      const sum = items.reduce((sum, item) => sum + Number(item.price || 0), 0);
+      if (!expensesProviderValues.totalPrice) return 0;
+      return ((sum * 100) / expensesProviderValues.totalPrice()).toFixed(1);
     }
     
     const grouped = groupedByCategoryName();

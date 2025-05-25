@@ -2,20 +2,21 @@ import React, { useState, useContext} from "react"
 import  './Expenses.css'
 import CurrencyInput from 'react-currency-input-field';
 import { ExpensesContext } from "./ExpensesContext";
+import {AuthContext} from './users/AuthContext'
 
 
 const Expenses = () => {
 
     const expensesProviderValues = useContext(ExpensesContext)
 
-
     return  <React.Fragment>
         <div className="expenses-wrapper">
             <div className="expenses-header">
-                <h2>Expenses</h2>
-                <div className="total">Total: € {expensesProviderValues.totalPrice} </div>
+                <h2>Expenses</h2>            
+                <div className="total">Total: € {expensesProviderValues.totalPrice()} </div>
             </div>
-            <table className="expenses-table">
+            
+            <table className="expenses-table">                
                 <thead>
                     <tr>
                         <th>Category</th>
@@ -40,9 +41,10 @@ const Expenses = () => {
                         <th></th>
                     </tr>
                 </thead>
+                
                 <tbody>
-                    {expensesProviderValues.rows
-                        .map((row, idx) => (                       
+                    { expensesProviderValues.rows.length ? (                    
+                        expensesProviderValues.rows.map((row, idx) => (                                              
                         <tr key={row.id || idx}>
                             <td>
                                 {
@@ -55,13 +57,13 @@ const Expenses = () => {
                             <td>
                                 {expensesProviderValues.editingId === row.id ? (                           
                                 <input
-                                type="date"
-                                value={expensesProviderValues.editDate || ""}
-                                onChange={e => expensesProviderValues.setEditDate(e.target.value)}
-                              />
-                            ) : (
+                                    type="date"
+                                    value={expensesProviderValues.editDate || ""}
+                                    onChange={e => expensesProviderValues.setEditDate(e.target.value)}
+                                />
+                                ) : (
                                 <>€ {row.payment_date}</>
-                            )}
+                                )}
                             </td>
                             <td>
                             {expensesProviderValues.editingId === row.id ? (                           
@@ -92,9 +94,18 @@ const Expenses = () => {
                                 </div>
                             </td>
                         </tr>
-                    ))}
+                        ) 
+                    ))
+                    : 
+                    <tr>
+                        <td colSpan={5} style={{ textAlign: "center", color: "#888" }}>
+                            No data. Please log in
+                        </td>
+                    </tr>
+                    }                
+
                     <tr>                           
-                        <td>
+                        <td>                           
                             <div className="categories-input">
                                 <select
                                     value={expensesProviderValues.selectedCategory}
@@ -113,8 +124,9 @@ const Expenses = () => {
                                 </select>
                             </div>               
                         </td>
+                      
                         <td>
-                            {expensesProviderValues.selectedCategoryObj?.name === "Miscellaneous" ? (
+                        {expensesProviderValues.selectedCategoryObj?.name === "Miscellaneous" ? (
                             <div className="expenses-input">
                                 <input
                                     type="text"
@@ -124,7 +136,7 @@ const Expenses = () => {
                                     onChange={e => expensesProviderValues.setMiscExpense(e.target.value)}
                                 />
                             </div>
-                            ) : (
+                        ) : (
                             <div className="expenses-select">
                                 <select 
                                     value={expensesProviderValues.selectedExpense} 
@@ -170,9 +182,11 @@ const Expenses = () => {
                                 </button>
                             </div>                          
                         </td>                             
-                    </tr>                    
-                </tbody>
-            </table>     
+                    </tr>   
+                                     
+                </tbody>               
+            </table>
+                                        
         </div>
   
             </React.Fragment>

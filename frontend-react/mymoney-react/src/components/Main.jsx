@@ -1,9 +1,12 @@
 import React, {useState, useEffect } from "react"
 import { Filter } from "./Filter";
+import { Login } from "./users/Login";
 import { Expenses } from "./Expenses";
 import { Diagram } from "./Diagram";
 import {FilterContext} from './FilterContext'
 import {ExpensesContext} from './ExpensesContext'
+import {LoginContext} from './LoginContext'
+import {AuthContext} from './users/AuthContext'
 
 
 function Main() {
@@ -23,8 +26,17 @@ function Main() {
     const [dateFrom, setDateFrom] = useState(getToday());
     const [dateTo, setDateTo] = useState(getToday());
 
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isLoginFormShow, setIsLoginFormShow] = useState(false);
 
-    const totalPrice = rows.reduce((prevTotal, row) => prevTotal + Number(row.price), 0)
+
+    const totalPrice = () => {
+       
+        if (isLoggedIn) {
+            return rows.reduce((prevTotal, row) => prevTotal + Number(row.price), 0)
+        } 
+        else { return ''}
+    }
 
     function getToday() {
         const today = new Date();
@@ -120,70 +132,105 @@ function Main() {
         setRows(data);
     };
 
+    // Inintial state (logged out)
     useEffect(() => {
-        fetchExpenses();
-    }, []);
+        if (isLoggedIn) {
+          fetchExpenses();
+        } else {
+          setRows([]); // Empty table when logged out
+        }
+      }, [isLoggedIn]);
 
- 
 
     const handleSave = async (e) => {
-        e.preventDefault();
+        console.log(isLoggedIn)
+        if (!isLoggedIn) {
+            alert('Your entries will not be saved! Please log in')
+        }
+        else {
+            e.preventDefault();
 
+        const selectedCategoryObj = categories.find(
+            cat => String(cat.id) === String(selectedCategory)
+        );
+    
         const isMisc = selectedCategoryObj?.name === "Miscellaneous";
         const expenseName = isMisc ? miscExpense : selectedExpense;
-
-        // Get value of payment date from input
+    
         const paymentDate = document.querySelector('input[name="paymentDate"]')?.value;
-        console.log('pyment date from input:', paymentDate)
-
+    
         if (
             selectedCategory === 'all' ||
             (selectedCategoryObj?.name === "Miscellaneous" ? !miscExpense : selectedExpense === 'all') ||
             !price ||
             !paymentDate
-          ) {
+        ) {
             alert('Please fill out all fields!');
             return;
-          }
-
-        // Send a new object to Django server
+        }
+    
         const newJangoExpense = {
-            category: categories.find(cat => String(cat.id) === String(selectedCategory))?.id || '',
+            category: selectedCategoryObj?.id || '',
             name: expenseName,
             price: getCleanPrice(price),
             payment_date: paymentDate ? paymentDate : getToday(),
         };
-
-        try {
-            const response = await fetch('http://127.0.0.1:8000/api/myexpenses/', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(newJangoExpense),
-            });
+    
+        if (isLoggedIn) {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/myexpenses/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(newJangoExpense),
+                });
         
-            if (!response.ok) {
-              const errorData = await response.json();
-              alert('Error!: ' + JSON.stringify(errorData));
-              return;
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    alert('Error!: ' + JSON.stringify(errorData));
+                    return;
+                }
+
+                await fetchExpenses();
+
+            } 
+            catch (error) {
+                alert(error.message);
             }
+        }
 
-            // After post object, update the table from django server
-            await fetchExpenses();
+        else {
+            const newLocalExpense = {
+                id: Date.now(),
+                category: selectedCategoryObj?.id || '',
+                name: expenseName,
+                price: getCleanPrice(price),
+                payment_date: paymentDate ? paymentDate : getToday(),  
+            }
+            setRows(prevRows => [newLocalExpense, ...prevRows]);   
+        }    
 
-            // Reset input fields            
             setSelectedCategory('all');
             setSelectedExpense('all');
             setPrice('');
             setPaymentDate(getToday());
-        } 
-        catch (error) {
-            alert(error.message);
+        }   
+    }
+
+
+    const emptyTable = () => {
+        const emptyLocalExpense = {
+            // id: ,
+            category: '',
+            name: '',
+            price: '',
+            payment_date: '',  
         }
-    };
-
-
+        setRows(emptyLocalExpense);  
+    }
+        
+  
     const deleteExpense = async (id) => {
         if (!id) {
           alert('Error: id undefined!');
@@ -332,6 +379,15 @@ function Main() {
         setRows(rows.slice().sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date))); 
     }
 
+    const handleLogin = () => {
+        // setIsLoggedIn(true)
+        setIsLoginFormShow(true)
+    }
+
+    const handleLoginAccount = () => {
+        setIsLoginFormShow(false)
+        setIsLoggedIn(true)
+    }
 
 
     const filterProviderValues = {       
@@ -356,6 +412,7 @@ function Main() {
     
     const expensesProviderValues = {       
         selectedCategory: selectedCategory,
+        selectedCategoryObj: selectedCategoryObj,
         categories: categories,
         selectedExpense:selectedExpense,
         expenses: expenses,
@@ -383,21 +440,45 @@ function Main() {
         sortDescending: sortDescending,
         setPaymentDate: setPaymentDate,
         formatDate: formatDate,
+        setMiscExpense: setMiscExpense,
+    }
+
+    const loginProviderValues = {
+        handleLogin: handleLogin,
+        isLoggedIn: isLoggedIn,
+        isLoginFormShow: isLoginFormShow,
+        handleLoginAccount: handleLoginAccount,
+    }
+
+    const authProviderValues = {
+        setIsLoggedIn: setIsLoggedIn,
+        emptyTable: emptyTable,
+        isLoggedIn: isLoggedIn,
     }
 
 
     return  <main>
+            <AuthContext.Provider value={authProviderValues}>
                 <FilterContext.Provider value={filterProviderValues}>
                     <ExpensesContext.Provider value={expensesProviderValues}>
-                        <Filter />
-                        <Expenses />
+                        <LoginContext.Provider value={loginProviderValues}>
+                            <Login /> 
+                        </LoginContext.Provider>
+                            <Filter />
+                            <Expenses />
                     </ExpensesContext.Provider>
                 </FilterContext.Provider>
+
+                {isLoggedIn &&
                 <FilterContext.Provider value={filterProviderValues}>
                     <ExpensesContext.Provider value={expensesProviderValues}>
                         <Diagram />
                     </ExpensesContext.Provider>
                 </FilterContext.Provider>
+                }
+            </AuthContext.Provider>
+                
+       
             </main>
     
 }

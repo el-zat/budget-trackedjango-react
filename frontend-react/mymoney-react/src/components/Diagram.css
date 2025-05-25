@@ -11,14 +11,9 @@
   flex-direction: row;
   align-items: center;
   gap: 12px;
-  /* justify-content: space-between; */
 }
 
 .cat-header {
-  /* display: flex;
-  justify-content: space-between; */
-  /* align-items: center; */
-  /* gap: 12px; */
   width: 30%;
   font-size: 17px;
 }
@@ -31,7 +26,6 @@
   height: 18px;
   overflow: hidden;
   margin-right: 10px;
-  /* style={{ width: '60%', background: '#4e89ff' }} */
 }
   
 .bar {
@@ -40,6 +34,5 @@
   transition: width 0.4s;
   width: 60%;
   background: '#4e89ff';
-  /* className="bar" style={{ width: '60%', background: '#4e89ff' }} */
 }
 

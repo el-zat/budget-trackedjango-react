@@ -1,11 +1,16 @@
+import React from "react"
+import './Header.css'
 
 
 function Header() {
 
+    const handleLogin = () => {
 
-    return  (
-        <h1 style={{ marginLeft: '80px', }}>Budget Tracker </h1>
-    )          
+    }
+
+
+    return  <h1>Budget Tracker </h1>
+       
 }
 
 export {Header}
