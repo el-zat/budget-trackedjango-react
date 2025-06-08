@@ -20,9 +20,10 @@ function Main() {
     const [price, setPrice] = useState('');
     const [miscExpense, setMiscExpense] = useState('');
     const [rows, setRows] = useState([]);
-    const [editingId, setEditingId] = useState(null);
+    const [editingField, setEditingField] = useState({ id: null, field: null });
     const [editPrice, setEditPrice] = useState(price);
     const [editDate, setEditDate] = useState(paymentDate);
+    // const [isEditing, setIsEditing] = useState(false);
 
     const [selectedInterval, setSelectedInterval] = useState('select-interval');
     const [dateFrom, setDateFrom] = useState(getToday());
@@ -107,15 +108,6 @@ function Main() {
     const selectedCategoryObj = categories.find(
         cat => String(cat.id) === String(selectedCategory)
     );
-
-
-    function getToday() {
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        return `${yyyy}-${mm}-${dd}`;
-    }
 
     const getCleanPrice = (price) => {
         let cleanPrice = price;
@@ -264,42 +256,47 @@ function Main() {
       }, [paymentDate]);
 
 
-    const applyChanges = async (id) => {
-        if (editingId === id) {
+    const applyChanges = async (id, field) => {
+        if (editingField.id === id) {     
+            // Edit price or date     
+            let bodyData = {};
+            if (field === 'price') {
+                bodyData = { price: Number(editPrice) };
+            } else if (field === 'date') {
+                bodyData = { payment_date: editDate };
+            }
+            
             // Send to server (PATCH)
-            await fetch(`http://127.0.0.1:8000/api/myexpenses/${id}/`, {
+            const response = await fetch(`http://127.0.0.1:8000/api/myexpenses/${id}/`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ price: editPrice,  payment_date: editDate })
+                body: JSON.stringify(bodyData)
             });
+            const result = await response.json().catch(() => ({}));
+            console.log('Server response:', response.status, result);
     
             // Update the local table
             setRows(rows.map(row =>
-                row.id === id ? { ...row, price: editPrice, payment_date: editDate } : row
+                row.id === id ? {  ...row, ...bodyData} : row
             ));
     
-            setEditingId(null);
+            setEditingField({id: null, field: null});
             setEditPrice('');
             setEditDate('');
         } else {
             // Edit price and payment date
             const expense = rows.find(row => row.id === id);
-            setEditPrice(expense.price);
-            setEditDate(expense.payment_date);
-            setEditingId(id);
-        }
-    };
 
-    const switchEditSaveExpense = (id) => {
-        if (editingId !== id) {
-            setEditingId(id);
-            const expense = rows.find(row => row.id === id);
+            if (!expense) {
+                alert('Строка с таким id не найдена!');
+                return;
+            }
+
             setEditPrice(expense.price);
             setEditDate(expense.payment_date);
-        } else {
-            applyChanges(id);
+            setEditingField({id: id, field: null});
         }
     };
 
@@ -381,14 +378,7 @@ function Main() {
         setRows(rows.slice().sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date))); 
     }
 
-    const handleLogin = () => {
-        // setIsLoggedIn(true)
-        setIsLoginFormShow(true)
-    }
-
-    
-
-
+  
     const filterProviderValues = {       
         selectedInterval: selectedInterval,
         dateFrom: dateFrom,
@@ -419,14 +409,13 @@ function Main() {
         price: price,
         miscExpense: miscExpense,
         rows: rows,
-        editingId: editingId,
+        editingField: editingField,
         editPrice: editPrice,
         editDate: editDate,
         totalPrice: totalPrice,
         setEditDate: setEditDate,       
         getToday: getToday,
         getFirstDayOfYear: getFirstDayOfYear,
-        switchEditSaveExpense: switchEditSaveExpense,
         applyChanges: applyChanges,
         deleteExpense: deleteExpense,
         handleSave: handleSave,
@@ -440,13 +429,15 @@ function Main() {
         setPaymentDate: setPaymentDate,
         formatDate: formatDate,
         setMiscExpense: setMiscExpense,
+        setEditingField: setEditingField,
+
     }
 
     const userProviderValues = {
         isLoggedIn: isLoggedIn,
         setIsLoggedIn: setIsLoggedIn,
         emptyTable: emptyTable,
-        handleLogin: handleLogin,
+        // handleLogin: handleLogin,
     }
 
     const authProviderValues = {

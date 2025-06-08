@@ -43,6 +43,7 @@ const Expenses = () => {
                 </thead>
                 
                 <tbody>
+                    {/* //Render Expenses table */}
                     { expensesProviderValues.rows.length ? (                    
                         expensesProviderValues.rows.map((row, idx) => (                                              
                         <tr key={row.id || idx}>
@@ -55,36 +56,51 @@ const Expenses = () => {
                             </td>
                             <td>{row.name}</td>
                             <td>
-                                {expensesProviderValues.editingId === row.id ? (                           
+                            {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'date' ? (                           
                                 <input
                                     type="date"
                                     value={expensesProviderValues.editDate || ""}
                                     onChange={e => expensesProviderValues.setEditDate(e.target.value)}
+                                    onKeyDown={e => {
+                                        if (e.key === 'Enter') {
+                                            expensesProviderValues.applyChanges(row.id, 'date')
+                                        }
+                                    }}
                                 />
                                 ) : (
-                                <>€ {row.payment_date}</>
+                                <span onClick={() => {
+                                    expensesProviderValues.setEditingField({id: row.id, field: 'date'});
+                                    expensesProviderValues.setEditDate(row.date);
+                                }}> {row.payment_date}</span>
                                 )}
                             </td>
                             <td>
-                            {expensesProviderValues.editingId === row.id ? (                           
-                                <CurrencyInput id="edit-price"
-                                    prefix="€ "
-                                    decimalsLimit={2} 
-                                    intlConfig={{ locale: 'de-DE', currency: 'EUR' }} 
-                                    placeholder="Enter new price"
-                                    value={expensesProviderValues.editPrice}
-                                    onValueChange={value => expensesProviderValues.setEditPrice(value)}
-                                />
-                            ) : (
-                                <>€ {row.price}</>
-                            )}
+                                {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'price' ? (                           
+                                    <CurrencyInput id="edit-price"
+                                        prefix="€ "
+                                        decimalsLimit={2} 
+                                        intlConfig={{ locale: 'de-DE', currency: 'EUR' }} 
+                                        placeholder="Enter new price"
+                                        value={expensesProviderValues.editPrice}
+                                        onBlur={() => expensesProviderValues.setEditingField({ id: null, field: null })}  //No editing on blur
+                                        onValueChange={value => expensesProviderValues.setEditPrice(value)}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter') {
+                                                expensesProviderValues.applyChanges(row.id, 'price')
+                                            }
+                                        }}
+                                    />
+                                ) : (
+                                    <span onClick={() => {
+                                        expensesProviderValues.setEditingField({id: row.id, field: 'price'});
+                                        expensesProviderValues.setEditPrice(row.price);
+                                    }}>
+                                        € {row.price}
+                                    </span>
+                                )}
                             </td>
                             <td>
                                 <div className="edit-delete">
-                                    <button className="edit-expense"                                    
-                                        onClick={() => expensesProviderValues.switchEditSaveExpense(row.id)}>
-                                        {expensesProviderValues.editingId === row.id ? "Apply" : "Edit"}
-                                    </button> 
                                     <button
                                         className="delete-expense"
                                         onClick={() => expensesProviderValues.deleteExpense(row.id)}
@@ -104,6 +120,7 @@ const Expenses = () => {
                     </tr>
                     }                
 
+                    {/* Input expenses  */}
                     <tr>                           
                         <td>                           
                             <div className="categories-input">
@@ -112,7 +129,7 @@ const Expenses = () => {
                                     onChange={e => expensesProviderValues.setSelectedCategory(e.target.value)}
                                     required
                                     >
-                                    <option value="all">Select Expense</option>
+                                    <option value="all">Select Category</option>
                                     console.log('row:', row)  
                                     {expensesProviderValues.categories.map(cat => (
                                         <option 

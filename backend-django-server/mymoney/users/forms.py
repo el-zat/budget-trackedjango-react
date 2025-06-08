@@ -18,6 +18,7 @@ class UserLoginForm(AuthenticationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['username'].widget.attrs.update({'class': 'form-control py-4', 'placeholder': 'Input username'})
+        self.fields['email'].widget.attrs.update({'class': 'form-control py-4', 'placeholder': 'Input e-mail'})
         self.fields['password'].widget.attrs.update({'class': 'form-control py-4', 'placeholder': 'Input password'})
 
 
