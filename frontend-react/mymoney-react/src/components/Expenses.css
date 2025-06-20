@@ -35,7 +35,6 @@
   height: 50px;
   border-color: #060914;
   padding-left: 20px;
-  /* background: #22306b; */
   align-items: center;
 }
 
@@ -90,13 +89,18 @@
 
 .save-btn,
 .delete-expense, 
-.edit-expense {
+.add-show-description {
   background: #263b7a;
   border-color: #060914;
   color: #fff;
   width: 60px;
   height: 30px;
   border-radius: 3px;
+}
+
+.add-show-description {
+  width: 120px;
+  margin-right: 5px;
 }
 
 .housing { color: #4e89ff; }
@@ -122,12 +126,9 @@
 }
 
 
-.add-details {
-  margin-left: 10px;
-  background-color: #4e89ff;
-}
-
-#edit-price {
+#edit-price, 
+#edit-name, 
+#edit-date {
   width: 80px;
   background-color: #4e89ff;
 }

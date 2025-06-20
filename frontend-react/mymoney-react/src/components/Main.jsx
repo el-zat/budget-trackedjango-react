@@ -1,14 +1,15 @@
-import React, {useState, useEffect } from "react"
+import React, {useState, useEffect, useMemo } from "react"
 import { Filter } from "./Filter";
-import { Login } from "./users/Login";
+// import { Login } from "./users/Login";
 import { User } from "./users/User";
+import  Description  from "./description/Description";
 import { Expenses } from "./Expenses";
 import { Diagram } from "./Diagram";
 import {FilterContext} from './FilterContext'
 import {ExpensesContext} from './ExpensesContext'
-import {UserContext} from './UserContext'
+import {UserContext} from './users/UserContext'
 import {AuthContext} from './users/AuthContext'
-// import {RegisterationForm} from './users/RegistrationForm'
+import {DescriptionContext} from './description/DescriptionContext'
 
 
 function Main() {
@@ -18,20 +19,29 @@ function Main() {
     const [expenses, setExpenses] = useState([]);
     const [paymentDate, setPaymentDate] = useState(getToday());
     const [price, setPrice] = useState('');
+    const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
+    const [currentDescriptionId, setCurrentDescriptionId] = useState(null);
     const [miscExpense, setMiscExpense] = useState('');
     const [rows, setRows] = useState([]);
     const [editingField, setEditingField] = useState({ id: null, field: null });
     const [editPrice, setEditPrice] = useState(price);
     const [editDate, setEditDate] = useState(paymentDate);
-    // const [isEditing, setIsEditing] = useState(false);
+    const [editName, setEditName] = useState(name);
+    const [isDescriptionShown, setIsDescriptionShown] = useState(false);
+    const [descriptionMap, setDescriptionMap] = useState(() => {
+        const saved = localStorage.getItem('descriptionMap');
+        return saved ? JSON.parse(saved) : {};
+      }); // { [id]: true/false }
 
     const [selectedInterval, setSelectedInterval] = useState('select-interval');
     const [dateFrom, setDateFrom] = useState(getToday());
     const [dateTo, setDateTo] = useState(getToday());
 
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [isLoginFormShow, setIsLoginFormShow] = useState(false);
 
+    console.log("id",currentDescriptionId)
+    
 
     const totalPrice = () => {
        
@@ -207,6 +217,7 @@ function Main() {
 
             setSelectedCategory('all');
             setSelectedExpense('all');
+            setName('');
             setPrice('');
             setPaymentDate(getToday());
         }   
@@ -258,12 +269,16 @@ function Main() {
 
     const applyChanges = async (id, field) => {
         if (editingField.id === id) {     
-            // Edit price or date     
+            // Edit name, price or date     
             let bodyData = {};
             if (field === 'price') {
                 bodyData = { price: Number(editPrice) };
-            } else if (field === 'date') {
+            } 
+            else if (field === 'date') {
                 bodyData = { payment_date: editDate };
+            }
+            else if (field === 'name') {
+                bodyData = { name: editName};
             }
             
             // Send to server (PATCH)
@@ -290,7 +305,7 @@ function Main() {
             const expense = rows.find(row => row.id === id);
 
             if (!expense) {
-                alert('Строка с таким id не найдена!');
+                alert('Row with this id not found!');
                 return;
             }
 
@@ -301,8 +316,19 @@ function Main() {
     };
 
 
-    const handleAddDetails = () => {  
+    const handleAddDescription = () => {          
+        setIsDescriptionShown(true)
     }
+
+    const closeDescription = () => {
+        setIsDescriptionShown(false)
+    }
+
+    const setHasDescription = (id, value) => {
+        console.log('setHasDescription called with:', id, typeof id);
+        setDescriptionMap(prev => ({ ...prev, [id]: value }));
+      };
+    
 
 
     useEffect(() => {
@@ -399,7 +425,7 @@ function Main() {
 
     
     
-    const expensesProviderValues = {       
+    const expensesProviderValues = useMemo(() =>  ({       
         selectedCategory: selectedCategory,
         selectedCategoryObj: selectedCategoryObj,
         categories: categories,
@@ -412,6 +438,7 @@ function Main() {
         editingField: editingField,
         editPrice: editPrice,
         editDate: editDate,
+        editName: editName,
         totalPrice: totalPrice,
         setEditDate: setEditDate,       
         getToday: getToday,
@@ -423,6 +450,7 @@ function Main() {
         setSelectedExpense: setSelectedExpense,
         setPrice: setPrice,
         setEditPrice: setEditPrice,
+        setEditName: setEditName,
         setSelectedInterval: setSelectedInterval,
         sortAscending: sortAscending,
         sortDescending: sortDescending,
@@ -430,14 +458,18 @@ function Main() {
         formatDate: formatDate,
         setMiscExpense: setMiscExpense,
         setEditingField: setEditingField,
-
-    }
+        handleAddDescription: handleAddDescription,
+        setIsDescriptionShown : setIsDescriptionShown ,
+        setCurrentDescriptionId: setCurrentDescriptionId,
+        closeDescription: closeDescription,
+        descriptionMap: descriptionMap,
+        setHasDescription: setHasDescription,
+    }), [descriptionMap, setHasDescription])
 
     const userProviderValues = {
         isLoggedIn: isLoggedIn,
         setIsLoggedIn: setIsLoggedIn,
         emptyTable: emptyTable,
-        // handleLogin: handleLogin,
     }
 
     const authProviderValues = {
@@ -446,27 +478,37 @@ function Main() {
         emptyTable: emptyTable,       
     }
 
+    const descriptionProviderValues = {
+        closeDescription: closeDescription,      
+        
+    }
+
+    console.log('has description', expensesProviderValues.hasDescription)
+
 
     return  <main>
             <AuthContext.Provider value={authProviderValues}>
                 <FilterContext.Provider value={filterProviderValues}>
-                    <ExpensesContext.Provider value={expensesProviderValues}>                       
-                            <Filter />
-                            <Expenses />
+                    <ExpensesContext.Provider value={expensesProviderValues}>
+                        <Filter />
+                        <Expenses />
+
+                        {isLoggedIn && 
+                            <Diagram />
+                        }
+
+                        {isDescriptionShown && currentDescriptionId &&
+                            <DescriptionContext.Provider value={descriptionProviderValues}>
+                                <Description id={currentDescriptionId}/>
+                            </DescriptionContext.Provider>
+                        }
+
                     </ExpensesContext.Provider>
                 </FilterContext.Provider>
 
                 <UserContext.Provider value={userProviderValues}>
-                    <User />                         
+                    <User />
                 </UserContext.Provider>
-
-                {isLoggedIn &&
-                <FilterContext.Provider value={filterProviderValues}>
-                    <ExpensesContext.Provider value={expensesProviderValues}>
-                        <Diagram />
-                    </ExpensesContext.Provider>
-                </FilterContext.Provider>
-                }
             </AuthContext.Provider>
        
             </main>

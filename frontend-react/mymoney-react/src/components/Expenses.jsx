@@ -1,4 +1,4 @@
-import React, { useState, useContext} from "react"
+import React, { useState, useContext, useEffect} from "react"
 import  './Expenses.css'
 import CurrencyInput from 'react-currency-input-field';
 import { ExpensesContext } from "./ExpensesContext";
@@ -8,6 +8,15 @@ import {AuthContext} from './users/AuthContext'
 const Expenses = () => {
 
     const expensesProviderValues = useContext(ExpensesContext)
+
+    const [descriptionMap, setDescriptionMap] = useState(() => {
+        const saved = localStorage.getItem('descriptionMap');
+        return saved ? JSON.parse(saved) : {};
+      });
+
+    useEffect(() => {
+        localStorage.setItem('descriptionMap', JSON.stringify(expensesProviderValues.descriptionMap));
+      }, [expensesProviderValues.descriptionMap]);
 
     return  <React.Fragment>
         <div className="expenses-wrapper">
@@ -43,7 +52,8 @@ const Expenses = () => {
                 </thead>
                 
                 <tbody>
-                    {/* //Render Expenses table */}
+                    {/* Render Expenses table */}
+
                     { expensesProviderValues.rows.length ? (                    
                         expensesProviderValues.rows.map((row, idx) => (                                              
                         <tr key={row.id || idx}>
@@ -54,10 +64,32 @@ const Expenses = () => {
                                     || 'Unknown'
                                 }                                   
                             </td>
-                            <td>{row.name}</td>
+
+                            <td>
+                            {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'name' ? (                                                         
+                                <input id="edit-name"
+                                    type="text"
+                                    name="name"
+                                    placeholder="Fill out expense name"
+                                    value={expensesProviderValues.editName || ""}
+                                    onChange={e => expensesProviderValues.setEditName(e.target.value)}
+                                    onKeyDown={e => {
+                                        if (e.key === 'Enter') {
+                                            expensesProviderValues.applyChanges(row.id, 'name')
+                                        }
+                                    }}
+                                />
+                                ) : (
+                                <span onClick={() => {
+                                    expensesProviderValues.setEditingField({id: row.id, field: 'name'});
+                                    expensesProviderValues.setEditName(row.name);
+                                }}> {row.name}
+                                </span>
+                                )}
+                            </td>
                             <td>
                             {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'date' ? (                           
-                                <input
+                                <input id="edit-date"
                                     type="date"
                                     value={expensesProviderValues.editDate || ""}
                                     onChange={e => expensesProviderValues.setEditDate(e.target.value)}
@@ -71,25 +103,26 @@ const Expenses = () => {
                                 <span onClick={() => {
                                     expensesProviderValues.setEditingField({id: row.id, field: 'date'});
                                     expensesProviderValues.setEditDate(row.date);
-                                }}> {row.payment_date}</span>
+                                }}> {row.payment_date}
+                                </span>
                                 )}
                             </td>
                             <td>
-                                {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'price' ? (                           
-                                    <CurrencyInput id="edit-price"
-                                        prefix="€ "
-                                        decimalsLimit={2} 
-                                        intlConfig={{ locale: 'de-DE', currency: 'EUR' }} 
-                                        placeholder="Enter new price"
-                                        value={expensesProviderValues.editPrice}
-                                        onBlur={() => expensesProviderValues.setEditingField({ id: null, field: null })}  //No editing on blur
-                                        onValueChange={value => expensesProviderValues.setEditPrice(value)}
-                                        onKeyDown={e => {
-                                            if (e.key === 'Enter') {
-                                                expensesProviderValues.applyChanges(row.id, 'price')
-                                            }
-                                        }}
-                                    />
+                            {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'price' ? (                           
+                                <CurrencyInput id="edit-price"
+                                    prefix="€ "
+                                    decimalsLimit={2} 
+                                    intlConfig={{ locale: 'de-DE', currency: 'EUR' }} 
+                                    placeholder="Enter new price"
+                                    value={expensesProviderValues.editPrice}
+                                    onBlur={() => expensesProviderValues.setEditingField({ id: null, field: null })}  //No editing on blur
+                                    onValueChange={value => expensesProviderValues.setEditPrice(value)}
+                                    onKeyDown={e => {
+                                        if (e.key === 'Enter') {
+                                            expensesProviderValues.applyChanges(row.id, 'price')
+                                        }
+                                    }}
+                                />
                                 ) : (
                                     <span onClick={() => {
                                         expensesProviderValues.setEditingField({id: row.id, field: 'price'});
@@ -99,15 +132,22 @@ const Expenses = () => {
                                     </span>
                                 )}
                             </td>
-                            <td>
-                                <div className="edit-delete">
-                                    <button
-                                        className="delete-expense"
-                                        onClick={() => expensesProviderValues.deleteExpense(row.id)}
+                            <td>        
+                                <button className="add-show-description"
+                                     onClick={() => {
+                                        expensesProviderValues.setIsDescriptionShown(true);
+                                        expensesProviderValues.setCurrentDescriptionId(row.id);
+                                      }}
                                     >
-                                        Delete
-                                    </button>
-                                </div>
+                                    {expensesProviderValues.descriptionMap[row.id]? "Show description" : "Add description"}
+                                </button>
+                                <button
+                                className="delete-expense"
+                                onClick={() => expensesProviderValues.deleteExpense(row.id)}
+                            >
+                                Delete
+                            </button>
+                            
                             </td>
                         </tr>
                         ) 
@@ -193,11 +233,9 @@ const Expenses = () => {
                             </div>                           
                         </td>                                    
                         <td>
-                            <div className="save-btn">
-                                <button className="save-btn"
-                                        onClick={expensesProviderValues.handleSave}>Save
-                                </button>
-                            </div>                          
+                            <button className="save-btn"
+                                onClick={expensesProviderValues.handleSave}>Save
+                            </button>                         
                         </td>                             
                     </tr>   
                                      
