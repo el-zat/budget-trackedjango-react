@@ -40,8 +40,6 @@ function Main() {
 
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    console.log("id",currentDescriptionId)
-    
 
     const totalPrice = () => {
        
@@ -482,8 +480,6 @@ function Main() {
         closeDescription: closeDescription,      
         
     }
-
-    console.log('has description', expensesProviderValues.hasDescription)
 
 
     return  <main>

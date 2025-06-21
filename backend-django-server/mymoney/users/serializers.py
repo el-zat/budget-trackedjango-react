@@ -54,11 +54,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class UserLoginSerializer(serializers.Serializer):
-    username = serializers.CharField(
+    # username = serializers.CharField(
+    #     required=True,
+    #     max_length=150,
+    #     style={'input_type': 'text'}
+    # )
+    email = serializers.EmailField( 
         required=True,
-        max_length=150,
-        style={'input_type': 'text'}
-    )
+        style={'input_type': 'email'}
+        )
     password = serializers.CharField(
         required=True,
         write_only=True,

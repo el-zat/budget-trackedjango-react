@@ -3,21 +3,23 @@ import './Login.css'
 import Modal from './Modal';
 import {AuthContext} from './AuthContext'
 import { ModalContext } from "./ModalContext";
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 
 function Login() {
 
-  const [loginUsername, setLoginUsername] = useState('');
+  const [loginUsername, setLoginUsername] = useState(localStorage.getItem('loginUsername') || '');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginEmail, setLoginEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const authProviderValues = useContext(AuthContext)
   const modalProviderValues = useContext(ModalContext);
 
 
   const handleLogin = async (e) => {
-      console.log('handleLogin called', loginUsername, loginEmail, loginPassword);
+      // console.log('handleLogin called', loginUsername, loginEmail, loginPassword);
       e.preventDefault();
       setMessage('');
       try {
@@ -25,22 +27,24 @@ function Login() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              username: loginUsername,
               email: loginEmail,
               password: loginPassword,
             }),
           });
     
         if (response.ok) {
-
+          const data = await response.json(); // Get username from response
           setMessage('Login successful!');
-          authProviderValues.setIsLoggedIn(true);
-          modalProviderValues.setModalLoginIsOpen(false);     
-          localStorage.setItem('isLoggedIn', 'true');
-          localStorage.setItem('loginUsername', loginUsername)
+          setLoginUsername(data.username);
+          setTimeout(() => {
+            authProviderValues.setIsLoggedIn(true);
+            modalProviderValues.setModalLoginIsOpen(false);     
+            localStorage.setItem('isLoggedIn', 'true');
+            setMessage(''); 
+          
+          }, 1500); // wait 1.5 sec and thean close the modal
   
-        } else {
-          alert('User not found')
+        } else { // User not found
           const data = await response.json();
           if (
             data.detail &&
@@ -54,7 +58,6 @@ function Login() {
                   onClick={() => {
                     modalProviderValues.setModalLoginIsOpen(false);
                     modalProviderValues.setModalRegistrationIsOpen(true);
-                    modalProviderValues.setRegistrationUsername(loginUsername); 
                   }}
                 >
                   Sign up?
@@ -62,7 +65,7 @@ function Login() {
               </>
             );
           } else {
-            setMessage('Login failed: ' + (data.detail || JSON.stringify(data)));
+            setMessage('Login failed!');
           }
         }
       } catch (error) {
@@ -101,15 +104,6 @@ function Login() {
                                   style={{ display: 'flex', flexDirection: 'column', gap:'15px' }}
                               >                               
                               <div>
-                                  <label>Username:</label>
-                                  <input
-                                      type="text"
-                                      value={loginUsername}
-                                      onChange={e => setLoginUsername(e.target.value)}
-                                      required
-                                  />
-                              </div>
-                              <div>
                                   <label>Email:</label>
                                   <input
                                       type="email"
@@ -121,14 +115,23 @@ function Login() {
                               <div className="form-group">
                                   <label htmlFor="password">Password</label>
                                   <input
-                                      type="password"
-                                      className="form-control"
-                                      id="password"
-                                      name="password"
-                                      placeholder="Input password" required
-                                      value={loginPassword}
-                                      onChange={e => setLoginPassword(e.target.value)}
+                                    type={showPassword ? "text" : "password"}
+                                    className="form-control"
+                                    value={loginPassword}
+                                    id="password"
+                                    name="password"
+                                    placeholder="Input password" 
+                                    required                                      
+                                    onChange={e => setLoginPassword(e.target.value)}
                                   />
+                                  <button
+                                    type="button"
+                                    className="show-password"
+                                    onClick={() => setShowPassword(s => !s)}
+                                    tabIndex={-1}
+                                  >
+                                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                  </button>
                               </div>                               
                               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop:'30px' }}>
                                   <button
@@ -141,6 +144,11 @@ function Login() {
                               </div>
                               
                           </form>
+                          {message && (
+                            <div className="login-message"> 
+                              {message}
+                            </div>
+                          )}
                           <p className="mt-3 text-center" style={{ color: '#000' }}>
                               No account? 
                               <a href="#"
