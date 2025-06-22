@@ -14,6 +14,18 @@ const Expenses = () => {
         return saved ? JSON.parse(saved) : {};
       });
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 5;
+
+    const totalRows = expensesProviderValues.rows.length;
+    const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+    const paginatedRows = expensesProviderValues.rows.slice(
+        (currentPage - 1) * rowsPerPage,
+        currentPage * rowsPerPage
+      );
+
+
     useEffect(() => {
         localStorage.setItem('descriptionMap', JSON.stringify(expensesProviderValues.descriptionMap));
       }, [expensesProviderValues.descriptionMap]);
@@ -53,9 +65,12 @@ const Expenses = () => {
                 
                 <tbody>
                     {/* Render Expenses table */}
+                    <div className="expenses-table">
+                        
+                    </div>
 
-                    { expensesProviderValues.rows.length ? (                    
-                        expensesProviderValues.rows.map((row, idx) => (                                              
+                    { paginatedRows.length ? (                    
+                        paginatedRows.map((row, idx) => (                                              
                         <tr key={row.id || idx}>
                             <td>
                                 {
@@ -158,7 +173,8 @@ const Expenses = () => {
                             No data. Please log in
                         </td>
                     </tr>
-                    }                
+                    }
+                       
 
                     {/* Input expenses  */}
                     <tr>                           
@@ -237,10 +253,25 @@ const Expenses = () => {
                                 onClick={expensesProviderValues.handleSave}>Save
                             </button>                         
                         </td>                             
-                    </tr>   
-                                     
+                    </tr>                                        
                 </tbody>               
             </table>
+
+            <div className="pagination">
+                <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                >
+                    Prev 
+                </button>
+                <span> Page {currentPage} of {totalPages} </span>
+                <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                >
+                    Next
+                </button>
+            </div>             
                                         
         </div>
   
