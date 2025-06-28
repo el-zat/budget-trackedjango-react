@@ -1,0 +1,20 @@
+@import './vars';
+@import './mixins';
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+}
+
+
+html {
+    background: $bgColor;
+}
+
+body {
+    @extend %mainFont;  
+}
+
+h1 {
+    padding: 50px 0 0 80px;
+}

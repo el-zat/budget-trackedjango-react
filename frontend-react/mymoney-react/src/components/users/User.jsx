@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Registration } from './Registration'
 import { Login } from './Login'
-import {ModalContext} from './ModalContext'
+import {ModalContext} from '../../context/ModalContext'
 
 
 function User() {

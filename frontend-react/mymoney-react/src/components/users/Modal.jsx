@@ -1,4 +1,4 @@
-import './Modal.css';
+import '../../styles/Modal.scss';
 import { createPortal } from 'react-dom';
 
 
@@ -9,10 +9,11 @@ const Modal = ({ isOpen, onClose, children }) => {
       console.error('modal-root not found in HTML!');
       return null;
     }
+    
     return createPortal(
       <div className="modal-overlay" onClick={onClose}>
-        <div className="modal-content" style={{ backgroundColor: ' #798fcf' }} 
-         onClick={e => e.stopPropagation()}>
+        <div className="modal-content"
+          onClick={e => e.stopPropagation()}>
             
           <button className='modal-close-btn'
             onClick={onClose}><i className="material-icons">close</i></button>

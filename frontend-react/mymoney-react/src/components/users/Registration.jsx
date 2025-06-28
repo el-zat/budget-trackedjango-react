@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react"
-import './Registration.css' 
+import '../../styles/Registration.scss' 
 import Modal from './Modal';
-import {ModalContext} from './ModalContext'
+import {ModalContext} from '../../context/ModalContext'
 
 
 function Registration() {

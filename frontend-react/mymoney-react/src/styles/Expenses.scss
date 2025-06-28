@@ -1,0 +1,136 @@
+@import './vars';
+@import './mixins';
+
+
+.expenses-wrapper {
+  margin: 30px;
+}
+
+.expenses-header {
+  @include flex(space-between, none, row)
+}
+
+
+.total {
+  @extend %btn;
+  width: 80px;
+  margin-right: 5px;
+  width: 150px;
+  padding: 10px;
+  font-size: 18px;
+  margin-bottom: 10px;
+  font-weight: bolder;
+  align-content: center;
+  cursor: default;
+  height: 50px;
+
+  &:hover {
+    background-color: $btnColor;
+  }
+}
+
+.expenses-table {
+  @extend %border;
+  border-color: $tableLinesOddColor;
+  border-style: ridge;
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+  & td {
+    height: 50px;
+    border-color: $tableLinesOddColor;
+    padding-left: 20px;
+    align-items: center;
+  }
+
+  & th {
+    background: $bgLightColor;
+    font-weight: 600;
+    font-size: 18px;
+    height: 40px;
+    padding-left: 20px;
+  }
+
+  tr:nth-child(even) {
+    background: $bgLightColor;
+  }
+}
+
+select,
+input,
+#edit-price, 
+#edit-name, 
+#edit-date {
+  @extend %input_select;
+
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px  #263b7a inset !important;
+  -webkit-text-fill-color: $white !important;
+  caret-color: $white!important;
+  transition: background-color 5000s ease-in-out 0s !important;
+  }
+  &:-webkit-autofill:focus {
+    border-color: $white !important;
+  }
+}
+
+
+.add-show-description-btn {
+  @extend %btn;
+  width: 150px;
+  margin-right: 5px;
+}
+
+.save-btn,
+.delete-expense-btn {
+  @extend %btn;
+  width: 80px;
+  margin-right: 5px;
+}
+
+.sort-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 2px;
+  font-size: 0.95em;
+  transition: color 0.2s;
+
+  &:hover {
+    color: $btnHoverColor;
+  }
+}
+
+
+.pagination {
+  @include flex(center, none, row);
+  margin-top: 10px;
+
+  button {
+    margin: 0 10px;
+    
+    &:hover {
+      background-color: $btnHoverColor;
+    }
+  }
+}
+
+
+// .icon {
+//   margin-right: 8px;
+//   font-size: 1.15em;
+//   vertical-align: middle;
+// }
+
+// .housing { color: #4e89ff; }
+// .groceries { color: #43e97b; }
+// .taxes { color: #ffb347; }
+// .transport { color: #f85757; }
+// .health { color: #a259c6; }
+// .entertainment { color: #f5a623; }
+// .other { color: #b2bec3; }

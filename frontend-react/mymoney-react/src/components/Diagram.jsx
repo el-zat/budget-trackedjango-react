@@ -1,6 +1,6 @@
 import React, {useContext} from "react"
-import  './Diagram.css'
-import { ExpensesContext } from "./ExpensesContext";
+import  '../styles/Diagram.scss'
+import { ExpensesContext } from "../context/ExpensesContext";
 
 
 const Diagram = () => {
@@ -52,12 +52,13 @@ const Diagram = () => {
                 <div className="cat-header">
                   <span>{group.name}</span>
                 </div>
+                <span className="percent"> { group.percent} % </span>     
                 <div className="bar-container">
                   <div className="bar" 
                         style={{ width: `${group.percent}%`, background: getRandomHexColor() }}>                           
                   </div>
                 </div>
-                <span className="percent"> { group.percent} % </span>           
+                      
             </div>
             ))}                                    
         </div>

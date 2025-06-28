@@ -1,0 +1,69 @@
+//colors
+$bgColor:  #22306b;
+$white: #fff;
+$black: #000000;
+$tableLinesOddColor: #060914;
+$bgLightColor:  lighten($bgColor, 5%);
+$inputColor:  lighten($bgColor, 10%);
+$btnColor:$bgColor;
+$btnHoverColor: $bgLightColor;
+$textAreaColor: lighten($bgLightColor, 20%);
+
+
+//fonts
+%mainFont {
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: $white;
+    line-height: 1;
+    text-decoration: none;
+}
+
+//input field
+%input_select {
+  @extend %border;
+  height: 40px;
+  background: $inputColor;
+  align-items: center;
+  color: $white;
+  font-size: 15px;
+  border-radius: 3px;
+  padding: 0 20px;
+} 
+
+
+%border {
+    border: solid 2px black;
+    border-style: ridge;
+    border-radius: 3px;
+}
+
+//buttons
+%btn {
+    @extend %mainFont;
+    @extend %border;
+    background-color: $btnColor;
+    font-size: 15px;
+    cursor: pointer;
+    text-align: center;
+    user-select: none;
+    text-decoration: none;
+    height: 30px;
+    padding: 2px;
+
+
+    &:hover {
+        background-color: $btnHoverColor;
+    }
+    &:focus {
+        outline: none;
+    }
+}
+
+
+
+//min-width for devices
+$_mobile: 'min-width: 320px';
+$_tablet: 'min-width: 767px';
+$_desktop: 'min-width: 1024px';
+$_projector: 'min-width: 1201px';
+

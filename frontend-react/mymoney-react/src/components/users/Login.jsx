@@ -1,8 +1,8 @@
 import React, { useContext, useState, useEffect } from "react"
-import './Login.css'
+import '../../styles/Login.scss'
 import Modal from './Modal';
-import {AuthContext} from './AuthContext'
-import { ModalContext } from "./ModalContext";
+import {AuthContext} from '../../context/AuthContext'
+import { ModalContext } from "../../context/ModalContext";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 
@@ -35,6 +35,7 @@ function Login() {
         if (response.ok) {
           const data = await response.json(); // Get username from response
           setMessage('Login successful!');
+          
           setLoginUsername(data.username);
           setTimeout(() => {
             authProviderValues.setIsLoggedIn(true);
@@ -73,6 +74,10 @@ function Login() {
       }
   };
 
+  useEffect(() => {
+    console.log('isLoggedIn changed:', authProviderValues.isLoggedIn);
+  }, [authProviderValues.isLoggedIn]);
+
 
   const handleLogout = () => {
       authProviderValues.setIsLoggedIn(false);
@@ -91,7 +96,7 @@ function Login() {
         authProviderValues.setIsLoggedIn(false);
         setLoginUsername('');
     }
-  }, []);
+  }, [authProviderValues]);
 
 
   return  <React.Fragment>
@@ -99,7 +104,7 @@ function Login() {
                       modalProviderValues.setModalLoginIsOpen(false)}>
                   <div className="container d-flex justify-content-center" >
                       <div className="login-container">
-                          <h2 style = {{color: 'black', textAlign : 'center'}}>Sign in</h2>
+                          <h2 style={{ marginBottom: '20px', textAlign: 'center' }} >Sign in</h2>
                           <form onSubmit={handleLogin}
                                   style={{ display: 'flex', flexDirection: 'column', gap:'15px' }}
                               >                               
@@ -126,18 +131,17 @@ function Login() {
                                   />
                                   <button
                                     type="button"
-                                    className="show-password"
+                                    className="show-password-btn"
                                     onClick={() => setShowPassword(s => !s)}
                                     tabIndex={-1}
                                   >
                                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                                   </button>
                               </div>                               
-                              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop:'30px' }}>
+                              <div>
                                   <button
                                       type="submit"
-                                      className="btn btn-primary btn-block"
-                                      style={{ fontSize: '15px', padding: '5px 15px' }}
+                                      className="login"                                      
                                   >
                                       Login
                                   </button>
@@ -149,9 +153,10 @@ function Login() {
                               {message}
                             </div>
                           )}
-                          <p className="mt-3 text-center" style={{ color: '#000' }}>
-                              No account? 
-                              <a href="#"
+                          {!authProviderValues.isLoggedIn && 
+                            <p className="mt-3 text-center" >
+                              No account?  
+                              <a href="#" style={{ color: '#000', marginLeft: '10px' }}
                                   onClick={e => {
                                       e.preventDefault();
                                       modalProviderValues.setModalLoginIsOpen(false); 
@@ -159,27 +164,32 @@ function Login() {
                                   }}
                               > 
                               Sign up</a>
-                          </p>
+                            </p>
+                          }
+                          
                       </div>
                   </div>
               </Modal>
               
               {!authProviderValues.isLoggedIn && !authProviderValues.isLoginFormShow &&
-                  <div className="login">               
-                      <button onClick={() => modalProviderValues.setModalLoginIsOpen(true)}>Login</button>
-                  </div>
+                                
+                <div className="loggedout">
+                  <button className="login-btn"
+                    onClick={() => modalProviderValues.setModalLoginIsOpen(true)}>
+                    Login
+                  </button> 
+                </div>         
               }
               {authProviderValues.isLoggedIn && 
-              <div className="loggedin">
-                  <div className="greeting">
-                      <i className="material-icons">perm_identity</i>               
-                      <span>{loginUsername}</span>
-                  </div>
-                  <div className="logout">               
-                      <button onClick={() => {handleLogout()}}>
-                          Logout
-                      </button>
-                  </div>
+              <div className="loggedin">                
+                <div className="greeting">
+                    <i className="material-icons">perm_identity</i>               
+                    <span>{loginUsername}</span>
+                </div> 
+                <button className="logout-btn"
+                  onClick={() => {handleLogout()}}>
+                    Logout
+                </button>                                                         
               </div>                    
               }
 

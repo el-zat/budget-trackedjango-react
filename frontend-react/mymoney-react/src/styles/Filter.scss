@@ -1,0 +1,51 @@
+@import './vars';
+@import './mixins';
+
+
+.filters {
+  @include flex(center, center, row);
+  gap: 32px;
+  @extend %mainFont;
+}
+
+.custom-interval {
+  @include flex(space-between, center, column);
+  width: 140px;
+
+  & p {
+    margin: 10px;
+    font-weight:bolder
+  }
+
+  & > input {
+    @extend %input_select;
+  }
+}
+
+.set-interval-button {
+  @extend %btn;
+  background: $inputColor;
+  width: 120px;
+}
+
+#date-filter,
+#categories-filter,
+.date-table {
+  font-size: 16px
+}
+
+.date-table {
+  @extend %btn;
+  width: 210px;
+  height: 80px;
+  font-weight: bold;
+  padding: 10px;
+}
+
+th, td {
+  text-align: left;
+}
+  
+
+
+

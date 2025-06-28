@@ -1,24 +1,19 @@
 import React, { useState, useContext, useEffect} from "react"
-import  './Expenses.css'
+import  '../styles/Expenses.scss'
 import CurrencyInput from 'react-currency-input-field';
-import { ExpensesContext } from "./ExpensesContext";
-import {AuthContext} from './users/AuthContext'
+import { ExpensesContext } from "../context/ExpensesContext";
 
 
 const Expenses = () => {
 
     const expensesProviderValues = useContext(ExpensesContext)
 
-    const [descriptionMap, setDescriptionMap] = useState(() => {
-        const saved = localStorage.getItem('descriptionMap');
-        return saved ? JSON.parse(saved) : {};
-      });
-
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 5;
 
     const totalRows = expensesProviderValues.rows.length;
     const totalPages = Math.ceil(totalRows / rowsPerPage);
+    
 
     const paginatedRows = expensesProviderValues.rows.slice(
         (currentPage - 1) * rowsPerPage,
@@ -65,9 +60,6 @@ const Expenses = () => {
                 
                 <tbody>
                     {/* Render Expenses table */}
-                    <div className="expenses-table">
-                        
-                    </div>
 
                     { paginatedRows.length ? (                    
                         paginatedRows.map((row, idx) => (                                              
@@ -148,7 +140,7 @@ const Expenses = () => {
                                 )}
                             </td>
                             <td>        
-                                <button className="add-show-description"
+                                <button className="add-show-description-btn"
                                      onClick={() => {
                                         expensesProviderValues.setIsDescriptionShown(true);
                                         expensesProviderValues.setCurrentDescriptionId(row.id);
@@ -156,8 +148,7 @@ const Expenses = () => {
                                     >
                                     {expensesProviderValues.descriptionMap[row.id]? "Show description" : "Add description"}
                                 </button>
-                                <button
-                                className="delete-expense"
+                                <button className="delete-expense-btn"
                                 onClick={() => expensesProviderValues.deleteExpense(row.id)}
                             >
                                 Delete
@@ -177,7 +168,7 @@ const Expenses = () => {
                        
 
                     {/* Input expenses  */}
-                    <tr>                           
+                    <tr>                       
                         <td>                           
                             <div className="categories-input">
                                 <select

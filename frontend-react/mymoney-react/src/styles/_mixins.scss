@@ -1,0 +1,116 @@
+@import './vars';
+
+//fonts
+@mixin font_title ($_size, $_height, $_weight) {
+    font-size: $_size;
+    line-height: $_height;
+    font-weight: $_weight;
+    font-family: cursive;
+    color: #ffff;
+}
+
+//display: flex
+@mixin flex ($_jc, $_ai, $_fd) {
+    display: flex;
+    justify-content: $_jc;
+    align-items: $_ai;
+    flex-direction: $_fd;
+}
+
+@mixin section($pt: 1rem, $pb: 1rem) {
+    // width: 100%;
+    padding-top: $pt;
+    padding-bottom: $pb;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    $beige: rgb(248, 239, 239);
+    
+    @media ($_desktop) {
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
+
+@mixin h() {
+    font-family: cursive;
+    text-shadow: $mainShadow;
+    text-align: center;
+    line-height: 1.5;
+    color: $mainFontColor;
+}
+
+@mixin h1 (){
+    @include h();
+    font-size: 2rem;
+
+    @media ($_tablet) {
+        font-size: 2.6rem;
+    }
+    @media ($_desktop) {
+        font-size: 3.5rem;
+    }
+}
+
+@mixin h2 (){
+    @include h();
+    font-size: 1.2;
+
+    @media ($_tablet) {
+        font-size: 1.6rem;
+    }
+    @media ($_desktop) {
+        font-size: 1.8rem;
+    }
+}
+
+
+@mixin p1($color: $mainFontColor) {
+    font-size: 1.6rem;
+    color: $color;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+    font-family: cursive;
+
+    @media ($_tablet) {
+        font-size: 2rem;
+        margin-bottom: 3rem;
+    }
+    @media ($_desktop) {
+        font-size: 2.5rem;
+        margin-bottom: 3rem;
+    }
+}
+
+@mixin p2($color: $mainFontColor) {
+    font-size: 1.8rem;
+    color: $color;
+    line-height: 1.5;
+    font-family: cursive;
+
+    @media ($_tablet) {
+        font-size: 2rem;
+        // margin-bottom: 3rem;
+    }
+    @media ($_desktop) {
+        font-size: 2.4rem;
+        // margin-bottom: 3rem;
+    }
+}
+
+@mixin p3($color: $mainFontColor) {
+    font-size: 1.6rem;
+    color: $color;
+    line-height: 1.5;
+    font-family: cursive;
+
+    @media ($_tablet) {
+        font-size: 1.8rem;
+        // margin-bottom: 3rem;
+    }
+    @media ($_desktop) {
+        font-size: 2rem;
+        // margin-bottom: 3rem;
+    }
+}
+
+

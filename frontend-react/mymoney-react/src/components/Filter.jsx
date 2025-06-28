@@ -1,6 +1,6 @@
 import React, {useContext} from "react"
-import  './Filter.css'
-import { FilterContext } from "./FilterContext"
+import  '../styles/Filter.scss'
+import { FilterContext } from "../context/FilterContext"
 
 
 const Filter = () => {
@@ -9,12 +9,12 @@ const Filter = () => {
 
 
     return  <React.Fragment>                
-              <header>               
+      
                 <div className="filters">         
                   <div className="date-filter">
                   {filterProviderValues.selectedInterval !== "custom" ? (
                     <div className="interval">
-                      <select
+                      <select style={{ fontWeight: 'bold' }}
                         id="date-filter"
                         value={filterProviderValues.selectedInterval}
                         onChange={e => {
@@ -25,7 +25,7 @@ const Filter = () => {
                           }
                         }}
                       >
-                        <option value="select-interval">Select Interval</option>
+                        <option value="select-interval" >Select Interval</option>
                         <option value="month">This Month</option>
                         <option value="today">Today</option>                     
                         <option value="year">This Year</option>                  
@@ -83,7 +83,7 @@ const Filter = () => {
                   </table>
 
                   <div className="categories">                  
-                    <select 
+                    <select id="categories-filter" style={{ fontWeight: 'bold' }}
                         value={filterProviderValues.selectedCategory} 
                         onChange={filterProviderValues.handleCategoryFilter}
                       >
@@ -94,17 +94,9 @@ const Filter = () => {
                       </option>
                       ))}
                     </select>    
-                  </div>
-                  {/* {filterProviderValues.filter === "month" && (                           
-                    <div className="balance">
-                      <div className="total-amount"> Total for Month: € 2000 </div>
-                      <div className="income">Income: € 3250</div>                      
-                      <div className="rest">Rest Balance: € 3250</div>                      
-                    </div>                            
-                  )}    */}
-                           
+                  </div>     
                 </div>                                      
-              </header>
+         
             </React.Fragment>
 }
     

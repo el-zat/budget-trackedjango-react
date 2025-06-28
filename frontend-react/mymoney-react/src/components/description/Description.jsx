@@ -1,7 +1,7 @@
 import React, {useContext, useState, useEffect} from "react"
-import { DescriptionContext } from "./DescriptionContext";
-import { ExpensesContext } from "../ExpensesContext";
-import './Description.css'
+import { DescriptionContext } from "../../context/DescriptionContext";
+import { ExpensesContext } from "../../context/ExpensesContext";
+import '../../styles/Description.scss'
 
 
 
@@ -57,7 +57,12 @@ function Description( {id} ) {
     if (!isLoaded) return <div>Loading...</div>;      
 
     return  <div className="description">   
-                <button className="close-description" onClick={descriptionProviderValues.closeDescription}>x</button>            
+                <button 
+                  className="close-description" 
+                  onClick={descriptionProviderValues.closeDescription}
+                  style = {{width: '30px'}}
+                  >x
+                  </button>            
                 <textarea
                     value={description}
                     onChange={e => setDescription(e.target.value)}
