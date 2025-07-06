@@ -12,9 +12,9 @@ import {DescriptionContext} from '../context/DescriptionContext'
 
 
 function Main() {
-    const expensesProviderValues = useContext(ExpensesContext)
+    // const expensesProviderValues = useContext(ExpensesContext)
     const authProviderValues = useContext(AuthContext)
-    const filterProviderValues = useContext(FilterContext)
+    // const filterProviderValues = useContext(FilterContext)
     const descriptionProviderValues = useContext(DescriptionContext)
 
     return  <main>

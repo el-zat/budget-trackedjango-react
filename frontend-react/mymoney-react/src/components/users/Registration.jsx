@@ -61,62 +61,66 @@ function Registration() {
   return  <React.Fragment>
           <Modal isOpen={modalProviderValues.isModalRegistrationOpen} 
                  onClose={() => modalProviderValues.setModalRegistrationIsOpen(false)}>
-          <form onSubmit={handleRegistration} style={{ maxWidth: 400, margin: '0 auto' }}>
-              <h2>Registration</h2>
-              <div>
-                <label>Username:</label>
-                <input
-                  type="text"
-                  value={modalProviderValues.registrationUsername}
-                  onChange={e => modalProviderValues.setRegistrationUsername(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label>Password:</label>
-                <input
-                  type="password"
-                  value={registrationPassword1}
-                  onChange={e => setRegistrationPassword1(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label>Confirm password:</label>
-                <input
-                  type="password"
-                  value={registrationPassword2}
-                  onChange={e => setRegistrationPassword2(e.target.value)}
-                  required
-                />
-              </div>          
-              <div>
-                <label>Email:</label>
-                <input
-                  type="email"
-                  value={registrationEmail}
-                  onChange={e => setRegistrationEmail(e.target.value)}
-                />
-              </div>
-              <div>
-                <label>First name:</label>
-                <input
-                  type="text"
-                  value={registrationFirstName}
-                  onChange={e => setRegistrationFirstName(e.target.value)}
-                />
-              </div>
-              <div>
-                <label>Last name:</label>
-                <input
-                  type="text"
-                  value={registrationLastName}
-                  onChange={e => setRegistrationLastName(e.target.value)}
-                />
-              </div>
-              <button type="submit">Create account</button>
-              {message && <div style={{ marginTop: 10 }}>{message}</div>}
-            </form>
+                  <div className="registration-container">
+                    <h2>Registration</h2>
+                    <form onSubmit={handleRegistration} style={{ maxWidth: 400, margin: '0 auto' }}>               
+                      <div>
+                        <label>Username:</label>
+                        <input
+                          type="text"
+                          value={modalProviderValues.registrationUsername}
+                          onChange={e => modalProviderValues.setRegistrationUsername(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label>Password:</label>
+                        <input
+                          type="password"
+                          value={registrationPassword1}
+                          onChange={e => setRegistrationPassword1(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label>Confirm password:</label>
+                        <input
+                          type="password"
+                          value={registrationPassword2}
+                          onChange={e => setRegistrationPassword2(e.target.value)}
+                          required
+                        />
+                      </div>          
+                      <div>
+                        <label>Email:</label>
+                        <input
+                          type="email"
+                          value={registrationEmail}
+                          onChange={e => setRegistrationEmail(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label>First name:</label>
+                        <input
+                          type="text"
+                          value={registrationFirstName}
+                          onChange={e => setRegistrationFirstName(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label>Last name:</label>
+                        <input
+                          type="text"
+                          value={registrationLastName}
+                          onChange={e => setRegistrationLastName(e.target.value)}
+                        />
+                      </div>
+                      <button className="submit-registration" type="submit">Create account</button>
+                      {message && <div style={{ marginTop: 10 }}>{message}</div>}
+                    </form>
+
+                  </div>
+          
           </Modal>
 
         </React.Fragment> 

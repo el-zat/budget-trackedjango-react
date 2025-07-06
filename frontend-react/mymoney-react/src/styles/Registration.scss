@@ -1,0 +1,22 @@
+@import './vars';
+@import './mixins';
+
+
+
+.registration-container {
+    h2 {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    form {
+        @include flex(none, flex-end, column);  
+        gap: 15px;
+    }
+}
+
+.submit-registration {
+    @extend %btn;
+    width: 150px;
+    border-radius: 5px;
+}

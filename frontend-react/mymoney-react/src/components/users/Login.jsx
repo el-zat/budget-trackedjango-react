@@ -13,6 +13,7 @@ function Login() {
   const [loginEmail, setLoginEmail] = useState('');
   const [message, setMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isSignupMessageShown, setSignupMessageShown] = useState(true);
 
   const authProviderValues = useContext(AuthContext)
   const modalProviderValues = useContext(ModalContext);
@@ -35,10 +36,11 @@ function Login() {
         if (response.ok) {
           const data = await response.json(); // Get username from response
           setMessage('Login successful!');
-          
+          setSignupMessageShown(false);
           setLoginUsername(data.username);
           setTimeout(() => {
             authProviderValues.setIsLoggedIn(true);
+            
             modalProviderValues.setModalLoginIsOpen(false);     
             localStorage.setItem('isLoggedIn', 'true');
             setMessage(''); 
@@ -104,9 +106,8 @@ function Login() {
                       modalProviderValues.setModalLoginIsOpen(false)}>
                   <div className="container d-flex justify-content-center" >
                       <div className="login-container">
-                          <h2 style={{ marginBottom: '20px', textAlign: 'center' }} >Sign in</h2>
+                          <h2 >Sign in</h2>
                           <form onSubmit={handleLogin}
-                                  style={{ display: 'flex', flexDirection: 'column', gap:'15px' }}
                               >                               
                               <div>
                                   <label>Email:</label>
@@ -135,13 +136,13 @@ function Login() {
                                     onClick={() => setShowPassword(s => !s)}
                                     tabIndex={-1}
                                   >
-                                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                    {showPassword ? <FaEyeSlash color="#fff"/> : <FaEye color="#fff"/>}
                                   </button>
                               </div>                               
                               <div>
                                   <button
                                       type="submit"
-                                      className="login"                                      
+                                      className="submit-login"                                      
                                   >
                                       Login
                                   </button>
@@ -153,7 +154,8 @@ function Login() {
                               {message}
                             </div>
                           )}
-                          {!authProviderValues.isLoggedIn && 
+                          {/* {!authProviderValues.isLoggedIn &&  */}
+                          {isSignupMessageShown &&
                             <p className="mt-3 text-center" >
                               No account?  
                               <a href="#" style={{ color: '#000', marginLeft: '10px' }}
@@ -175,7 +177,11 @@ function Login() {
                                 
                 <div className="loggedout">
                   <button className="login-btn"
-                    onClick={() => modalProviderValues.setModalLoginIsOpen(true)}>
+                  onClick={() => {
+                    setSignupMessageShown(true);
+                    modalProviderValues.setModalLoginIsOpen(true);
+                  }}
+                  >
                     Login
                   </button> 
                 </div>         

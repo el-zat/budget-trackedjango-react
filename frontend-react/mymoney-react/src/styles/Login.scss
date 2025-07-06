@@ -2,11 +2,17 @@
 @import './mixins';
 
 
-// .loggedin {
-//     position: absolute;   
-//     top: 50px;
-//     right: 50px;
-// }
+.login-container {
+    h2 {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    form {
+        @include flex(none, flex-end, column);  
+        gap: 15px;
+    }
+}
 
 
 .loggedout,
@@ -83,4 +89,10 @@ input {
     border: '1px solid #f5aca6';
     border-radius: 4;
     @include flex (none, center, none) 
+}
+
+.submit-login {
+    @extend %btn;
+    width: 80px;
+    border-radius: 5px;
 }

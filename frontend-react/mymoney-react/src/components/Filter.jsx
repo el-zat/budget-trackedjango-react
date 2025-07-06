@@ -1,16 +1,25 @@
 import React, {useContext} from "react"
 import  '../styles/Filter.scss'
 import { FilterContext } from "../context/FilterContext"
+import { ModalContext } from "../context/ModalContext";
 
 
 const Filter = () => {
 
     const filterProviderValues = useContext(FilterContext)
+    const modalProviderValues = useContext(ModalContext);
 
 
     return  <React.Fragment>                
       
-                <div className="filters">         
+                <div className="filters">
+               
+                  <button className="filter-btn"
+                    onClick={() => modalProviderValues.setModalFilterIsOpen(true)}>
+                    Filter
+                  </button> 
+             
+
                   <div className="date-filter">
                   {filterProviderValues.selectedInterval !== "custom" ? (
                     <div className="interval">
