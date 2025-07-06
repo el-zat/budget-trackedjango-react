@@ -2,11 +2,13 @@ import React, { useState, useContext, useEffect} from "react"
 import  '../styles/Expenses.scss'
 import CurrencyInput from 'react-currency-input-field';
 import { ExpensesContext } from "../context/ExpensesContext";
+import { ModalContext } from "../context/ModalContext";
 
 
 const Expenses = () => {
 
     const expensesProviderValues = useContext(ExpensesContext)
+    const modalProviderValues = useContext(ModalContext);
 
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 5;
@@ -27,6 +29,10 @@ const Expenses = () => {
 
     return  <React.Fragment>
         <div className="expenses-wrapper">
+            <button className="filter-btn" onClick={() => modalProviderValues.setModalFilterIsOpen(true)}>
+                <i className="material-icons">tune</i>
+                Filter                   
+            </button> 
             <div className="expenses-header">
                 <h2>Expenses</h2>            
                 <div className="total">Total: € {expensesProviderValues.totalPrice()} </div>

@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from "react"
 import '../../styles/Login.scss'
-import Modal from './Modal';
+import Modal from '../Modal';
 import {AuthContext} from '../../context/AuthContext'
 import { ModalContext } from "../../context/ModalContext";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
@@ -154,7 +154,6 @@ function Login() {
                               {message}
                             </div>
                           )}
-                          {/* {!authProviderValues.isLoggedIn &&  */}
                           {isSignupMessageShown &&
                             <p className="mt-3 text-center" >
                               No account?  

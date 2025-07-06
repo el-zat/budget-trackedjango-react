@@ -17,7 +17,7 @@ function App() {
     const [paymentDate, setPaymentDate] = useState(getToday());
     const [price, setPrice] = useState('');
     const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
+    // const [description, setDescription] = useState('');
     const [currentDescriptionId, setCurrentDescriptionId] = useState(null);
     const [miscExpense, setMiscExpense] = useState('');
     const [rows, setRows] = useState([]);
@@ -34,6 +34,7 @@ function App() {
     const [selectedInterval, setSelectedInterval] = useState('select-interval');
     const [dateFrom, setDateFrom] = useState(getToday());
     const [dateTo, setDateTo] = useState(getToday());
+    const [selectedCategories, setSelectedCategories] = useState([]);
 
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -350,17 +351,41 @@ function App() {
       }, []);
 
 
-    const handleCategoryFilter = (event) => {
-        const value = event.target.value;
-        setSelectedCategory(value)
-        console.log('selected category:', value)
-        const rows = expensesProviderValues.rows || []
-        setRows(rows => rows.filter(row =>
-            value === 'all' ||
-            String(row.category) === String(value)
-        ))
-    }
+    // const handleCategoryFilter = (event) => {
+    //     const value = event.target.value;
+    //     setSelectedCategory(value)
+    //     console.log('selected category:', value)
+    //     const rows = expensesProviderValues.rows || []
+    //     setRows(rows => rows.filter(row =>
+    //         value === 'all' ||
+    //         String(row.category) === String(value)
+    //     ))
+    // }
 
+    const handleCategoryCheckbox = (catId) => {
+        let newSelected;
+        if (selectedCategories.includes(catId)) {
+          newSelected = selectedCategories.filter(id => id !== catId);
+        } else {
+          newSelected = [...selectedCategories, catId];
+        }
+        setSelectedCategories(newSelected);
+      
+        // Filter
+        const rows = expensesProviderValues.rows || [];
+        if (newSelected.length === 0) {
+          setRows(rows); // Show all
+        } else {
+          setRows(rows.filter(row =>
+            newSelected.map(String).includes(String(row.category))
+          ));
+        }
+      };
+  
+    const handleAllCategories = () => {
+    setSelectedCategories([]);
+    setRows(expensesProviderValues.rows || []);
+    };
 
     const handleDateFilter = (filterValue) => {
         const filter = filterValue || selectedInterval;
@@ -407,8 +432,12 @@ function App() {
         startDate: startDate,
         endDate: endDate,       
         categories: categories,
+        selectedCategories, 
+        setSelectedCategories,
+        handleCategoryCheckbox,
+        handleAllCategories,
         setSelectedCategory: setSelectedCategory,
-        handleCategoryFilter: handleCategoryFilter,
+        // handleCategoryFilter: handleCategoryFilter,
         handleDateFilter: handleDateFilter,
         formatDate: formatDate,
         getToday: getToday,

@@ -1,6 +1,10 @@
 @import './vars';
 @import './mixins';
 
+.modal-filter {
+  @include flex(space-between, none, column);
+  gap: 10px;
+}
 
 .filters {
   @include flex(center, center, row);

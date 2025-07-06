@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react"
 import '../../styles/Registration.scss' 
-import Modal from './Modal';
+import Modal from '../Modal';
 import {ModalContext} from '../../context/ModalContext'
 
 
