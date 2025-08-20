@@ -14,76 +14,79 @@ const Filter = () => {
                 
                   <Modal isOpen={modalProviderValues.isModalFilterOpen} onClose={() => 
                       modalProviderValues.setModalFilterIsOpen(false)}> 
+
                       <div className="modal-filter">
+
                         <div className="date-filter">
-                        {filterProviderValues.selectedInterval !== "custom" ? (
-                          <div className="interval">
-                          <form style={{ fontWeight: 'bold' }}>
-                            <div>
-                              <label>
-                                <input
-                                  type="radio"
-                                  name="interval"
-                                  value="month"
-                                  checked={filterProviderValues.selectedInterval === "month"}
-                                  onChange={e => {
-                                    filterProviderValues.setSelectedInterval(e.target.value);
-                                    filterProviderValues.handleDateFilter(e.target.value);
-                                  }}
-                                />
-                                This Month
-                              </label>
+                          <h3>Select interval</h3>
+                            <div className="interval">
+                              <form style={{ fontWeight: 'bold' }}>
+                                <div className="set_this_month">
+                                  <label>
+                                    <input
+                                      type="radio"
+                                      name="interval"
+                                      value="month"
+                                      checked={filterProviderValues.selectedInterval === "month"}
+                                      onChange={e => {
+                                        filterProviderValues.setSelectedInterval(e.target.value);
+                                        filterProviderValues.handleDateFilter(e.target.value);
+                                      }}
+                                    />
+                                    This Month
+                                  </label>
+                                </div>                                
+                                <div className="set_this_year">
+                                  <label>
+                                    <input
+                                      type="radio"
+                                      name="interval"
+                                      value="year"
+                                      checked={filterProviderValues.selectedInterval === "year"}
+                                      onChange={e => {
+                                        filterProviderValues.setSelectedInterval(e.target.value);
+                                        filterProviderValues.handleDateFilter(e.target.value);
+                                      }}
+                                    />
+                                    This Year
+                                  </label>
+                                </div>
+                                <div className="set_today">
+                                  <label>
+                                    <input
+                                      type="radio"
+                                      name="interval"
+                                      value="today"
+                                      checked={filterProviderValues.selectedInterval === "today"}
+                                      onChange={e => {
+                                        filterProviderValues.setSelectedInterval(e.target.value);
+                                        filterProviderValues.handleDateFilter(e.target.value);
+                                      }}
+                                    />
+                                    Today
+                                  </label>
+                                </div>
+                                <div className="set_custom_interval">
+                                  <label>
+                                    <input
+                                      type="radio"
+                                      name="interval"
+                                      value="custom"
+                                      checked={filterProviderValues.selectedInterval === "custom"}
+                                      onChange={e => {
+                                        filterProviderValues.setSelectedInterval(e.target.value);                                
+                                      }}
+                                    />
+                                    Custom Interval
+                                  </label>
+                                </div>
+
+                              </form>
                             </div>
-                            <div>
-                              <label>
-                                <input
-                                  type="radio"
-                                  name="interval"
-                                  value="today"
-                                  checked={filterProviderValues.selectedInterval === "today"}
-                                  onChange={e => {
-                                    filterProviderValues.setSelectedInterval(e.target.value);
-                                    filterProviderValues.handleDateFilter(e.target.value);
-                                  }}
-                                />
-                                Today
-                              </label>
-                            </div>
-                            <div>
-                              <label>
-                                <input
-                                  type="radio"
-                                  name="interval"
-                                  value="year"
-                                  checked={filterProviderValues.selectedInterval === "year"}
-                                  onChange={e => {
-                                    filterProviderValues.setSelectedInterval(e.target.value);
-                                    filterProviderValues.handleDateFilter(e.target.value);
-                                  }}
-                                />
-                                This Year
-                              </label>
-                            </div>
-                            <div>
-                              <label>
-                                <input
-                                  type="radio"
-                                  name="interval"
-                                  value="custom"
-                                  checked={filterProviderValues.selectedInterval === "custom"}
-                                  onChange={e => {
-                                    filterProviderValues.setSelectedInterval(e.target.value);
-                                    // Не вызываем handleDateFilter для custom
-                                  }}
-                                />
-                                Custom Interval
-                              </label>
-                            </div>
-                          </form>
-                        </div>
-       
+
                         
-                          ) : (
+                          {/* if selected custom interval */}
+                          {filterProviderValues.selectedInterval === "custom" &&                                  
                             <div className="custom-interval">
                               <p>Input Interval:</p>
                               <input
@@ -105,62 +108,65 @@ const Filter = () => {
                                 </button>
                               </div>
                             </div>
-                          )}
-                        </div>
+                          }       
+                        </div>          
 
-                      <table className="date-table">
-                        <tbody>
-                          <tr>
-                            <th>Start Date:</th>
-                            <td>
-                              {
-                                filterProviderValues.selectedInterval === "select-interval"
-                                ? ""                            
-                                : filterProviderValues.formatDate(filterProviderValues.startDate)
-                              }
-                            </td>
-                          </tr>
-                          <tr>
-                            <th>End Date:</th>
-                            <td>
-                              {
-                                filterProviderValues.selectedInterval === "select-interval"
-                                ? ""
-                                : filterProviderValues.formatDate(filterProviderValues.endDate)
-                              }
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
+                        <table className="date-table">
+                          <tbody>
+                            <tr>
+                              <th>Start Date:</th>
+                              <td>
+                                {
+                                  filterProviderValues.selectedInterval === "select-interval"
+                                  ? ""                            
+                                  : filterProviderValues.formatDate(filterProviderValues.startDate)
+                                }
+                              </td>
+                            </tr>
+                            <tr>
+                              <th>End Date:</th>
+                              <td>
+                                {
+                                  filterProviderValues.selectedInterval === "select-interval"
+                                  ? ""
+                                  : filterProviderValues.formatDate(filterProviderValues.endDate)
+                                }
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
 
                         <div className="categories" style={{ fontWeight: 'bold' }}>
-                          <div>
-                            <label>
-                              <input
-                                type="checkbox"
-                                value="all"
-                                checked={filterProviderValues.selectedCategories.length === 0}
-                                onChange={filterProviderValues.handleAllCategories}
-                              />
-                              All Categories
-                            </label>
-                          </div>
-                          {filterProviderValues.categories.map(cat => (
-                            <div key={cat.id}>
+                          <h3>Select category</h3>
+                            <div >
                               <label>
                                 <input
                                   type="checkbox"
-                                  value={cat.id}
-                                  checked={filterProviderValues.selectedCategories.includes(cat.id)}
-                                  onChange={() => filterProviderValues.handleCategoryCheckbox(cat.id)}
+                                  value="all"
+                                  checked={filterProviderValues.selectedCategories.length === 0}
+                                  onChange={filterProviderValues.handleAllCategories}
                                 />
-                                {cat.name}
+                                All Categories
                               </label>
+                            
+                              {filterProviderValues.categories.slice() 
+                              .sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
+                                <div key={cat.id}>
+                                  <label>
+                                    <input
+                                      type="checkbox"
+                                      value={cat.id}
+                                      checked={filterProviderValues.selectedCategories.includes(cat.id)}
+                                      onChange={() => filterProviderValues.handleCategoryCheckbox(cat.id)}
+                                    />
+                                    {cat.name}
+                                  </label>
+                                </div>
+                              ))}
                             </div>
-                          ))}
                         </div>
 
-                      </div>
+                     </div>
                     
                   </Modal>   
                 

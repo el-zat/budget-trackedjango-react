@@ -31,7 +31,7 @@ function App() {
         return saved ? JSON.parse(saved) : {};
       }); // { [id]: true/false }
 
-    const [selectedInterval, setSelectedInterval] = useState('select-interval');
+    const [selectedInterval, setSelectedInterval] = useState('month');
     const [dateFrom, setDateFrom] = useState(getToday());
     const [dateTo, setDateTo] = useState(getToday());
     const [selectedCategories, setSelectedCategories] = useState([]);
