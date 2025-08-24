@@ -3,12 +3,13 @@ import  '../styles/Expenses.scss'
 import CurrencyInput from 'react-currency-input-field';
 import { ExpensesContext } from "../context/ExpensesContext";
 import { ModalContext } from "../context/ModalContext";
+import { FilterContext } from "../context/FilterContext";
 
 
 const Expenses = () => {
 
     const expensesProviderValues = useContext(ExpensesContext)
-    const modalProviderValues = useContext(ModalContext);
+    const filterProviderValues = useContext(FilterContext)
 
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 5;
@@ -29,14 +30,15 @@ const Expenses = () => {
 
     return  <React.Fragment>
         <div className="expenses-wrapper">
-            <button className="filter-btn" onClick={() => modalProviderValues.setModalFilterIsOpen(true)}>
-                <i className="material-icons">tune</i>
-                Filter                   
-            </button> 
+        
             <div className="expenses-header">
-                <h2>Expenses</h2>            
-                <div className="total">Total: € {expensesProviderValues.totalPrice()} </div>
-            </div>
+                <h2>Expenses</h2>
+                <button className="filter-btn" onClick={() => filterProviderValues.setFilterIsOpen(true)}>
+                    <i className="material-icons">tune</i>
+                    Filter                   
+                </button> 
+                
+            </div>           
             
             <table className="expenses-table">                
                 <thead>
@@ -267,8 +269,12 @@ const Expenses = () => {
                     disabled={currentPage === totalPages}
                 >
                     Next
-                </button>
-            </div>             
+                </button>               
+            </div>  
+
+            <div className="expenses-total">                               
+                <div className="total">Total: € {expensesProviderValues.totalPrice()} </div>
+            </div>           
                                         
         </div>
   

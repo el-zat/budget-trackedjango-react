@@ -1,22 +1,18 @@
 import React, {useContext, useState} from "react"
 import  '../styles/Filter.scss'
 import { FilterContext } from "../context/FilterContext"
-import { ModalContext } from "../context/ModalContext";
-import Modal from './Modal';
+
 
 const Filter = () => {
 
     const filterProviderValues = useContext(FilterContext)
-    const modalProviderValues = useContext(ModalContext);
 
 
     return  <React.Fragment>                
                 
-                  <Modal isOpen={modalProviderValues.isModalFilterOpen} onClose={() => 
-                      modalProviderValues.setModalFilterIsOpen(false)}> 
-
-                      <div className="modal-filter">
-
+                    {filterProviderValues.isFilterOpen  && 
+                    <div className="filter">
+                      <div className="set-filter">
                         <div className="date-filter">
                           <h3>Select interval</h3>
                             <div className="interval">
@@ -33,7 +29,7 @@ const Filter = () => {
                                         filterProviderValues.handleDateFilter(e.target.value);
                                       }}
                                     />
-                                    This Month
+                                    This month
                                   </label>
                                 </div>                                
                                 <div className="set_this_year">
@@ -48,7 +44,7 @@ const Filter = () => {
                                         filterProviderValues.handleDateFilter(e.target.value);
                                       }}
                                     />
-                                    This Year
+                                    This year
                                   </label>
                                 </div>
                                 <div className="set_today">
@@ -77,7 +73,7 @@ const Filter = () => {
                                         filterProviderValues.setSelectedInterval(e.target.value);                                
                                       }}
                                     />
-                                    Custom Interval
+                                    Custom interval
                                   </label>
                                 </div>
 
@@ -104,7 +100,7 @@ const Filter = () => {
                                   className="set-interval-button"
                                   onClick={() => filterProviderValues.handleDateFilter("custom")}
                                 >
-                                  Apply Interval
+                                  Apply interval
                                 </button>
                               </div>
                             </div>
@@ -114,7 +110,7 @@ const Filter = () => {
                         <table className="date-table">
                           <tbody>
                             <tr>
-                              <th>Start Date:</th>
+                              <th>Start date:</th>
                               <td>
                                 {
                                   filterProviderValues.selectedInterval === "select-interval"
@@ -124,7 +120,7 @@ const Filter = () => {
                               </td>
                             </tr>
                             <tr>
-                              <th>End Date:</th>
+                              <th>End date:</th>
                               <td>
                                 {
                                   filterProviderValues.selectedInterval === "select-interval"
@@ -146,7 +142,7 @@ const Filter = () => {
                                   checked={filterProviderValues.selectedCategories.length === 0}
                                   onChange={filterProviderValues.handleAllCategories}
                                 />
-                                All Categories
+                                All categories
                               </label>
                             
                               {filterProviderValues.categories.slice() 
@@ -165,12 +161,27 @@ const Filter = () => {
                               ))}
                             </div>
                         </div>
-
                      </div>
-                    
-                  </Modal>   
-                
-              
+
+                     <div className="search-container">
+                      <input 
+                        id="search-word"
+                        type="search" 
+                        placeholder="Search..." 
+                        name="search" 
+                        value={filterProviderValues.searchWord || ""}    
+                        onChange={(e) => filterProviderValues.setSearchWord(e.target.value)}                                          
+                      /> 
+                      <button 
+                        type="button"
+                        onClick={() => filterProviderValues.filterBySearchWord(filterProviderValues.searchWord)}
+                        >
+                        <i className="material-icons">search</i>                        
+                      </button>
+                    </div>
+                  </div>                    
+                  }
+
             </React.Fragment>
 }
     

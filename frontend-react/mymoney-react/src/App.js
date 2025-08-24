@@ -37,6 +37,9 @@ function App() {
     const [selectedCategories, setSelectedCategories] = useState([]);
 
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isFilterOpen, setFilterIsOpen] = useState(false);
+
+    const [searchWord, setSearchWord] = useState('');
 
 
     const totalPrice = () => {
@@ -351,17 +354,6 @@ function App() {
       }, []);
 
 
-    // const handleCategoryFilter = (event) => {
-    //     const value = event.target.value;
-    //     setSelectedCategory(value)
-    //     console.log('selected category:', value)
-    //     const rows = expensesProviderValues.rows || []
-    //     setRows(rows => rows.filter(row =>
-    //         value === 'all' ||
-    //         String(row.category) === String(value)
-    //     ))
-    // }
-
     const handleCategoryCheckbox = (catId) => {
         let newSelected;
         if (selectedCategories.includes(catId)) {
@@ -424,6 +416,24 @@ function App() {
         setRows(rows.slice().sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date))); 
     }
 
+    const filterBySearchWord = (searchWord) => {
+        console.log("search word:", searchWord);
+        const cleanedWord = String(searchWord).trim().toLowerCase();
+        setSearchWord(searchWord)
+        
+        const rows = expensesProviderValues.rows || [];
+        console.log("search word:", searchWord);
+        const filteredRows = rows.filter(row => {
+            return (
+              typeof row.name === 'string' &&
+              row.name.toLowerCase().includes(cleanedWord)
+            );
+          });
+        
+        setRows(filteredRows);
+
+    }
+
   
     const filterProviderValues = {       
         selectedInterval: selectedInterval,
@@ -433,11 +443,15 @@ function App() {
         endDate: endDate,       
         categories: categories,
         selectedCategories, 
+        isFilterOpen, 
+        searchWord, 
+        filterBySearchWord,
+        setSearchWord,
+        setFilterIsOpen,
         setSelectedCategories,
         handleCategoryCheckbox,
         handleAllCategories,
         setSelectedCategory: setSelectedCategory,
-        // handleCategoryFilter: handleCategoryFilter,
         handleDateFilter: handleDateFilter,
         formatDate: formatDate,
         getToday: getToday,
@@ -461,7 +475,7 @@ function App() {
         editPrice: editPrice,
         editDate: editDate,
         editName: editName,
-        descriptionMap: descriptionMap,
+        descriptionMap: descriptionMap,       
         totalPrice: totalPrice,
         setEditDate: setEditDate,       
         getToday: getToday,

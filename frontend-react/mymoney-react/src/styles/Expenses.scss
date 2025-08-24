@@ -7,36 +7,19 @@
 }
 
 .expenses-header {
-  @include flex(space-between, none, row);
-  margin-top: 50px;
+  @include flex(space-between, flex-end, row);
+  margin-top: 100px;
+  margin-bottom: 20px;
+  gap: 50px;
 }
 
-
-.total {
-  @extend %btn;
-  width: 80px;
-  margin-right: 50px;
-  width: 150px;
-  padding: 10px;
-  font-size: 18px;
-  margin-bottom: 10px;
-  font-weight: bolder;
-  align-content: center;
-  cursor: default;
-  height: 50px;
-
-  &:hover {
-    background-color: $btnColor;
-  }
-}
 
 .filter-btn {
   @extend %btn;
   @include flex(center, center, row);
   gap: 5px;
-  position: relative;
+  margin-left: 5px;
   left: 200px;
-  top: 100px;
   width: 100px;
   height: 50px;   
   font-size: 20px;
@@ -134,17 +117,29 @@ input,
   }
 }
 
+.expenses-total {
+  @include flex(center, center, row);
+  
+}
 
-// .icon {
-//   margin-right: 8px;
-//   font-size: 1.15em;
-//   vertical-align: middle;
-// }
 
-// .housing { color: #4e89ff; }
-// .groceries { color: #43e97b; }
-// .taxes { color: #ffb347; }
-// .transport { color: #f85757; }
-// .health { color: #a259c6; }
-// .entertainment { color: #f5a623; }
-// .other { color: #b2bec3; }
+.total {
+  @extend %btn;
+  @extend %border;
+  background-color: $bgLightColor;
+  width: 80px;
+  height: 50px;
+  margin: 40px 20px;
+  position: absolute;
+  right: 10px;
+  width: 150px;
+  padding: 10px;
+  font-size: 18px;
+  font-weight: bolder;
+  align-content: center;
+  cursor: default;
+
+  &:hover {
+    background-color: $btnColor;
+  }
+}

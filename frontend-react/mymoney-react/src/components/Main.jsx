@@ -12,13 +12,13 @@ import {DescriptionContext} from '../context/DescriptionContext'
 import {ModalContext} from '../context/ModalContext'
 import { Registration } from './users/Registration'
 import { Login } from './users/Login'
+import { FilterContext } from "../context/FilterContext";
 
 
 function Main() {
 
     const [isModalLoginOpen, setModalLoginIsOpen] = useState(false);
     const [isModalRegistrationOpen, setModalRegistrationIsOpen] = useState(false);
-    const [isModalFilterOpen, setModalFilterIsOpen] = useState(false);
     const [registrationUsername, setRegistrationUsername] = useState('');
 
 
@@ -26,24 +26,23 @@ function Main() {
         isModalLoginOpen,     
         isModalRegistrationOpen,
         registrationUsername,
-        isModalFilterOpen,
         setModalLoginIsOpen,
         setModalRegistrationIsOpen,
         setRegistrationUsername,
-        setModalFilterIsOpen,
       };
 
 
     const authProviderValues = useContext(AuthContext)
     const descriptionProviderValues = useContext(DescriptionContext)
+    const filterProviderValues = useContext(FilterContext)
 
 
     return  <main>
                 <h1>Budget Tracker </h1>
-                <ModalContext value={modalProviderValues}>
+                <FilterContext value={filterProviderValues}>
                     <Filter />
                     <Expenses />
-                </ModalContext>
+                </FilterContext>
                 
                 {authProviderValues.isLoggedIn && 
                     <Diagram />

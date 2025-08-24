@@ -17,20 +17,18 @@
 
 .loggedout,
 .loggedin {  
-    @include flex(flex-end, center, column);  
+    @include flex(none, center, row);  
     gap: 10px;
     position: absolute;   
     font-size: 20px;
     top: 50px;
     right: 50px;
 
-
     .login-btn,
     .logout-btn {
         @extend %btn;
         position: relative;
         right: 0;
-        top: 0;
         width: 100px;
         height: 50px;   
         font-size: 20px;
