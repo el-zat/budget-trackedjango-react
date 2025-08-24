@@ -10,6 +10,7 @@ import {DescriptionContext} from './context/DescriptionContext'
 
 function App() {
 
+    //Setting expenses
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [categories, setCategories] = useState([]);
     const [selectedExpense, setSelectedExpense] = useState('all');
@@ -17,33 +18,113 @@ function App() {
     const [paymentDate, setPaymentDate] = useState(getToday());
     const [price, setPrice] = useState('');
     const [name, setName] = useState('');
-    // const [description, setDescription] = useState('');
-    const [currentDescriptionId, setCurrentDescriptionId] = useState(null);
     const [miscExpense, setMiscExpense] = useState('');
     const [rows, setRows] = useState([]);
-    const [editingField, setEditingField] = useState({ id: null, field: null });
-    const [editPrice, setEditPrice] = useState(price);
-    const [editDate, setEditDate] = useState(paymentDate);
-    const [editName, setEditName] = useState(name);
+
+    //Description
+    const [currentDescriptionId, setCurrentDescriptionId] = useState(null);
     const [isDescriptionShown, setIsDescriptionShown] = useState(false);
     const [descriptionMap, setDescriptionMap] = useState(() => {
         const saved = localStorage.getItem('descriptionMap');
         return saved ? JSON.parse(saved) : {};
       }); // { [id]: true/false }
 
-    const [selectedInterval, setSelectedInterval] = useState('month');
+    
+    //Editing
+    const [editingField, setEditingField] = useState({ id: null, field: null });
+    const [editPrice, setEditPrice] = useState(price);
+    const [editDate, setEditDate] = useState(paymentDate);
+    const [editName, setEditName] = useState(name);
+    
+    //Logging
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+
+    //Filtering
+    const [isFilterOpen, setFilterIsOpen] = useState(() => {
+        const saved = localStorage.getItem('isFilterOpen');
+        return saved === 'true'; 
+      });
+    
     const [dateFrom, setDateFrom] = useState(getToday());
     const [dateTo, setDateTo] = useState(getToday());
+
     const [selectedCategories, setSelectedCategories] = useState([]);
-
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [isFilterOpen, setFilterIsOpen] = useState(false);
-
+    const [selectedInterval, setSelectedInterval] = useState(() => {
+        return localStorage.getItem('month');
+      });
     const [searchWord, setSearchWord] = useState('');
 
 
-    const totalPrice = () => {
-       
+    // Fetch expenses from django server
+    const fetchExpenses = async () => {
+        const response = await fetch('http://127.0.0.1:8000/api/myexpenses/');
+        const data = await response.json();
+        // console.log("data:", data)
+        setRows(data);
+    };
+
+    // Inintial state (logged out)
+    useEffect(() => {
+        if (isLoggedIn) {
+            fetchExpenses();
+        } else {
+            setRows([]); // Empty table when logged out
+        }
+        }, [isLoggedIn]);
+
+    useEffect(() => {
+        fetch('http://127.0.0.1:8000/api/categories/')
+            .then(res => res.json())
+            .then(data => {
+            setCategories(data);
+            })
+            .catch(error => {
+            console.error('Fetch error:', error);
+            });
+        }, []);
+
+
+    useEffect(() => {
+        fetch('http://127.0.0.1:8000/api/expenses/')
+            .then(res => res.json())
+            .then(data => {
+            setExpenses(data);
+            })
+            .catch(error => {
+            console.error('Fetch error:', error);
+            });
+          }, []);
+        
+
+    useEffect(() => {
+        localStorage.setItem('isFilterOpen', isFilterOpen);
+    }, [isFilterOpen]);
+
+
+    // useEffect(() => {
+    //     localStorage.setItem('selectedInterval', selectedInterval);
+    //   }, [selectedInterval]);
+
+    useEffect(() => {
+        handleDateFilter('month');
+      }, []);
+    
+    useEffect(() => {
+        if (isFilterOpen) {
+          handleDateFilter(selectedInterval);
+        }
+      }, [isFilterOpen, selectedInterval]);
+  
+
+    useEffect(() => {
+        if (!selectedInterval) {
+          setSelectedInterval("month");
+        }
+      }, []);
+
+
+    const totalPrice = () => {      
         if (isLoggedIn) {
             return rows.reduce((prevTotal, row) => prevTotal + Number(row.price), 0)
         } 
@@ -126,24 +207,6 @@ function App() {
         return cleanPrice;
     }
     
-
-    // Fetch expenses from django server
-    const fetchExpenses = async () => {
-        const response = await fetch('http://127.0.0.1:8000/api/myexpenses/');
-        const data = await response.json();
-        // console.log("data:", data)
-        setRows(data);
-    };
-
-    // Inintial state (logged out)
-    useEffect(() => {
-        if (isLoggedIn) {
-          fetchExpenses();
-        } else {
-          setRows([]); // Empty table when logged out
-        }
-      }, [isLoggedIn]);
-
 
     const handleSave = async (e) => {
         console.log(isLoggedIn)
@@ -326,33 +389,18 @@ function App() {
     const setHasDescription = (id, value) => {
         console.log('setHasDescription called with:', id, typeof id);
         setDescriptionMap(prev => ({ ...prev, [id]: value }));
-      };
+    };
+
+    const sortAscending = () => {
+        console.log('sort ascending')
+        setRows(rows.slice().sort((a, b) => new Date(a.payment_date) - new Date(b.payment_date))); 
+    }
+
+    const sortDescending = () => {
+        console.log('sort descending')
+        setRows(rows.slice().sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date))); 
+    }
     
-
-
-    useEffect(() => {
-        fetch('http://127.0.0.1:8000/api/categories/')
-          .then(res => res.json())
-          .then(data => {
-            setCategories(data);
-          })
-          .catch(error => {
-            console.error('Fetch error:', error);
-          });
-      }, []);
-
-
-    useEffect(() => {
-        fetch('http://127.0.0.1:8000/api/expenses/')
-          .then(res => res.json())
-          .then(data => {
-            setExpenses(data);
-          })
-          .catch(error => {
-            console.error('Fetch error:', error);
-          });
-      }, []);
-
 
     const handleCategoryCheckbox = (catId) => {
         let newSelected;
@@ -372,12 +420,14 @@ function App() {
             newSelected.map(String).includes(String(row.category))
           ));
         }
-      };
-  
-    const handleAllCategories = () => {
-    setSelectedCategories([]);
-    setRows(expensesProviderValues.rows || []);
     };
+  
+
+    const handleAllCategories = () => {
+        setSelectedCategories([]);
+        setRows(expensesProviderValues.rows || []);
+    };
+
 
     const handleDateFilter = (filterValue) => {
         const filter = filterValue || selectedInterval;
@@ -406,16 +456,6 @@ function App() {
         }));
     };
 
-    const sortAscending = () => {
-        console.log('sort ascending')
-        setRows(rows.slice().sort((a, b) => new Date(a.payment_date) - new Date(b.payment_date))); 
-    }
-
-    const sortDescending = () => {
-        console.log('sort descending')
-        setRows(rows.slice().sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date))); 
-    }
-
     const filterBySearchWord = (searchWord) => {
         console.log("search word:", searchWord);
         const cleanedWord = String(searchWord).trim().toLowerCase();
@@ -434,6 +474,11 @@ function App() {
 
     }
 
+
+    const closeFilter = () => {
+        setFilterIsOpen(false)
+    }
+
   
     const filterProviderValues = {       
         selectedInterval: selectedInterval,
@@ -445,6 +490,7 @@ function App() {
         selectedCategories, 
         isFilterOpen, 
         searchWord, 
+        closeFilter,
         filterBySearchWord,
         setSearchWord,
         setFilterIsOpen,

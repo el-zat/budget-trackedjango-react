@@ -33,10 +33,12 @@ const Expenses = () => {
         
             <div className="expenses-header">
                 <h2>Expenses</h2>
+                {!filterProviderValues.isFilterOpen  &&
                 <button className="filter-btn" onClick={() => filterProviderValues.setFilterIsOpen(true)}>
                     <i className="material-icons">tune</i>
                     Filter                   
                 </button> 
+                }
                 
             </div>           
             
