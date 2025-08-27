@@ -20,6 +20,7 @@ function App() {
     const [name, setName] = useState('');
     const [miscExpense, setMiscExpense] = useState('');
     const [rows, setRows] = useState([]);
+    
 
     //Description
     const [currentDescriptionId, setCurrentDescriptionId] = useState(null);
@@ -53,6 +54,7 @@ function App() {
     const [selectedInterval, setSelectedInterval] = useState('month')
 
     const [searchWord, setSearchWord] = useState('');
+    const [filteredRows, setFilteredRows] = useState([]);
 
 
     // Fetch expenses from django server
@@ -416,44 +418,54 @@ function App() {
 
     const filterRows = (rows, selectedInterval, startDate, endDate) => {
         if (!rows.length) return [];
-
+        
         return rows.filter(row => {
-            const rowDate = formatDate(row.payment_date);
+            const rowDate = new Date(row.payment_date);
+            const today = new Date();
+            const firstDayOfYear = new Date(today.getFullYear(), 0, 1); // 1.January
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        
             switch (selectedInterval) {
                 case "today":
-                    return rowDate === getToday();
+                    return (
+                    rowDate.getFullYear() === today.getFullYear() &&
+                    rowDate.getMonth() === today.getMonth() &&
+                    rowDate.getDate() === today.getDate()
+                    );
                 case "year":
-                    return rowDate >= getFirstDayOfYear() && rowDate <= getToday();
+                    return rowDate >= firstDayOfYear && rowDate <= today;
+                case "month":
+                    return rowDate >= firstDayOfMonth && rowDate <= today;
                 case "custom":
                     if (!startDate || !endDate) return true;
-                    return rowDate >= startDate && rowDate <= endDate;
-                case "month":
-                    return rowDate >= getFirstDayOfMonth() && rowDate <= getToday();
+                    return new Date(rowDate) >= new Date(startDate) && new Date(rowDate) <= new Date(endDate);
                 default:
-                    return rowDate >= getFirstDayOfMonth() && rowDate <= getToday();
-            }})
-    }
+                    return rowDate >= firstDayOfMonth && rowDate <= today;
+            }
+        });
+        
+    };
         
 
     const handleDateFilter = (selectedInterval) => {
         console.log("selected interval:", selectedInterval)
         const filtered = filterRows(allRows, selectedInterval, startDate, endDate);
         console.log("filtered rows:", filtered)
-        setRows(filtered);
+        setFilteredRows(filtered);
         console.log("selected interval:", selectedInterval);
         console.log("filtered rows:", filtered);
       };
 
-    
-    useEffect(() => {
-    if (selectedInterval && allRows.length) {
-        const filtered = filterRows(allRows, selectedInterval, startDate, endDate);
 
-        if (JSON.stringify(filtered) !== JSON.stringify(rows)) {
-        setRows(filtered);
+
+    useEffect(() => {
+        if (selectedInterval && allRows.length) {
+            console.log("selectedInterval in useEffect:", selectedInterval);
+            console.log("allRows length:", allRows.length);
+            console.log("rows length before setRows:", rows.length);
+            handleDateFilter(selectedInterval)
         }
-    }
-    }, [selectedInterval, allRows, startDate, endDate])
+      }, [selectedInterval, allRows, startDate, endDate]);
 
 
     const handleCategoryCheckbox = (catId) => {
@@ -516,6 +528,8 @@ function App() {
         selectedCategories, 
         isFilterOpen, 
         searchWord, 
+        filteredRows, 
+        setFilteredRows,
         closeFilter,
         filterBySearchWord,
         setSearchWord,

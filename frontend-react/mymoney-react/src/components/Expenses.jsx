@@ -2,7 +2,6 @@ import React, { useState, useContext, useEffect} from "react"
 import  '../styles/Expenses.scss'
 import CurrencyInput from 'react-currency-input-field';
 import { ExpensesContext } from "../context/ExpensesContext";
-import { ModalContext } from "../context/ModalContext";
 import { FilterContext } from "../context/FilterContext";
 import { AuthContext } from "../context/AuthContext";
 
@@ -20,7 +19,7 @@ const Expenses = () => {
     const totalPages = Math.ceil(totalRows / rowsPerPage);
     
 
-    const paginatedRows = expensesProviderValues.rows.slice(
+    const paginatedRows = filterProviderValues.filteredRows.slice(
         (currentPage - 1) * rowsPerPage,
         currentPage * rowsPerPage
       );
@@ -75,107 +74,107 @@ const Expenses = () => {
 
                     { paginatedRows.length ? (                    
                         paginatedRows.map((row, idx) => (                                              
-                        <tr key={row.id || idx}>
-                            <td>
-                                {
-                                    expensesProviderValues.categories.find(
-                                        cat => String(cat.id) === String(row.category))?.name 
-                                    || 'Unknown'
-                                }                                   
-                            </td>
+                            <tr key={row.id || idx}>
+                                <td>
+                                    {
+                                        expensesProviderValues.categories.find(
+                                            cat => String(cat.id) === String(row.category))?.name 
+                                        || 'Unknown'
+                                    }                                   
+                                </td>
 
-                            <td>
-                            {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'name' ? (                                                         
-                                <input id="edit-name"
-                                    type="text"
-                                    name="name"
-                                    placeholder="Fill out expense name"
-                                    value={expensesProviderValues.editName || ""}
-                                    onChange={e => expensesProviderValues.setEditName(e.target.value)}
-                                    onKeyDown={e => {
-                                        if (e.key === 'Enter') {
-                                            expensesProviderValues.applyChanges(row.id, 'name')
-                                        }
-                                    }}
-                                />
-                                ) : (
-                                <span onClick={() => {
-                                    expensesProviderValues.setEditingField({id: row.id, field: 'name'});
-                                    expensesProviderValues.setEditName(row.name);
-                                }}> {row.name}
-                                </span>
-                                )}
-                            </td>
-                            <td>
-                            {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'date' ? (                           
-                                <input id="edit-date"
-                                    type="date"
-                                    value={expensesProviderValues.editDate || ""}
-                                    onChange={e => expensesProviderValues.setEditDate(e.target.value)}
-                                    onKeyDown={e => {
-                                        if (e.key === 'Enter') {
-                                            expensesProviderValues.applyChanges(row.id, 'date')
-                                        }
-                                    }}
-                                />
-                                ) : (
-                                <span onClick={() => {
-                                    expensesProviderValues.setEditingField({id: row.id, field: 'date'});
-                                    expensesProviderValues.setEditDate(row.date);
-                                }}> {row.payment_date}
-                                </span>
-                                )}
-                            </td>
-                            <td>
-                            {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'price' ? (                           
-                                <CurrencyInput id="edit-price"
-                                    prefix="€ "
-                                    decimalsLimit={2} 
-                                    intlConfig={{ locale: 'de-DE', currency: 'EUR' }} 
-                                    placeholder="Enter new price"
-                                    value={expensesProviderValues.editPrice}
-                                    onBlur={() => expensesProviderValues.setEditingField({ id: null, field: null })}  //No editing on blur
-                                    onValueChange={value => expensesProviderValues.setEditPrice(value)}
-                                    onKeyDown={e => {
-                                        if (e.key === 'Enter') {
-                                            expensesProviderValues.applyChanges(row.id, 'price')
-                                        }
-                                    }}
-                                />
-                                ) : (
+                                <td>
+                                {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'name' ? (                                                         
+                                    <input id="edit-name"
+                                        type="text"
+                                        name="name"
+                                        placeholder="Fill out expense name"
+                                        value={expensesProviderValues.editName || ""}
+                                        onChange={e => expensesProviderValues.setEditName(e.target.value)}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter') {
+                                                expensesProviderValues.applyChanges(row.id, 'name')
+                                            }
+                                        }}
+                                    />
+                                    ) : (
                                     <span onClick={() => {
-                                        expensesProviderValues.setEditingField({id: row.id, field: 'price'});
-                                        expensesProviderValues.setEditPrice(row.price);
-                                    }}>
-                                        € {row.price}
+                                        expensesProviderValues.setEditingField({id: row.id, field: 'name'});
+                                        expensesProviderValues.setEditName(row.name);
+                                    }}> {row.name}
                                     </span>
-                                )}
-                            </td>
-                            <td>        
-                                <button className="add-show-description-btn"
-                                     onClick={() => {
-                                        expensesProviderValues.setIsDescriptionShown(true);
-                                        expensesProviderValues.setCurrentDescriptionId(row.id);
-                                      }}
-                                    >
-                                    {expensesProviderValues.descriptionMap[row.id]? "Show description" : "Add description"}
+                                    )}
+                                </td>
+                                <td>
+                                {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'date' ? (                           
+                                    <input id="edit-date"
+                                        type="date"
+                                        value={expensesProviderValues.editDate || ""}
+                                        onChange={e => expensesProviderValues.setEditDate(e.target.value)}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter') {
+                                                expensesProviderValues.applyChanges(row.id, 'date')
+                                            }
+                                        }}
+                                    />
+                                    ) : (
+                                    <span onClick={() => {
+                                        expensesProviderValues.setEditingField({id: row.id, field: 'date'});
+                                        expensesProviderValues.setEditDate(row.date);
+                                    }}> {row.payment_date}
+                                    </span>
+                                    )}
+                                </td>
+                                <td>
+                                {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'price' ? (                           
+                                    <CurrencyInput id="edit-price"
+                                        prefix="€ "
+                                        decimalsLimit={2} 
+                                        intlConfig={{ locale: 'de-DE', currency: 'EUR' }} 
+                                        placeholder="Enter new price"
+                                        value={expensesProviderValues.editPrice}
+                                        onBlur={() => expensesProviderValues.setEditingField({ id: null, field: null })}  //No editing on blur
+                                        onValueChange={value => expensesProviderValues.setEditPrice(value)}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter') {
+                                                expensesProviderValues.applyChanges(row.id, 'price')
+                                            }
+                                        }}
+                                    />
+                                    ) : (
+                                        <span onClick={() => {
+                                            expensesProviderValues.setEditingField({id: row.id, field: 'price'});
+                                            expensesProviderValues.setEditPrice(row.price);
+                                        }}>
+                                            € {row.price}
+                                        </span>
+                                    )}
+                                </td>
+                                <td>        
+                                    <button className="add-show-description-btn"
+                                        onClick={() => {
+                                            expensesProviderValues.setIsDescriptionShown(true);
+                                            expensesProviderValues.setCurrentDescriptionId(row.id);
+                                        }}
+                                        >
+                                        {expensesProviderValues.descriptionMap[row.id]? "Show description" : "Add description"}
+                                    </button>
+                                    <button className="delete-expense-btn"
+                                    onClick={() => expensesProviderValues.deleteExpense(row.id)}
+                                >
+                                    Delete
                                 </button>
-                                <button className="delete-expense-btn"
-                                onClick={() => expensesProviderValues.deleteExpense(row.id)}
-                            >
-                                Delete
-                            </button>
-                            
+                                
+                                </td>
+                            </tr>
+                        ) 
+                        ))
+                        : 
+                        <tr>
+                            <td colSpan={5} style={{ textAlign: "center", color: "#888" }}>
+                                No data. Please log in
                             </td>
                         </tr>
-                        ) 
-                    ))
-                    : 
-                    <tr>
-                        <td colSpan={5} style={{ textAlign: "center", color: "#888" }}>
-                            No data. Please log in
-                        </td>
-                    </tr>
                     }
                        
 
