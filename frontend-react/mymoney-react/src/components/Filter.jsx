@@ -29,7 +29,7 @@ const Filter = () => {
                                     checked={filterProviderValues.selectedInterval === "month"}
                                     onChange={e => {
                                       filterProviderValues.setSelectedInterval(e.target.value);
-                                      // filterProviderValues.handleDateFilter(e.target.value);
+                                      filterProviderValues.handleDateFilter(e.target.value);
                                     }}
                                   />
                                   This month
@@ -44,7 +44,7 @@ const Filter = () => {
                                     checked={filterProviderValues.selectedInterval === "year"}
                                     onChange={e => {
                                       filterProviderValues.setSelectedInterval(e.target.value);
-                                      // filterProviderValues.handleDateFilter(e.target.value);
+                                      filterProviderValues.handleDateFilter(e.target.value);
                                     }}
                                   />
                                   This year
@@ -59,7 +59,7 @@ const Filter = () => {
                                     checked={filterProviderValues.selectedInterval === "today"}
                                     onChange={e => {
                                       filterProviderValues.setSelectedInterval(e.target.value);
-                                      // filterProviderValues.handleDateFilter(e.target.value);
+                                      filterProviderValues.handleDateFilter(e.target.value);
                                     }}
                                   />
                                   Today
@@ -73,7 +73,8 @@ const Filter = () => {
                                     value="custom"
                                     checked={filterProviderValues.selectedInterval === "custom"}
                                     onChange={e => {
-                                      filterProviderValues.setSelectedInterval(e.target.value);                                
+                                      filterProviderValues.setSelectedInterval(e.target.value);
+                                      // filterProviderValues.handleDateFilter(e.target.value)                                
                                     }}
                                   />
                                   Custom interval

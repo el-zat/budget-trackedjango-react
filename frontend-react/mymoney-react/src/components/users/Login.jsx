@@ -3,6 +3,7 @@ import '../../styles/Login.scss'
 import Modal from '../Modal';
 import {AuthContext} from '../../context/AuthContext'
 import { ModalContext } from "../../context/ModalContext";
+import { FilterContext } from "../../context/FilterContext";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 
@@ -17,12 +18,15 @@ function Login() {
 
   const authProviderValues = useContext(AuthContext)
   const modalProviderValues = useContext(ModalContext);
+  const filterProviderValues = useContext(FilterContext);
 
+
+  
 
   const handleLogin = async (e) => {
-      // console.log('handleLogin called', loginUsername, loginEmail, loginPassword);
       e.preventDefault();
       setMessage('');
+      
       try {
           const response = await fetch('http://127.0.0.1:8000/api/login/', {
             method: 'POST',
@@ -38,6 +42,9 @@ function Login() {
           setMessage('Login successful!');
           setSignupMessageShown(false);
           setLoginUsername(data.username);
+          filterProviderValues.setSelectedInterval('month')
+          filterProviderValues.setIsFilterOpen(false);
+          
           setTimeout(() => {
             authProviderValues.setIsLoggedIn(true);
             
@@ -76,15 +83,18 @@ function Login() {
       }
   };
 
+
   useEffect(() => {
     console.log('isLoggedIn changed:', authProviderValues.isLoggedIn);
   }, [authProviderValues.isLoggedIn]);
 
 
-  const handleLogout = () => {
-      authProviderValues.setIsLoggedIn(false);
-      authProviderValues.emptyTable(); 
-      localStorage.setItem('isLoggedIn', 'false');
+  const handleLogout = () => { 
+    
+    filterProviderValues.setIsFilterOpen(false)
+    authProviderValues.emptyTable(); 
+    authProviderValues.setIsLoggedIn(false);
+    localStorage.setItem('isLoggedIn', 'false');
   }
 
   // Restore the state when loading the page

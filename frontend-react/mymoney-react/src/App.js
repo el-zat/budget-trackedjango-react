@@ -1,6 +1,6 @@
 import './App.css';
 import {Main} from "./components/Main"
-import React, {useState, useEffect, useMemo } from "react"
+import React, {useState, useEffect, useMemo, useCallback  } from "react"
 import  './styles/Main.scss'
 import {FilterContext} from './context/FilterContext'
 import {ExpensesContext} from './context/ExpensesContext'
@@ -41,18 +41,17 @@ function App() {
 
 
     //Filtering
-    const [isFilterOpen, setFilterIsOpen] = useState(() => {
+    const [isFilterOpen, setIsFilterOpen] = useState(() => {
         const saved = localStorage.getItem('isFilterOpen');
-        return saved === 'true'; 
+        return saved !== null ? JSON.parse(saved) : false;
       });
-    
+
     const [dateFrom, setDateFrom] = useState(getToday());
     const [dateTo, setDateTo] = useState(getToday());
 
     const [selectedCategories, setSelectedCategories] = useState([]);
-    const [selectedInterval, setSelectedInterval] = useState(() => {
-        return localStorage.getItem('month');
-      });
+    const [selectedInterval, setSelectedInterval] = useState('month')
+
     const [searchWord, setSearchWord] = useState('');
 
 
@@ -95,34 +94,43 @@ function App() {
             console.error('Fetch error:', error);
             });
           }, []);
-        
+
 
     useEffect(() => {
-        localStorage.setItem('isFilterOpen', isFilterOpen);
+        localStorage.setItem('isFilterOpen', JSON.stringify(isFilterOpen));
     }, [isFilterOpen]);
 
 
-    // useEffect(() => {
-    //     localStorage.setItem('selectedInterval', selectedInterval);
-    //   }, [selectedInterval]);
+    useEffect(() => {
+        const savedIsOpen = JSON.parse(localStorage.getItem('isFilterOpen'));
+        if (savedIsOpen !== null) {
+            setIsFilterOpen(savedIsOpen);
+        } else {
+            setIsFilterOpen(false);
+        }
+      }, []);
+
+
 
     useEffect(() => {
-        handleDateFilter('month');
-      }, []);
+        if (isLoggedIn) {
+            setSelectedInterval('month');          
+        }
+      }, [isLoggedIn]);
+
+
+    useEffect(() => {
+        const savedInterval = localStorage.getItem('selectedInterval') || "month";
+        setSelectedInterval(savedInterval);
+    }, []);
     
-    useEffect(() => {
-        if (isFilterOpen) {
-          handleDateFilter(selectedInterval);
-        }
-      }, [isFilterOpen, selectedInterval]);
-  
 
     useEffect(() => {
-        if (!selectedInterval) {
-          setSelectedInterval("month");
-        }
-      }, []);
-
+        localStorage.setItem('selectedInterval', selectedInterval);
+    }, [selectedInterval]);
+   
+    
+    
 
     const totalPrice = () => {      
         if (isLoggedIn) {
@@ -400,7 +408,53 @@ function App() {
         console.log('sort descending')
         setRows(rows.slice().sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date))); 
     }
+
+    const allRows = useMemo(() => {
+        return rows || [];
+      }, [rows]);
+
+
+    const filterRows = (rows, selectedInterval, startDate, endDate) => {
+        if (!rows.length) return [];
+
+        return rows.filter(row => {
+            const rowDate = formatDate(row.payment_date);
+            switch (selectedInterval) {
+                case "today":
+                    return rowDate === getToday();
+                case "year":
+                    return rowDate >= getFirstDayOfYear() && rowDate <= getToday();
+                case "custom":
+                    if (!startDate || !endDate) return true;
+                    return rowDate >= startDate && rowDate <= endDate;
+                case "month":
+                    return rowDate >= getFirstDayOfMonth() && rowDate <= getToday();
+                default:
+                    return rowDate >= getFirstDayOfMonth() && rowDate <= getToday();
+            }})
+    }
+        
+
+    const handleDateFilter = (selectedInterval) => {
+        console.log("selected interval:", selectedInterval)
+        const filtered = filterRows(allRows, selectedInterval, startDate, endDate);
+        console.log("filtered rows:", filtered)
+        setRows(filtered);
+        console.log("selected interval:", selectedInterval);
+        console.log("filtered rows:", filtered);
+      };
+
     
+    useEffect(() => {
+    if (selectedInterval && allRows.length) {
+        const filtered = filterRows(allRows, selectedInterval, startDate, endDate);
+
+        if (JSON.stringify(filtered) !== JSON.stringify(rows)) {
+        setRows(filtered);
+        }
+    }
+    }, [selectedInterval, allRows, startDate, endDate])
+
 
     const handleCategoryCheckbox = (catId) => {
         let newSelected;
@@ -428,34 +482,6 @@ function App() {
         setRows(expensesProviderValues.rows || []);
     };
 
-
-    const handleDateFilter = (filterValue) => {
-        const filter = filterValue || selectedInterval;
-        setSelectedInterval(filter); 
-
-        const allRows = expensesProviderValues.rows || []
-    
-        setRows(allRows.filter(row => {
-            const rowDate = formatDate(row.payment_date);
-            switch (filter) {
-                case "today":
-                    return rowDate === getToday();
-                case "year":
-                    return rowDate >= getFirstDayOfYear() && rowDate <= getToday();
-                case "custom":
-                    if (!startDate || !endDate) return true;
-                    return rowDate >= startDate && rowDate <= endDate;
-                case "month":
-                    return rowDate >= getFirstDayOfMonth() && rowDate <= getToday();
-                case "select-interval":
-                    return false; // Empty
-                default:
-                    // Currrent month on default
-                    return rowDate >= getFirstDayOfMonth() && rowDate <= getToday();
-            }
-        }));
-    };
-
     const filterBySearchWord = (searchWord) => {
         console.log("search word:", searchWord);
         const cleanedWord = String(searchWord).trim().toLowerCase();
@@ -476,7 +502,7 @@ function App() {
 
 
     const closeFilter = () => {
-        setFilterIsOpen(false)
+        setIsFilterOpen(false)
     }
 
   
@@ -493,7 +519,7 @@ function App() {
         closeFilter,
         filterBySearchWord,
         setSearchWord,
-        setFilterIsOpen,
+        setIsFilterOpen,
         setSelectedCategories,
         handleCategoryCheckbox,
         handleAllCategories,

@@ -53,8 +53,10 @@ function Main() {
                 }
 
                 <ModalContext value={modalProviderValues}>
-                    <Login />
-                    <Registration />
+                    <FilterContext value={filterProviderValues}>
+                        <Login />
+                        <Registration />
+                    </FilterContext>
                 </ModalContext>
                        
             </main>

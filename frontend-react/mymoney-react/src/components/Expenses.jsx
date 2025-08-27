@@ -4,12 +4,14 @@ import CurrencyInput from 'react-currency-input-field';
 import { ExpensesContext } from "../context/ExpensesContext";
 import { ModalContext } from "../context/ModalContext";
 import { FilterContext } from "../context/FilterContext";
+import { AuthContext } from "../context/AuthContext";
 
 
 const Expenses = () => {
 
     const expensesProviderValues = useContext(ExpensesContext)
     const filterProviderValues = useContext(FilterContext)
+    const authProviderValues = useContext(AuthContext)
 
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 5;
@@ -33,8 +35,8 @@ const Expenses = () => {
         
             <div className="expenses-header">
                 <h2>Expenses</h2>
-                {!filterProviderValues.isFilterOpen  &&
-                <button className="filter-btn" onClick={() => filterProviderValues.setFilterIsOpen(true)}>
+                {!filterProviderValues.isFilterOpen  && authProviderValues.isLoggedIn &&
+                <button className="filter-btn" onClick={() => filterProviderValues.setIsFilterOpen(true)}>
                     <i className="material-icons">tune</i>
                     Filter                   
                 </button> 
