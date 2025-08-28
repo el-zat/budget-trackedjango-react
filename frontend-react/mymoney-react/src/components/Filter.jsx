@@ -29,7 +29,6 @@ const Filter = () => {
                                     checked={filterProviderValues.selectedInterval === "month"}
                                     onChange={e => {
                                       filterProviderValues.setSelectedInterval(e.target.value);
-                                      // filterProviderValues.handleDateFilter(e.target.value);
                                     }}
                                   />
                                   This month
@@ -127,7 +126,7 @@ const Filter = () => {
                             </div>
                       </div>
 
-                      <table className="interval-table">
+                      {/* <table className="interval-table">
                         <tbody>
                           <tr>
                             <th>Start date:</th>
@@ -150,7 +149,7 @@ const Filter = () => {
                             </td>
                           </tr>
                         </tbody>
-                      </table>
+                      </table> */}
                      </div>
 
                      <div className="filter-actions">

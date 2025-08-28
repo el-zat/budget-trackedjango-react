@@ -22,7 +22,6 @@
   background-color: $bgColor;
   padding: 20px;
   height: auto;
-  // width: auto;
   margin-bottom: 10px;
 
   form {
@@ -32,21 +31,7 @@
   }
 }
 
-.interval-table { 
-  font-weight: bold;
-  padding: 20px;
-  width: auto;
-  height: auto;
-  background-color: $bgColor;
-  @extend %border;
-  @extend %mainFont;
-  font-size: 18px; 
 
-  th, td {
-    text-align: left;
-    padding-bottom: 10px;
-  }
-}
 
 .categories-filter {
   @extend %border;

@@ -31,17 +31,36 @@ const Expenses = () => {
 
     return  <React.Fragment>
         <div className="expenses-wrapper">
-        
-            <div className="expenses-header">
-                <h2>Expenses</h2>
+            {/* <h2>Expenses</h2> */}
+            <div className="expenses-header">                
                 {!filterProviderValues.isFilterOpen  && authProviderValues.isLoggedIn &&
-                <button className="filter-btn" onClick={() => filterProviderValues.setIsFilterOpen(true)}>
-                    <i className="material-icons">tune</i>
-                    Filter                   
-                </button> 
+                    <button className="filter-btn" onClick={() => filterProviderValues.setIsFilterOpen(true)}>
+                        <i className="material-icons">tune</i>
+                        Filter                   
+                    </button> 
                 }
-                
-            </div>           
+
+                <div className="show-interval">
+                    {
+                    filterProviderValues.selectedInterval === "month" ? (
+                        <p>{filterProviderValues.currentMonth}</p>
+                    ) : filterProviderValues.selectedInterval === "year" ? (
+                        <p>{filterProviderValues.currentYear}</p>
+                    ) : filterProviderValues.selectedInterval === "today" ? (
+                        <p>{filterProviderValues.today}</p>
+                    ) : filterProviderValues.selectedInterval === "custom" ? (
+                        <div className="show-custom-interval">
+                            <div className="show-custom">
+                                <p>From: </p> {filterProviderValues.formatDate(filterProviderValues.startDate)}
+                            </div>
+                            <div className="show-custom">
+                                <p>To: </p> {filterProviderValues.formatDate(filterProviderValues.endDate)}
+                            </div>
+                        </div>             
+                    ) : null 
+                    }
+                </div>   
+            </div>        
             
             <table className="expenses-table">                
                 <thead>

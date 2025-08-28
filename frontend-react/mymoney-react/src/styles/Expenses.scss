@@ -132,7 +132,7 @@ input,
   margin: 40px 20px;
   position: absolute;
   right: 10px;
-  width: 150px;
+  width: 180px;
   padding: 10px;
   font-size: 18px;
   font-weight: bolder;
@@ -142,4 +142,21 @@ input,
   &:hover {
     background-color: $btnColor;
   }
+}
+
+.show-interval{ 
+  width: auto;
+  height: auto;
+
+}
+
+.show-custom {
+  @include flex(space-between, center, row);
+  gap: 10px;
+  width: 100%;
+}
+
+.show-custom-interval {
+  @include flex(space-between, flex-start, column);
+  gap: 12px;
 }

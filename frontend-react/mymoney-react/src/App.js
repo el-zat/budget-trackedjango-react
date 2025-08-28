@@ -131,8 +131,6 @@ function App() {
         localStorage.setItem('selectedInterval', selectedInterval);
     }, [selectedInterval]);
    
-    
-    
 
     const totalPrice = () => {      
         if (isLoggedIn) {
@@ -141,12 +139,24 @@ function App() {
         else { return ''}
     }
 
+
+    function getCurrentMonth() {
+        const today = new Date();
+        const month = today.toLocaleString('default', { month: 'long' }); // например, "August"
+        const year = today.getFullYear();
+        return `${month} ${year}`;
+      }
+
+    function getCurrentYear() {
+        const today = new Date();
+        const month = today.toLocaleString('default', { month: 'long' }); // например, "August"
+        const year = today.getFullYear();
+        return `${year}`;
+    }
+
     function getToday() {
         const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        return `${yyyy}-${mm}-${dd}`;
+        return today.toLocaleString('en', { day: 'numeric', month: 'long', year: 'numeric' });
     }
 
     function getFirstDayOfMonth() {
@@ -194,6 +204,9 @@ function App() {
       
     const startDate = getStartDate(selectedInterval);
     const endDate = getEndDate(selectedInterval);
+    const today = getToday(selectedInterval);
+    const currentMonth = getCurrentMonth(selectedInterval);
+    const currentYear = getCurrentYear(selectedInterval);
 
 
     function formatDate(value) {
@@ -450,10 +463,10 @@ function App() {
     const handleDateFilter = (selectedInterval) => {
         console.log("selected interval:", selectedInterval)
         const filtered = filterRows(allRows, selectedInterval, startDate, endDate);
-        console.log("filtered rows:", filtered)
+        // console.log("filtered rows:", filtered)
         setFilteredRows(filtered);
-        console.log("selected interval:", selectedInterval);
-        console.log("filtered rows:", filtered);
+        // console.log("selected interval:", selectedInterval);
+        // console.log("filtered rows:", filtered);
       };
 
 
@@ -529,6 +542,9 @@ function App() {
         isFilterOpen, 
         searchWord, 
         filteredRows, 
+        today,
+        currentMonth,
+        currentYear,
         setFilteredRows,
         closeFilter,
         filterBySearchWord,
