@@ -14,7 +14,7 @@ const Expenses = () => {
     const expensesProviderValues = useContext(ExpensesContext)
     const filterProviderValues = useContext(FilterContext)
     const authProviderValues = useContext(AuthContext)
-    const sortProviderValues = useContext(SortContext)
+    // const sortProviderValues = useContext(SortContext)
     const modalProviderValues = useContext(ModalContext)
 
     const [currentPage, setCurrentPage] = useState(1);

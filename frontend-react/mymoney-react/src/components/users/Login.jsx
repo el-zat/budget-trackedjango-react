@@ -21,8 +21,6 @@ function Login() {
   const filterProviderValues = useContext(FilterContext);
 
 
-  
-
   const handleLogin = async (e) => {
       e.preventDefault();
       setMessage('');
@@ -89,14 +87,18 @@ function Login() {
   }, [authProviderValues.isLoggedIn]);
 
 
-  const handleLogout = () => { 
-    
-    filterProviderValues.setIsFilterOpen(false)
-    authProviderValues.emptyTable(); 
+  const emptyTable = () => {
+    filterProviderValues.setFilteredRows([]); 
+}
+
+  const handleLogout = () => {
+    filterProviderValues.setIsFilterOpen(false);
+    emptyTable();
     authProviderValues.setIsLoggedIn(false);
     localStorage.setItem('isLoggedIn', 'false');
-  }
+  };
 
+  
   // Restore the state when loading the page
   useEffect(() => {
     const loggedIn = localStorage.getItem('isLoggedIn');

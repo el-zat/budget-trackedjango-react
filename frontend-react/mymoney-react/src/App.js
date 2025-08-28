@@ -229,7 +229,6 @@ function App() {
     }
 
 
-
     const selectedCategoryObj = categories.find(
         cat => String(cat.id) === String(selectedCategory)
     );
@@ -318,18 +317,6 @@ function App() {
             setPrice('');
             setPaymentDate(getToday());
         }   
-    }
-
-
-    const emptyTable = () => {
-        const emptyLocalExpense = {
-            // id: ,
-            category: '',
-            name: '',
-            price: '',
-            payment_date: '',  
-        }
-        setRows([]); 
     }
         
   
@@ -429,32 +416,12 @@ function App() {
     };
 
 
-
     //Sorting and filtering
 
     const allRows = useMemo(() => {
         return rows || [];
       }, [rows]);
 
-    const sortDateAscending = () => {
-        console.log('sort ascending')
-        setRows(rows.slice().sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date))); 
-    }
-
-    const sortDateDescending = () => {
-        console.log('sort descending')
-        setRows(rows.slice().sort((a, b) => new Date(a.payment_date) - new Date(b.payment_date))); 
-    }
-
-    const sortPriceAscending = () => {
-        console.log('sort ascending')
-        setRows(rows.slice().sort((a, b) => b.price - a.price)); 
-    }
-
-    const sortPriceDescending = () => {
-        console.log('sort descending')
-        setRows(rows.slice().sort((a, b) => a.price - b.price)); 
-    }
 
     const categoriesMap = {};
         categories.forEach(category => {
@@ -514,17 +481,6 @@ function App() {
         setSelectedSort(value);
         handleSort(value);  
       };
-
-
-    // useEffect(() => {
-    //     if (selectedSort) {
-    //       handleSort(selectedSort);
-    //     }
-    //   }, [selectedSort, allRows]);
-
-    // const allRows = useMemo(() => {
-    //     return rows || [];
-    //   }, [rows]);
 
 
     const filterRowsByDate = (rows, selectedInterval, startDate, endDate) => {
@@ -597,10 +553,6 @@ function App() {
         setRows(expensesProviderValues.rows || []);
     }
 
-      
-
-
-
 
     // const handleCategoryCheckbox = (catId) => {
     //     let newSelected;
@@ -628,6 +580,7 @@ function App() {
     //     setRows(expensesProviderValues.rows || []);
     // };
 
+
     const filterBySearchWord = (searchWord) => {
         console.log("search word:", searchWord);
         const cleanedWord = String(searchWord).trim().toLowerCase();
@@ -652,21 +605,8 @@ function App() {
     }
 
     const sortProviderValues = {
-        sortConfig, 
-        sortOption, 
-        direction,
         selectedSort, 
         onSortChange,
-
-        sortDateAscending,
-        sortDateDescending,
-        sortPriceAscending,
-        sortPriceDescending,
-        sortCategoriesAlphabetically,
-        setSelectedSort,
-        setSortOption,         
-        setDirection,
-        setSortConfig,
     }
   
     const filterProviderValues = {       
@@ -742,10 +682,10 @@ function App() {
         setHasDescription: setHasDescription,
     }), [descriptionMap, setHasDescription])
 
+
     const authProviderValues = {
         isLoggedIn: isLoggedIn,
-        setIsLoggedIn: setIsLoggedIn,
-        emptyTable: emptyTable,       
+        setIsLoggedIn: setIsLoggedIn,      
     }
 
     const descriptionProviderValues = {
