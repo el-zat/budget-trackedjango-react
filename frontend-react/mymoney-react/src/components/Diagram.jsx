@@ -45,7 +45,7 @@ const Diagram = () => {
 
     return <React.Fragment> 
         <div className="category-summary">
-            <h2>Category Summary</h2>
+            <h2>Categories Summary</h2>
             {sortedGroupArray.map((group) => (
 
             <div className="category-row" key={group.name}>

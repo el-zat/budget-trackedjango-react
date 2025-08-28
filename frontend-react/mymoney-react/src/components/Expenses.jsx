@@ -8,6 +8,7 @@ import { AuthContext } from "../context/AuthContext";
 
 const Expenses = () => {
 
+    
     const expensesProviderValues = useContext(ExpensesContext)
     const filterProviderValues = useContext(FilterContext)
     const authProviderValues = useContext(AuthContext)
@@ -22,24 +23,18 @@ const Expenses = () => {
     const paginatedRows = filterProviderValues.filteredRows.slice(
         (currentPage - 1) * rowsPerPage,
         currentPage * rowsPerPage
-      );
+    );
 
 
     useEffect(() => {
         localStorage.setItem('descriptionMap', JSON.stringify(expensesProviderValues.descriptionMap));
       }, [expensesProviderValues.descriptionMap]);
 
+
     return  <React.Fragment>
         <div className="expenses-wrapper">
             {/* <h2>Expenses</h2> */}
             <div className="expenses-header">                
-                {!filterProviderValues.isFilterOpen  && authProviderValues.isLoggedIn &&
-                    <button className="filter-btn" onClick={() => filterProviderValues.setIsFilterOpen(true)}>
-                        <i className="material-icons">tune</i>
-                        Filter                   
-                    </button> 
-                }
-
                 <div className="show-interval">
                     {
                     filterProviderValues.selectedInterval === "month" ? (
@@ -60,13 +55,19 @@ const Expenses = () => {
                     ) : null 
                     }
                 </div>   
+                {!filterProviderValues.isFilterOpen  && authProviderValues.isLoggedIn &&
+                    <button className="filter-btn" onClick={() => filterProviderValues.setIsFilterOpen(true)}>
+                        <i className="material-icons">tune</i>
+                        Filter                   
+                    </button> 
+                }
             </div>        
             
             <table className="expenses-table">                
                 <thead>
                     <tr>
-                        <th>Category</th>
-                        <th>Expense</th>                    
+                        <th onClick={() => expensesProviderValues.sortAlphabetically('category')}>Category </th>                      
+                        <th onClick={() => expensesProviderValues.sortAlphabetically('name')}>Expense</th>                    
                         <th>Date
                             <button 
                                 className="sort-btn" 

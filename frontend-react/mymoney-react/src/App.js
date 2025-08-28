@@ -47,14 +47,18 @@ function App() {
         return saved !== null ? JSON.parse(saved) : false;
       });
 
-    const [dateFrom, setDateFrom] = useState(getToday());
-    const [dateTo, setDateTo] = useState(getToday());
+    const [dateFrom, setDateFrom] = useState('');
+    const [dateTo, setDateTo] = useState('');
 
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedInterval, setSelectedInterval] = useState('month')
 
     const [searchWord, setSearchWord] = useState('');
     const [filteredRows, setFilteredRows] = useState([]);
+
+    //Sorting
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+
 
 
     // Fetch expenses from django server
@@ -210,12 +214,14 @@ function App() {
 
 
     function formatDate(value) {
+        if (!value) return "";
         const d = new Date(value);
         const yyyy = d.getFullYear();
         const mm = String(d.getMonth() + 1).padStart(2, '0');
         const dd = String(d.getDate()).padStart(2, '0');
         return `${yyyy}-${mm}-${dd}`;
     }
+
 
 
     const selectedCategoryObj = categories.find(
@@ -424,12 +430,31 @@ function App() {
         setRows(rows.slice().sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date))); 
     }
 
+    const sortAlphabetically = (key) => {
+        console.log('sort categories alphabetically')
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        const sorted = rows.slice().sort((a, b) => {
+            const aKey = String(a[key] || "").toLowerCase();
+            const bKey = String(b[key] || "").toLowerCase();
+
+            if (aKey < bKey) return direction === 'asc' ? -1 : 1;
+            if (aKey > bKey) return direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+        setRows(sorted);
+        setSortConfig({ key, direction });
+    };
+    
+
     const allRows = useMemo(() => {
         return rows || [];
       }, [rows]);
 
 
-    const filterRows = (rows, selectedInterval, startDate, endDate) => {
+    const filterRowsByDate = (rows, selectedInterval, startDate, endDate) => {
         if (!rows.length) return [];
         
         return rows.filter(row => {
@@ -462,7 +487,7 @@ function App() {
 
     const handleDateFilter = (selectedInterval) => {
         console.log("selected interval:", selectedInterval)
-        const filtered = filterRows(allRows, selectedInterval, startDate, endDate);
+        const filtered = filterRowsByDate(allRows, selectedInterval, startDate, endDate);
         // console.log("filtered rows:", filtered)
         setFilteredRows(filtered);
         // console.log("selected interval:", selectedInterval);
@@ -593,6 +618,7 @@ function App() {
         setSelectedInterval: setSelectedInterval,
         sortAscending: sortAscending,
         sortDescending: sortDescending,
+        sortAlphabetically,
         setPaymentDate: setPaymentDate,
         formatDate: formatDate,
         setMiscExpense: setMiscExpense,

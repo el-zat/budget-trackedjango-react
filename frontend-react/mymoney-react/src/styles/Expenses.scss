@@ -39,7 +39,7 @@
     height: 50px;
     border-color: $tableLinesOddColor;
     padding-left: 20px;
-    align-items: center;
+    text-align: left;
   }
 
   & th {
@@ -48,6 +48,7 @@
     font-size: 18px;
     height: 40px;
     padding-left: 20px;
+    text-align: left;
   }
 
   tr:nth-child(even) {
