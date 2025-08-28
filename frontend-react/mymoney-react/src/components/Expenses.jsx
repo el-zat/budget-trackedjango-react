@@ -4,6 +4,8 @@ import CurrencyInput from 'react-currency-input-field';
 import { ExpensesContext } from "../context/ExpensesContext";
 import { FilterContext } from "../context/FilterContext";
 import { AuthContext } from "../context/AuthContext";
+import { SortContext } from "../context/SortContext";
+import { ModalContext } from "../context/ModalContext";
 
 
 const Expenses = () => {
@@ -12,6 +14,8 @@ const Expenses = () => {
     const expensesProviderValues = useContext(ExpensesContext)
     const filterProviderValues = useContext(FilterContext)
     const authProviderValues = useContext(AuthContext)
+    const sortProviderValues = useContext(SortContext)
+    const modalProviderValues = useContext(ModalContext)
 
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 5;
@@ -33,7 +37,6 @@ const Expenses = () => {
 
     return  <React.Fragment>
         <div className="expenses-wrapper">
-            {/* <h2>Expenses</h2> */}
             <div className="expenses-header">                
                 <div className="show-interval">
                     {
@@ -54,37 +57,34 @@ const Expenses = () => {
                         </div>             
                     ) : null 
                     }
-                </div>   
-                {!filterProviderValues.isFilterOpen  && authProviderValues.isLoggedIn &&
-                    <button className="filter-btn" onClick={() => filterProviderValues.setIsFilterOpen(true)}>
-                        <i className="material-icons">tune</i>
-                        Filter                   
+                </div>  
+
+                {!modalProviderValues.isModalSortOpen  && authProviderValues.isLoggedIn &&
+                <div className="sort">
+                    <button className="sort-btn" 
+                        onClick={() => modalProviderValues.setIsModalSortOpen(true)}>
+                        <i className="material-icons">sort</i>
+                        Sort                   
                     </button> 
+                </div>
+                }
+                
+                {!filterProviderValues.isFilterOpen  && authProviderValues.isLoggedIn &&
+                <button className="filter-btn" 
+                    onClick={() => filterProviderValues.setIsFilterOpen(true)}>
+                    <i className="material-icons">tune</i>
+                    Filter                   
+                </button> 
                 }
             </div>        
             
             <table className="expenses-table">                
                 <thead>
                     <tr>
-                        <th onClick={() => expensesProviderValues.sortAlphabetically('category')}>Category </th>                      
-                        <th onClick={() => expensesProviderValues.sortAlphabetically('name')}>Expense</th>                    
-                        <th>Date
-                            <button 
-                                className="sort-btn" 
-                                title="Sort ascending"
-                                onClick={expensesProviderValues.sortAscending}
-                                >
-                                    <i className="fas fa-arrow-up"></i>
-                            </button>
-                            <button 
-                                className="sort-btn" 
-                                title="Sort descending"
-                                onClick={expensesProviderValues.sortDescending}
-                                >
-                                    <i className="fas fa-arrow-down"></i>
-                            </button>
-                        </th>
-                        <th>Price, €</th>
+                        <th> Category </th>                      
+                        <th> Expense </th>                                           
+                        <th> Date </th>
+                        <th> Price, € </th>
                         <th></th>
                     </tr>
                 </thead>

@@ -6,6 +6,7 @@ import {FilterContext} from './context/FilterContext'
 import {ExpensesContext} from './context/ExpensesContext'
 import {AuthContext} from './context/AuthContext'
 import {DescriptionContext} from './context/DescriptionContext'
+import {SortContext} from './context/SortContext'
 
 
 function App() {
@@ -55,9 +56,15 @@ function App() {
 
     const [searchWord, setSearchWord] = useState('');
     const [filteredRows, setFilteredRows] = useState([]);
+    const [filteredRowsByCategories, setFilteredRowsByCategories] = useState(filteredRows);
+    const [checkedCategories, setCheckedCategories] = useState([]);
 
     //Sorting
+
+    const [selectedSort, setSelectedSort] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+    const [sortOption, setSortOption] = useState(null);
+    const [direction, setDirection] = useState("asc");
 
 
 
@@ -146,14 +153,13 @@ function App() {
 
     function getCurrentMonth() {
         const today = new Date();
-        const month = today.toLocaleString('default', { month: 'long' }); // например, "August"
+        const month = today.toLocaleString('default', { month: 'long' });
         const year = today.getFullYear();
         return `${month} ${year}`;
       }
 
     function getCurrentYear() {
         const today = new Date();
-        const month = today.toLocaleString('default', { month: 'long' }); // например, "August"
         const year = today.getFullYear();
         return `${year}`;
     }
@@ -407,6 +413,8 @@ function App() {
     };
 
 
+    //Description 
+
     const handleAddDescription = () => {          
         setIsDescriptionShown(true)
     }
@@ -420,38 +428,103 @@ function App() {
         setDescriptionMap(prev => ({ ...prev, [id]: value }));
     };
 
-    const sortAscending = () => {
-        console.log('sort ascending')
-        setRows(rows.slice().sort((a, b) => new Date(a.payment_date) - new Date(b.payment_date))); 
-    }
 
-    const sortDescending = () => {
-        console.log('sort descending')
-        setRows(rows.slice().sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date))); 
-    }
 
-    const sortAlphabetically = (key) => {
-        console.log('sort categories alphabetically')
-        let direction = 'asc';
-        if (sortConfig.key === key && sortConfig.direction === 'asc') {
-            direction = 'desc';
-        }
-        const sorted = rows.slice().sort((a, b) => {
-            const aKey = String(a[key] || "").toLowerCase();
-            const bKey = String(b[key] || "").toLowerCase();
-
-            if (aKey < bKey) return direction === 'asc' ? -1 : 1;
-            if (aKey > bKey) return direction === 'asc' ? 1 : -1;
-            return 0;
-        });
-        setRows(sorted);
-        setSortConfig({ key, direction });
-    };
-    
+    //Sorting and filtering
 
     const allRows = useMemo(() => {
         return rows || [];
       }, [rows]);
+
+    const sortDateAscending = () => {
+        console.log('sort ascending')
+        setRows(rows.slice().sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date))); 
+    }
+
+    const sortDateDescending = () => {
+        console.log('sort descending')
+        setRows(rows.slice().sort((a, b) => new Date(a.payment_date) - new Date(b.payment_date))); 
+    }
+
+    const sortPriceAscending = () => {
+        console.log('sort ascending')
+        setRows(rows.slice().sort((a, b) => b.price - a.price)); 
+    }
+
+    const sortPriceDescending = () => {
+        console.log('sort descending')
+        setRows(rows.slice().sort((a, b) => a.price - b.price)); 
+    }
+
+    const categoriesMap = {};
+        categories.forEach(category => {
+            categoriesMap[category.id] = category;
+    });
+
+
+    const sortCategoriesAlphabetically = () => {
+        console.log('sort categories alphabetically ascending');
+        console.log(rows[0]);
+      
+        const sorted = rows.slice().sort((a, b) => {
+          const aKey = categoriesMap[a.category]?.name.toLowerCase() || "";
+          const bKey = categoriesMap[b.category]?.name.toLowerCase() || "";
+      
+          console.log(`Comparing "${aKey}" with "${bKey}"`);
+      
+          const comparison = aKey.localeCompare(bKey, 'en', { sensitivity: 'base', numeric: true });
+      
+          console.log(`Result of localeCompare: ${comparison}`);
+      
+          return comparison;
+        });
+      
+        console.log('Sorted result categories:', sorted.map(item => categoriesMap[item.category]?.name || "Unknown"));
+        setRows(sorted);
+    };
+    
+
+    const handleSort = (selectedSort) => {
+        console.log("selected sort:", selectedSort);
+        switch (selectedSort) {
+          case "date-dec":
+            setRows(rows.slice().sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date)));
+            break;
+          case "date-inc":
+            setRows(rows.slice().sort((a, b) => new Date(a.payment_date) - new Date(b.payment_date)));
+            break;
+          case "category":
+            sortCategoriesAlphabetically("category");
+            break;
+          case "price-inc":
+            setRows(rows.slice().sort((a, b) => a.price - b.price));
+            break;
+          case "price-dec":
+            setRows(rows.slice().sort((a, b) => b.price - a.price));
+            break;
+          default:
+            setRows(rows.slice().sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date)));
+            break;
+        }     
+        setSelectedSort(selectedSort);
+      };
+    
+
+    const onSortChange = (value) => {
+        setSelectedSort(value);
+        handleSort(value);  
+      };
+
+
+    // useEffect(() => {
+    //     if (selectedSort) {
+    //       handleSort(selectedSort);
+    //     }
+    //   }, [selectedSort, allRows]);
+
+    // const allRows = useMemo(() => {
+    //     return rows || [];
+    //   }, [rows]);
 
 
     const filterRowsByDate = (rows, selectedInterval, startDate, endDate) => {
@@ -488,10 +561,7 @@ function App() {
     const handleDateFilter = (selectedInterval) => {
         console.log("selected interval:", selectedInterval)
         const filtered = filterRowsByDate(allRows, selectedInterval, startDate, endDate);
-        // console.log("filtered rows:", filtered)
         setFilteredRows(filtered);
-        // console.log("selected interval:", selectedInterval);
-        // console.log("filtered rows:", filtered);
       };
 
 
@@ -506,31 +576,57 @@ function App() {
       }, [selectedInterval, allRows, startDate, endDate]);
 
 
-    const handleCategoryCheckbox = (catId) => {
-        let newSelected;
-        if (selectedCategories.includes(catId)) {
-          newSelected = selectedCategories.filter(id => id !== catId);
+
+
+    const handleCategoryCheckbox = (categoryId) => {
+        setCheckedCategories(prevSelected => {
+        if (prevSelected.includes(categoryId)) {
+    
+        return prevSelected.filter(id => id !== categoryId);
         } else {
-          newSelected = [...selectedCategories, catId];
+        
+        return [...prevSelected, categoryId];
         }
-        setSelectedCategories(newSelected);
-      
-        // Filter
-        const rows = expensesProviderValues.rows || [];
-        if (newSelected.length === 0) {
-          setRows(rows); // Show all
-        } else {
-          setRows(rows.filter(row =>
-            newSelected.map(String).includes(String(row.category))
-          ));
-        }
+    });
     };
-  
+      
+   
 
     const handleAllCategories = () => {
         setSelectedCategories([]);
         setRows(expensesProviderValues.rows || []);
-    };
+    }
+
+      
+
+
+
+
+    // const handleCategoryCheckbox = (catId) => {
+    //     let newSelected;
+    //     if (selectedCategories.includes(catId)) {
+    //       newSelected = selectedCategories.filter(id => id !== catId);
+    //     } else {
+    //       newSelected = [...selectedCategories, catId];
+    //     }
+    //     setSelectedCategories(newSelected);
+      
+    //     // Filter
+    //     const rows = expensesProviderValues.rows || [];
+    //     if (newSelected.length === 0) {
+    //       setRows(rows); // Show all
+    //     } else {
+    //       setRows(rows.filter(row =>
+    //         newSelected.map(String).includes(String(row.category))
+    //       ));
+    //     }
+    // };
+  
+
+    // const handleAllCategories = () => {
+    //     setSelectedCategories([]);
+    //     setRows(expensesProviderValues.rows || []);
+    // };
 
     const filterBySearchWord = (searchWord) => {
         console.log("search word:", searchWord);
@@ -555,6 +651,23 @@ function App() {
         setIsFilterOpen(false)
     }
 
+    const sortProviderValues = {
+        sortConfig, 
+        sortOption, 
+        direction,
+        selectedSort, 
+        onSortChange,
+
+        sortDateAscending,
+        sortDateDescending,
+        sortPriceAscending,
+        sortPriceDescending,
+        sortCategoriesAlphabetically,
+        setSelectedSort,
+        setSortOption,         
+        setDirection,
+        setSortConfig,
+    }
   
     const filterProviderValues = {       
         selectedInterval: selectedInterval,
@@ -602,7 +715,8 @@ function App() {
         editPrice: editPrice,
         editDate: editDate,
         editName: editName,
-        descriptionMap: descriptionMap,       
+        descriptionMap: descriptionMap,     
+        
         totalPrice: totalPrice,
         setEditDate: setEditDate,       
         getToday: getToday,
@@ -616,9 +730,7 @@ function App() {
         setEditPrice: setEditPrice,
         setEditName: setEditName,
         setSelectedInterval: setSelectedInterval,
-        sortAscending: sortAscending,
-        sortDescending: sortDescending,
-        sortAlphabetically,
+
         setPaymentDate: setPaymentDate,
         formatDate: formatDate,
         setMiscExpense: setMiscExpense,
@@ -647,11 +759,13 @@ function App() {
     <>
     <AuthContext.Provider value={authProviderValues}>
         <FilterContext.Provider value={filterProviderValues}>
-            <ExpensesContext.Provider value={expensesProviderValues}>
-                <DescriptionContext.Provider value={descriptionProviderValues}>
-                    <Main />
-                </DescriptionContext.Provider>
-            </ExpensesContext.Provider>
+            <SortContext.Provider value={sortProviderValues}>
+                <ExpensesContext.Provider value={expensesProviderValues}>
+                    <DescriptionContext.Provider value={descriptionProviderValues}>
+                            <Main />
+                    </DescriptionContext.Provider>
+                </ExpensesContext.Provider>
+            </SortContext.Provider>
         </FilterContext.Provider>
     </AuthContext.Provider>
     </>

@@ -7,8 +7,6 @@ const Filter = () => {
 
     const filterProviderValues = useContext(FilterContext)
 
-    
-
 
     return  <React.Fragment>                
                 
