@@ -101,7 +101,7 @@ const Filter = () => {
                                 <input
                                   type="checkbox"
                                   value="all"
-                                  checked={filterProviderValues.selectedCategories.length === 0}
+                                  checked={filterProviderValues.checkedCategories.length === 0}
                                   onChange={filterProviderValues.handleAllCategories}
                                 />
                                 All categories
@@ -114,7 +114,7 @@ const Filter = () => {
                                     <input
                                       type="checkbox"
                                       value={cat.id}
-                                      checked={filterProviderValues.selectedCategories.includes(cat.id)}
+                                      checked={filterProviderValues.checkedCategories.includes(cat.id)}
                                       onChange={() => filterProviderValues.handleCategoryCheckbox(cat.id)}
                                     />
                                     {cat.name}
@@ -123,34 +123,9 @@ const Filter = () => {
                               ))}
                             </div>
                       </div>
+                    </div>
 
-                      {/* <table className="interval-table">
-                        <tbody>
-                          <tr>
-                            <th>Start date:</th>
-                            <td>
-                              {
-                                filterProviderValues.selectedInterval === "select-interval"
-                                ? ""                            
-                                : filterProviderValues.formatDate(filterProviderValues.startDate)
-                              }
-                            </td>
-                          </tr>
-                          <tr>
-                            <th>End date:</th>
-                            <td>
-                              {
-                                filterProviderValues.selectedInterval === "select-interval"
-                                ? ""
-                                : filterProviderValues.formatDate(filterProviderValues.endDate)
-                              }
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table> */}
-                     </div>
-
-                     <div className="filter-actions">
+                    <div className="filter-actions">
                       <div className="search-container">
                         <input 
                           id="search-word"
@@ -175,7 +150,7 @@ const Filter = () => {
                           Close filter
                         </button>
                       </div>       
-                     </div>
+                    </div>
                     
                      
                   </div>                    

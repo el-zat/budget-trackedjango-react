@@ -51,20 +51,17 @@ function App() {
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
 
-    const [selectedCategories, setSelectedCategories] = useState([]);
+    const [checkedCategories, setCheckedCategories] = useState([]);
+    
     const [selectedInterval, setSelectedInterval] = useState('month')
 
     const [searchWord, setSearchWord] = useState('');
+    const [filteredRowsByDate, setFilteredRowsByDate] = useState([]);
     const [filteredRows, setFilteredRows] = useState([]);
-    const [filteredRowsByCategories, setFilteredRowsByCategories] = useState(filteredRows);
-    const [checkedCategories, setCheckedCategories] = useState([]);
+
 
     //Sorting
-
     const [selectedSort, setSelectedSort] = useState([]);
-    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
-    const [sortOption, setSortOption] = useState(null);
-    const [direction, setDirection] = useState("asc");
 
 
 
@@ -430,29 +427,18 @@ function App() {
 
 
     const sortCategoriesAlphabetically = () => {
-        console.log('sort categories alphabetically ascending');
-        console.log(rows[0]);
-      
         const sorted = rows.slice().sort((a, b) => {
           const aKey = categoriesMap[a.category]?.name.toLowerCase() || "";
-          const bKey = categoriesMap[b.category]?.name.toLowerCase() || "";
-      
-          console.log(`Comparing "${aKey}" with "${bKey}"`);
-      
+          const bKey = categoriesMap[b.category]?.name.toLowerCase() || ""      
           const comparison = aKey.localeCompare(bKey, 'en', { sensitivity: 'base', numeric: true });
-      
-          console.log(`Result of localeCompare: ${comparison}`);
       
           return comparison;
         });
-      
-        console.log('Sorted result categories:', sorted.map(item => categoriesMap[item.category]?.name || "Unknown"));
         setRows(sorted);
     };
     
 
     const handleSort = (selectedSort) => {
-        console.log("selected sort:", selectedSort);
         switch (selectedSort) {
           case "date-dec":
             setRows(rows.slice().sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date)));
@@ -515,70 +501,60 @@ function App() {
         
 
     const handleDateFilter = (selectedInterval) => {
-        console.log("selected interval:", selectedInterval)
         const filtered = filterRowsByDate(allRows, selectedInterval, startDate, endDate);
-        setFilteredRows(filtered);
+        setFilteredRowsByDate(filtered);
       };
-
 
 
     useEffect(() => {
         if (selectedInterval && allRows.length) {
-            console.log("selectedInterval in useEffect:", selectedInterval);
-            console.log("allRows length:", allRows.length);
-            console.log("rows length before setRows:", rows.length);
             handleDateFilter(selectedInterval)
         }
       }, [selectedInterval, allRows, startDate, endDate]);
 
-
-
-
-    const handleCategoryCheckbox = (categoryId) => {
-        setCheckedCategories(prevSelected => {
-        if (prevSelected.includes(categoryId)) {
     
-        return prevSelected.filter(id => id !== categoryId);
+    //filteredRows must depend on filteredRowsByDate:
+    useEffect(() => {
+        setFilteredRows(filteredRowsByDate);
+    }, [filteredRowsByDate]);
+
+
+    const handleCategoryCheckbox = (checkedID) => {
+        console.log("filteredRowsByDate:", filteredRowsByDate)
+        console.log("filteredRows:", filteredRows)
+        if (!checkedID) {
+            console.warn("checkedCategory.id is undefined", checkedID);
+            return;
+          }
+        let newChecked = [];
+        if (checkedCategories.includes(checkedID)) {
+            newChecked = checkedCategories.filter(id => id !== checkedID);  //If the category is already selected, it is removed from the list
         } else {
-        
-        return [...prevSelected, categoryId];
+            newChecked = [...checkedCategories, checkedID]; //Otherwise, it is added to the list of selected categories
         }
-    });
+        setCheckedCategories(newChecked);
+        console.log("new checked: ", newChecked)
+
+        const rowsToFilter = filteredRowsByDate.length ? filteredRowsByDate : expensesProviderValues.rows || [];
+
+        const filtered = rowsToFilter.filter(row =>
+            newChecked.length === 0 ||
+            newChecked.map(String).includes(String(row.category))
+          );
+          setFilteredRows(filtered);
+
+        console.log("rows:", filteredRows)
     };
-      
-   
-
-    const handleAllCategories = () => {
-        setSelectedCategories([]);
-        setRows(expensesProviderValues.rows || []);
-    }
-
-
-    // const handleCategoryCheckbox = (catId) => {
-    //     let newSelected;
-    //     if (selectedCategories.includes(catId)) {
-    //       newSelected = selectedCategories.filter(id => id !== catId);
-    //     } else {
-    //       newSelected = [...selectedCategories, catId];
-    //     }
-    //     setSelectedCategories(newSelected);
-      
-    //     // Filter
-    //     const rows = expensesProviderValues.rows || [];
-    //     if (newSelected.length === 0) {
-    //       setRows(rows); // Show all
-    //     } else {
-    //       setRows(rows.filter(row =>
-    //         newSelected.map(String).includes(String(row.category))
-    //       ));
-    //     }
-    // };
   
 
-    // const handleAllCategories = () => {
-    //     setSelectedCategories([]);
-    //     setRows(expensesProviderValues.rows || []);
-    // };
+    const handleAllCategories = () => {
+        setCheckedCategories([]);
+        setFilteredRows(rows || []);
+    };
+
+    useEffect(() => {
+        console.log("filteredRows (after update):", filteredRows);
+      }, [filteredRows]);
 
 
     const filterBySearchWord = (searchWord) => {
@@ -616,19 +592,20 @@ function App() {
         startDate: startDate,
         endDate: endDate,       
         categories: categories,
-        selectedCategories, 
+        checkedCategories, 
         isFilterOpen, 
         searchWord, 
-        filteredRows, 
         today,
         currentMonth,
         currentYear,
-        setFilteredRows,
+        filteredRowsByDate,
+        // filteredRowsByCategories,
+        filteredRows,
         closeFilter,
         filterBySearchWord,
         setSearchWord,
         setIsFilterOpen,
-        setSelectedCategories,
+        setCheckedCategories,
         handleCategoryCheckbox,
         handleAllCategories,
         setSelectedCategory: setSelectedCategory,

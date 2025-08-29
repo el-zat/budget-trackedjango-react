@@ -4,7 +4,6 @@ import CurrencyInput from 'react-currency-input-field';
 import { ExpensesContext } from "../context/ExpensesContext";
 import { FilterContext } from "../context/FilterContext";
 import { AuthContext } from "../context/AuthContext";
-import { SortContext } from "../context/SortContext";
 import { ModalContext } from "../context/ModalContext";
 
 
@@ -14,8 +13,8 @@ const Expenses = () => {
     const expensesProviderValues = useContext(ExpensesContext)
     const filterProviderValues = useContext(FilterContext)
     const authProviderValues = useContext(AuthContext)
-    // const sortProviderValues = useContext(SortContext)
     const modalProviderValues = useContext(ModalContext)
+
 
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 5;
