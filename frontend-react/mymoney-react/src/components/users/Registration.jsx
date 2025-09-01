@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react"
 import '../../styles/Registration.scss' 
 import Modal from '../Modal';
 import {ModalContext} from '../../context/ModalContext'
+import {AuthContext} from '../../context/AuthContext'
 
 
 function Registration() {
@@ -16,6 +17,8 @@ function Registration() {
 
 
   const modalProviderValues = useContext(ModalContext);
+  const authProviderValues = useContext(AuthContext)
+  
 
   const handleRegistration = async (e) => {
     e.preventDefault();
@@ -28,7 +31,7 @@ function Registration() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username : modalProviderValues.registrationUsername,
+          username : authProviderValues.registrationUsername,
           password1: registrationPassword1,
           password2: registrationPassword2,
           email: registrationEmail,
@@ -39,14 +42,14 @@ function Registration() {
       });
 
       if (response.ok) {
-        setMessage('Account sussefully created! You can sing in.');
-        modalProviderValues.setRegistrationUsername('');
+        setMessage('Account successfully created! You can sing in.');
+        authProviderValues.setRegistrationUsername('');
         setRegistrationPassword1('');
         setRegistrationPassword2('');
         setRegistrationEmail('');
         setRegistrationFirstName('');
         setRegistrationLastName('');
-        modalProviderValues.setModalRegistrationIsOpen(false) // Close modal window after susessful registration
+        modalProviderValues.setIsModalRegistrationOpen(false) // Close modal window after susessful registration
         
       } else {
         const data = await response.json();
@@ -60,7 +63,7 @@ function Registration() {
 
   return  <React.Fragment>
           <Modal isOpen={modalProviderValues.isModalRegistrationOpen} 
-                 onClose={() => modalProviderValues.setModalRegistrationIsOpen(false)}>
+                 onClose={() => modalProviderValues.setIsModalRegistrationOpen(false)}>
                   <div className="registration-container">
                     <h2>Registration</h2>
                     <form onSubmit={handleRegistration} style={{ maxWidth: 400, margin: '0 auto' }}>               
@@ -68,8 +71,8 @@ function Registration() {
                         <label>Username:</label>
                         <input
                           type="text"
-                          value={modalProviderValues.registrationUsername}
-                          onChange={e => modalProviderValues.setRegistrationUsername(e.target.value)}
+                          value={authProviderValues.registrationUsername}
+                          onChange={e => authProviderValues.setRegistrationUsername(e.target.value)}
                           required
                         />
                       </div>

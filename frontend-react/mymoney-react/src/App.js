@@ -7,6 +7,7 @@ import {ExpensesContext} from './context/ExpensesContext'
 import {AuthContext} from './context/AuthContext'
 import {DescriptionContext} from './context/DescriptionContext'
 import {SortContext} from './context/SortContext'
+import { ModalContext } from './context/ModalContext';
 
 
 function App() {
@@ -21,6 +22,8 @@ function App() {
     const [name, setName] = useState('');
     const [miscExpense, setMiscExpense] = useState('');
     const [rows, setRows] = useState([]);
+    const [newRecord, setNewRecord] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
     
 
     //Description
@@ -38,9 +41,15 @@ function App() {
     const [editDate, setEditDate] = useState(paymentDate);
     const [editName, setEditName] = useState(name);
     
-    //Logging
+    //Authorization
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-
+    const [loginEmail, setLoginEmail] = useState('');
+    const [message, setMessage] = useState('');
+    const [loginUsername, setLoginUsername] = useState(localStorage.getItem('loginUsername') || '');
+    const [loginPassword, setLoginPassword] = useState('');
+    const [loginValue, setLoginValue] = useState('');
+    const [isSignupMessageShown, setIsSignupMessageShown] = useState(true);
+    const [registrationUsername, setRegistrationUsername] = useState('');
 
     //Filtering
     const [isFilterOpen, setIsFilterOpen] = useState(() => {
@@ -64,6 +73,12 @@ function App() {
     const [selectedSort, setSelectedSort] = useState([]);
 
 
+    //Modal
+    const [isModalSortOpen, setIsModalSortOpen] = useState(false);
+    const [isModalLoginOpen, setIsModalLoginOpen] = useState(false);
+    const [isModalRegistrationOpen, setIsModalRegistrationOpen] = useState(false);
+    // const [registrationUsername, setRegistrationUsername] = useState('');
+
 
     // Fetch expenses from django server
     const fetchExpenses = async () => {
@@ -81,6 +96,7 @@ function App() {
             setRows([]); // Empty table when logged out
         }
         }, [isLoggedIn]);
+
 
     useEffect(() => {
         fetch('http://127.0.0.1:8000/api/categories/')
@@ -142,7 +158,7 @@ function App() {
 
     const totalPrice = () => {      
         if (isLoggedIn) {
-            return rows.reduce((prevTotal, row) => prevTotal + Number(row.price), 0)
+            return filteredRows.reduce((prevTotal, row) => prevTotal + Number(row.price), 0)
         } 
         else { return ''}
     }
@@ -237,6 +253,114 @@ function App() {
         }
         return cleanPrice;
     }
+
+
+    // Login, authorization
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setMessage('');
+  
+        const loginPayload = {
+          login: loginValue,
+          password: loginPassword,
+        };
+  
+        console.log("login value: ",loginValue)
+                
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/login/', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(loginPayload),
+            });
+      
+          if (response.ok) {
+            const data = await response.json(); // Get username from response
+            setMessage('Login successful!');
+            setIsSignupMessageShown(false);
+            setLoginEmail(data.email);            
+            setLoginUsername(data.username);
+            console.log("username from response:", data.username)
+            localStorage.setItem('loginUsername', data.username);
+            localStorage.setItem('loginEmail', data.email);
+            filterProviderValues.setSelectedInterval('month')
+            filterProviderValues.setIsFilterOpen(false);
+            
+            setTimeout(() => {
+              setIsLoggedIn(true);             
+              setIsModalSortOpen(false);     
+              localStorage.setItem('isLoggedIn', 'true');
+              setMessage(''); 
+              setIsModalLoginOpen(false)
+            
+            }, 1000); // wait 1.5 sec and thean close the modal
+    
+          } else {
+            const data = await response.json();
+            console.log("No response");
+            console.log("Full response data:", data); // Логируйте целиком ответ
+            if (data.error) {
+              setMessage(data.error);
+              console.log("Error:", data.error);
+            } else if (
+              data.detail &&
+              (data.detail.includes('not found') || data.detail.includes('User not found'))
+            ) {
+              setMessage(
+                <>
+                  User not found.{' '}
+                  <span
+                    style={{ color: 'blue', cursor: 'pointer' }}
+                    onClick={() => {
+                      setIsModalLoginOpen(false);
+                      setIsModalRegistrationOpen(true);
+                    }}
+                  >
+                    Sign up?
+                  </span>
+                </>
+              );
+            } else {
+              setMessage('Login failed!');
+            }
+          }
+        } catch (error) {
+          setMessage('Server error: ' + error.message);
+        }
+    };
+
+    // Restore the state when loading the page
+    useEffect(() => {
+        const loggedIn = localStorage.getItem('isLoggedIn');
+        const storedUsername = localStorage.getItem('loginUsername'); // Get username from localStorage
+        if (loggedIn === 'true' && storedUsername) {
+            setIsLoggedIn(true);
+            setLoginUsername(storedUsername); // Set username from localStorage
+        } else {
+            setIsLoggedIn(false);
+            setLoginUsername('');
+        }
+    }, []);
+  
+  
+    useEffect(() => {
+      console.log('isLoggedIn changed:', isLoggedIn);
+    }, [isLoggedIn]);
+  
+    
+    useEffect(() => {
+      console.log("loginUsername updated:", loginUsername);
+    }, [loginUsername]);
+  
+  
+    useEffect(() => {
+      const storedEmail = localStorage.getItem('loginEmail');
+      console.log("login email", loginEmail)
+      if (storedEmail) {
+        setLoginEmail(storedEmail);
+      }
+    }, []);
     
 
     const handleSave = async (e) => {
@@ -247,6 +371,8 @@ function App() {
         else {
             e.preventDefault();
 
+        
+        // Мalidation and creation of newJangoExpense    
         const selectedCategoryObj = categories.find(
             cat => String(cat.id) === String(selectedCategory)
         );
@@ -267,6 +393,7 @@ function App() {
         }
     
         const newJangoExpense = {
+            user_email: loginEmail,
             category: selectedCategoryObj?.id || '',
             name: expenseName,
             price: getCleanPrice(price),
@@ -282,14 +409,26 @@ function App() {
                     },
                     body: JSON.stringify(newJangoExpense),
                 });
+
+                const data = await response.json();
         
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    alert('Error!: ' + JSON.stringify(errorData));
+                    alert('Error!: ' + JSON.stringify(data));
                     return;
                 }
 
+                const newRecord = data;
+
                 await fetchExpenses();
+
+                // After updating the list, searching for the index of the added entry
+                const newRecordIndex = filterProviderValues.filteredRows.findIndex(row => row.id === newRecord.id);
+
+                if (newRecordIndex !== -1) {
+                const rowsPerPage = 5;
+                const newPage = Math.floor(newRecordIndex / rowsPerPage) + 1;
+                setCurrentPage(newPage);
+                }               
 
             } 
             catch (error) {
@@ -308,6 +447,7 @@ function App() {
             setRows(prevRows => [newLocalExpense, ...prevRows]);   
         }    
 
+            // Clear form
             setSelectedCategory('all');
             setSelectedExpense('all');
             setName('');
@@ -315,8 +455,20 @@ function App() {
             setPaymentDate(getToday());
         }   
     }
+
+    useEffect(() => {
+        if (newRecord && filteredRows.length > 0) {
+          const index = filteredRows.findIndex(row => row.id === newRecord.id);
+          if (index !== -1) {
+            const rowsPerPage = 5;
+            const page = Math.floor(index / rowsPerPage) + 1;
+            setCurrentPage(page);
+            setNewRecord(null); 
+          }
+        }
+      }, [filteredRows, newRecord]);
         
-  
+
     const deleteExpense = async (id) => {
         if (!id) {
           alert('Error: id undefined!');
@@ -476,7 +628,9 @@ function App() {
             const rowDate = new Date(row.payment_date);
             const today = new Date();
             const firstDayOfYear = new Date(today.getFullYear(), 0, 1); // 1.January
+            const lastDayOfYear = new Date(today.getFullYear(), 11, 31)
             const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
         
             switch (selectedInterval) {
                 case "today":
@@ -486,9 +640,9 @@ function App() {
                     rowDate.getDate() === today.getDate()
                     );
                 case "year":
-                    return rowDate >= firstDayOfYear && rowDate <= today;
+                    return rowDate >= firstDayOfYear && rowDate <= lastDayOfYear;
                 case "month":
-                    return rowDate >= firstDayOfMonth && rowDate <= today;
+                    return rowDate >= firstDayOfMonth && rowDate <= lastDayOfMonth;
                 case "custom":
                     if (!startDate || !endDate) return true;
                     return new Date(rowDate) >= new Date(startDate) && new Date(rowDate) <= new Date(endDate);
@@ -599,8 +753,8 @@ function App() {
         currentMonth,
         currentYear,
         filteredRowsByDate,
-        // filteredRowsByCategories,
         filteredRows,
+        setFilteredRows,
         closeFilter,
         filterBySearchWord,
         setSearchWord,
@@ -633,7 +787,8 @@ function App() {
         editDate: editDate,
         editName: editName,
         descriptionMap: descriptionMap,     
-        
+        currentPage, 
+        setCurrentPage,
         totalPrice: totalPrice,
         setEditDate: setEditDate,       
         getToday: getToday,
@@ -661,8 +816,20 @@ function App() {
 
 
     const authProviderValues = {
-        isLoggedIn: isLoggedIn,
-        setIsLoggedIn: setIsLoggedIn,      
+        isLoggedIn,
+        loginEmail, 
+        loginUsername,
+        loginPassword, 
+        loginValue,
+        registrationUsername,
+        setIsSignupMessageShown,
+        setRegistrationUsername,
+        setLoginUsername,
+        handleLogin,
+        setLoginPassword,
+        setLoginValue,
+        setLoginEmail,
+        setIsLoggedIn,      
     }
 
     const descriptionProviderValues = {
@@ -671,20 +838,36 @@ function App() {
         currentDescriptionId: currentDescriptionId,
     }
 
+    const modalProviderValues = {
+        isModalLoginOpen,     
+        isModalRegistrationOpen,
+        
+        isModalSortOpen, 
+        
+        setIsModalSortOpen,
+        setIsModalLoginOpen,
+        setIsModalRegistrationOpen,
+        
+      };
+
 
   return (
     <>
-    <AuthContext.Provider value={authProviderValues}>
-        <FilterContext.Provider value={filterProviderValues}>
-            <SortContext.Provider value={sortProviderValues}>
-                <ExpensesContext.Provider value={expensesProviderValues}>
-                    <DescriptionContext.Provider value={descriptionProviderValues}>
-                            <Main />
-                    </DescriptionContext.Provider>
-                </ExpensesContext.Provider>
-            </SortContext.Provider>
-        </FilterContext.Provider>
-    </AuthContext.Provider>
+    
+        <AuthContext.Provider value={authProviderValues}>
+        <ModalContext.Provider value={modalProviderValues}>
+            <FilterContext.Provider value={filterProviderValues}>
+                <SortContext.Provider value={sortProviderValues}>
+                    <ExpensesContext.Provider value={expensesProviderValues}>
+                        <DescriptionContext.Provider value={descriptionProviderValues}>
+                                <Main />
+                        </DescriptionContext.Provider>
+                    </ExpensesContext.Provider>
+                </SortContext.Provider>
+            </FilterContext.Provider>
+            </ModalContext.Provider>
+        </AuthContext.Provider>
+    
     </>
 
   );

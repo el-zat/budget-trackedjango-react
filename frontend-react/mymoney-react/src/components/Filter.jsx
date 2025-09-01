@@ -109,8 +109,8 @@ const Filter = () => {
                             
                               {filterProviderValues.categories.slice() 
                               .sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
-                                <div key={cat.id}>
-                                  <label>
+                                <div className="select-category-checkbox" key={cat.id}>
+                                  <label >
                                     <input
                                       type="checkbox"
                                       value={cat.id}

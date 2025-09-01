@@ -9,82 +9,10 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 function Login() {
 
-  const [loginUsername, setLoginUsername] = useState(localStorage.getItem('loginUsername') || '');
-  const [loginPassword, setLoginPassword] = useState('');
-  const [loginEmail, setLoginEmail] = useState('');
-  const [message, setMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isSignupMessageShown, setSignupMessageShown] = useState(true);
-
   const authProviderValues = useContext(AuthContext)
   const modalProviderValues = useContext(ModalContext);
   const filterProviderValues = useContext(FilterContext);
-
-
-  const handleLogin = async (e) => {
-      e.preventDefault();
-      setMessage('');
-      
-      try {
-          const response = await fetch('http://127.0.0.1:8000/api/login/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email: loginEmail,
-              password: loginPassword,
-            }),
-          });
-    
-        if (response.ok) {
-          const data = await response.json(); // Get username from response
-          setMessage('Login successful!');
-          setSignupMessageShown(false);
-          setLoginUsername(data.username);
-          filterProviderValues.setSelectedInterval('month')
-          filterProviderValues.setIsFilterOpen(false);
-          
-          setTimeout(() => {
-            authProviderValues.setIsLoggedIn(true);
-            
-            modalProviderValues.setModalLoginIsOpen(false);     
-            localStorage.setItem('isLoggedIn', 'true');
-            setMessage(''); 
-          
-          }, 1500); // wait 1.5 sec and thean close the modal
-  
-        } else { // User not found
-          const data = await response.json();
-          if (
-            data.detail &&
-            (data.detail.includes('not found') || data.detail.includes('User not found'))
-          ) {
-            setMessage(
-              <>
-                User not found.{' '}
-                <span
-                  style={{ color: 'blue', cursor: 'pointer' }}
-                  onClick={() => {
-                    modalProviderValues.setModalLoginIsOpen(false);
-                    modalProviderValues.setModalRegistrationIsOpen(true);
-                  }}
-                >
-                  Sign up?
-                </span>
-              </>
-            );
-          } else {
-            setMessage('Login failed!');
-          }
-        }
-      } catch (error) {
-        setMessage('Server error: ' + error.message);
-      }
-  };
-
-
-  useEffect(() => {
-    console.log('isLoggedIn changed:', authProviderValues.isLoggedIn);
-  }, [authProviderValues.isLoggedIn]);
 
 
   const emptyTable = () => {
@@ -98,49 +26,34 @@ function Login() {
     localStorage.setItem('isLoggedIn', 'false');
   };
 
-  
-  // Restore the state when loading the page
-  useEffect(() => {
-    const loggedIn = localStorage.getItem('isLoggedIn');
-    const storedUsername = localStorage.getItem('loginUsername'); // Get username from localStorage
-    if (loggedIn === 'true' && storedUsername) {
-        authProviderValues.setIsLoggedIn(true);
-        setLoginUsername(storedUsername); // Set username from localStorage
-    } else {
-        authProviderValues.setIsLoggedIn(false);
-        setLoginUsername('');
-    }
-  }, [authProviderValues]);
-
 
   return  <React.Fragment>
               <Modal isOpen={modalProviderValues.isModalLoginOpen} onClose={() => 
-                      modalProviderValues.setModalLoginIsOpen(false)}>
+                      modalProviderValues.setIsModalLoginOpen(false)}>
                   <div className="container d-flex justify-content-center" >
                       <div className="login-container">
                           <h2 >Sign in</h2>
-                          <form onSubmit={handleLogin}
-                              >                               
-                              <div>
-                                  <label>Email:</label>
-                                  <input
-                                      type="email"
-                                      value={loginEmail}
-                                      onChange={e => setLoginEmail(e.target.value)}
-                                      required
-                                  />
+                          <form onSubmit={authProviderValues.handleLogin} >                               
+                              <div> 
+                              <label htmlFor="username">Username/e-mail:</label>
+                              <input 
+                                type="text"
+                                value={authProviderValues.loginValue}
+                                onChange={e => authProviderValues.setLoginValue(e.target.value)}
+                                required
+                              />
                               </div>
                               <div className="form-group">
-                                  <label htmlFor="password">Password</label>
+                                  <label htmlFor="password">Password:</label>
                                   <input
                                     type={showPassword ? "text" : "password"}
                                     className="form-control"
-                                    value={loginPassword}
+                                    value={authProviderValues.loginPassword}
                                     id="password"
                                     name="password"
                                     placeholder="Input password" 
                                     required                                      
-                                    onChange={e => setLoginPassword(e.target.value)}
+                                    onChange={e => authProviderValues.setLoginPassword(e.target.value)}
                                   />
                                   <button
                                     type="button"
@@ -161,24 +74,24 @@ function Login() {
                               </div>
                               
                           </form>
-                          {message && (
+                          {authProviderValues.message && (
                             <div className="login-message"> 
-                              {message}
+                              {authProviderValues.message}
                             </div>
                           )}
-                          {isSignupMessageShown &&
+                          {/* {authProviderValues.isSignupMessageShown && */}
                             <p className="mt-3 text-center" >
                               No account?  
                               <a href="#" style={{ color: '#000', marginLeft: '10px' }}
                                   onClick={e => {
                                       e.preventDefault();
-                                      modalProviderValues.setModalLoginIsOpen(false); 
-                                      modalProviderValues.setModalRegistrationIsOpen(true); 
+                                      modalProviderValues.setIsModalLoginOpen(false); 
+                                      modalProviderValues.setIsModalRegistrationOpen(true); 
                                   }}
                               > 
                               Sign up</a>
                             </p>
-                          }
+                          {/* } */}
                           
                       </div>
                   </div>
@@ -188,9 +101,9 @@ function Login() {
                                 
                 <div className="loggedout">
                   <button className="login-btn"
-                  onClick={() => {
-                    setSignupMessageShown(true);
-                    modalProviderValues.setModalLoginIsOpen(true);
+                  onClick={() => {                    
+                    modalProviderValues.setIsModalLoginOpen(true);
+                    authProviderValues.setIsSignupMessageShown(true);
                   }}
                   >
                     Login
@@ -201,7 +114,7 @@ function Login() {
               <div className="loggedin">                
                 <div className="greeting">
                     <i className="material-icons">perm_identity</i>               
-                    <span>{loginUsername}</span>
+                    <span>{authProviderValues.loginUsername}</span>
                 </div> 
                 <button className="logout-btn"
                   onClick={() => {handleLogout()}}>

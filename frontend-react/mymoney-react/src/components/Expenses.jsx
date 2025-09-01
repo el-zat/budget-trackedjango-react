@@ -10,33 +10,33 @@ import { ModalContext } from "../context/ModalContext";
 const Expenses = () => {
 
     
+    
     const expensesProviderValues = useContext(ExpensesContext)
     const filterProviderValues = useContext(FilterContext)
     const authProviderValues = useContext(AuthContext)
     const modalProviderValues = useContext(ModalContext)
 
 
-    const [currentPage, setCurrentPage] = useState(1);
+    // const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 5;
 
-    const totalRows = expensesProviderValues.rows.length;
-    const totalPages = Math.ceil(totalRows / rowsPerPage);
-    
+
+
+    const totalRows = filterProviderValues.filteredRows.length;
+    const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
+
 
     const paginatedRows = filterProviderValues.filteredRows.slice(
-        (currentPage - 1) * rowsPerPage,
-        currentPage * rowsPerPage
+        (expensesProviderValues.currentPage - 1) * rowsPerPage,
+        expensesProviderValues.currentPage * rowsPerPage
     );
 
-
-    useEffect(() => {
-        localStorage.setItem('descriptionMap', JSON.stringify(expensesProviderValues.descriptionMap));
-      }, [expensesProviderValues.descriptionMap]);
 
 
     return  <React.Fragment>
         <div className="expenses-wrapper">
-            <div className="expenses-header">                
+            <div className="expenses-header">
+                {authProviderValues.isLoggedIn &&                
                 <div className="show-interval">
                     {
                     filterProviderValues.selectedInterval === "month" ? (
@@ -57,6 +57,7 @@ const Expenses = () => {
                     ) : null 
                     }
                 </div>  
+                }
 
                 {!modalProviderValues.isModalSortOpen  && authProviderValues.isLoggedIn &&
                 <div className="sort">
@@ -79,13 +80,15 @@ const Expenses = () => {
             
             <table className="expenses-table">                
                 <thead>
-                    <tr>
+                    {authProviderValues.isLoggedIn &&
+                    <tr>                       
                         <th> Category </th>                      
                         <th> Expense </th>                                           
                         <th> Date </th>
                         <th> Price, € </th>
                         <th></th>
                     </tr>
+                    }
                 </thead>
                 
                 <tbody>
@@ -103,7 +106,7 @@ const Expenses = () => {
                                 </td>
 
                                 <td>
-                                {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'name' ? (                                                         
+                                {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'name' ? (                                                                                            
                                     <input id="edit-name"
                                         type="text"
                                         name="name"
@@ -116,12 +119,13 @@ const Expenses = () => {
                                             }
                                         }}
                                     />
+                                    
                                     ) : (
                                     <span onClick={() => {
                                         expensesProviderValues.setEditingField({id: row.id, field: 'name'});
                                         expensesProviderValues.setEditName(row.name);
-                                    }}> {row.name}
-                                    </span>
+                                    }}> {row.name } <i className="material-icons">edit</i>                                   
+                                    </span>                                    
                                     )}
                                 </td>
                                 <td>
@@ -198,6 +202,7 @@ const Expenses = () => {
                        
 
                     {/* Input expenses  */}
+                    {authProviderValues.isLoggedIn &&
                     <tr>                       
                         <td>                           
                             <div className="categories-input">
@@ -274,29 +279,34 @@ const Expenses = () => {
                                 onClick={expensesProviderValues.handleSave}>Save
                             </button>                         
                         </td>                             
-                    </tr>                                        
+                    </tr> 
+                    }                                                          
                 </tbody>               
             </table>
-
+            
+            {authProviderValues.isLoggedIn &&    
             <div className="pagination">
                 <button
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
+                    onClick={() => expensesProviderValues.setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={expensesProviderValues.currentPage === 1}
                 >
                     Prev 
                 </button>
-                <span> Page {currentPage} of {totalPages} </span>
+                <span> Page {expensesProviderValues.currentPage} of {totalPages > 1 ? totalPages : 1} </span>
                 <button
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
+                    onClick={() => expensesProviderValues.setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={expensesProviderValues.currentPage === totalPages || totalPages === 1}
                 >
                     Next
                 </button>               
-            </div>  
-
+            </div>
+            }
+              
+            {authProviderValues.isLoggedIn &&    
             <div className="expenses-total">                               
                 <div className="total">Total: € {expensesProviderValues.totalPrice()} </div>
-            </div>           
+            </div>
+            }           
                                         
         </div>
   

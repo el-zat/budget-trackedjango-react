@@ -32,17 +32,20 @@
 }
 
 
-
 .categories-filter {
   @extend %border;
   background-color: $bgColor;
   padding: 20px;
   margin-bottom: 10px;
-  max-height: 140px; 
+  max-height: 160px; 
   width: 20%;
   overflow-y: auto;
   padding-right: 10px;
 
+}
+
+.select-category-checkbox {
+  @include flex(none, flex-start, column);
 }
 
 

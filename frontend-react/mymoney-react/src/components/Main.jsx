@@ -16,28 +16,29 @@ import { SortContext } from "../context/SortContext";
 
 function Main() {
 
-    const [isModalLoginOpen, setModalLoginIsOpen] = useState(false);
-    const [isModalRegistrationOpen, setModalRegistrationIsOpen] = useState(false);
-    const [registrationUsername, setRegistrationUsername] = useState('');
-    const [isModalSortOpen, setIsModalSortOpen] = useState(false); 
+    // const [isModalLoginOpen, setModalLoginIsOpen] = useState(false);
+    // const [isModalRegistrationOpen, setModalRegistrationIsOpen] = useState(false);
+    // const [registrationUsername, setRegistrationUsername] = useState('');
+    // const [isModalSortOpen, setIsModalSortOpen] = useState(false); 
 
 
-    const modalProviderValues = {
-        isModalLoginOpen,     
-        isModalRegistrationOpen,
-        registrationUsername,
-        isModalSortOpen, 
-        setIsModalSortOpen,
-        setModalLoginIsOpen,
-        setModalRegistrationIsOpen,
-        setRegistrationUsername,
-      };
+    // const modalProviderValues = {
+    //     isModalLoginOpen,     
+    //     isModalRegistrationOpen,
+    //     registrationUsername,
+    //     isModalSortOpen, 
+    //     setIsModalSortOpen,
+    //     setModalLoginIsOpen,
+    //     setModalRegistrationIsOpen,
+    //     setRegistrationUsername,
+    //   };
 
 
     const authProviderValues = useContext(AuthContext)
     const descriptionProviderValues = useContext(DescriptionContext)
     const filterProviderValues = useContext(FilterContext)
     const sortProviderValues = useContext(SortContext)
+    const modalProviderValues = useContext(ModalContext)
 
 
     return  <main>

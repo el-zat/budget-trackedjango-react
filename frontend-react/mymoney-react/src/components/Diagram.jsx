@@ -1,15 +1,18 @@
 import React, {useContext} from "react"
 import  '../styles/Diagram.scss'
 import { ExpensesContext } from "../context/ExpensesContext";
+import { FilterContext } from "../context/FilterContext";
 
 
 const Diagram = () => {
 
     const expensesProviderValues = useContext(ExpensesContext)
+    const filterProviderValues = useContext(FilterContext)
+
 
     // Groupe expenses by their categories
     const groupedByCategoryName = () => {
-        return expensesProviderValues.rows.reduce((acc, expense) => {
+        return filterProviderValues.filteredRows.reduce((acc, expense) => {
           const cat = expensesProviderValues.categories.find(c => String(c.id) === String(expense.category));
           const catName = cat?.name || 'Unknown';
           if (!acc[catName]) acc[catName] = [];
@@ -17,6 +20,13 @@ const Diagram = () => {
           return acc;
         }, {});
     };
+
+
+    function sumByGroup(items) {      
+      if (!expensesProviderValues.totalPrice) return 0;
+      const sum = items.reduce((sum, item) => sum + Number(item.price || 0), 0);
+      return sum
+    }
 
 
     function percentByGroup(items) {
@@ -30,6 +40,7 @@ const Diagram = () => {
     const groupArray = Object.entries(grouped).map(([name, items]) => ({
       name,
       items,
+      sum: sumByGroup(items),
       percent: percentByGroup(items)
     }));
 
@@ -52,11 +63,13 @@ const Diagram = () => {
                 <div className="cat-header">
                   <span>{group.name}</span>
                 </div>
-                <span className="percent"> { group.percent} % </span>     
+                <span className="sum"> { group.sum} € </span>     
+                <span className="percent"> { group.percent} % </span>        
+  
                 <div className="bar-container">
                   <div className="bar" 
-                        style={{ width: `${group.percent}%`, background: getRandomHexColor() }}>                           
-                  </div>
+                        style={{ width: `${group.percent}%`, background: getRandomHexColor() }}>                                                
+                  </div>                                
                 </div>
                       
             </div>

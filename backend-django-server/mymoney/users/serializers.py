@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import User, EmailVerification
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -54,17 +54,33 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class UserLoginSerializer(serializers.Serializer):
-    # username = serializers.CharField(
-    #     required=True,
-    #     max_length=150,
-    #     style={'input_type': 'text'}
-    # )
-    email = serializers.EmailField( 
-        required=True,
-        style={'input_type': 'email'}
-        )
+    login = serializers.CharField(required=True)  # universal field for username or email
     password = serializers.CharField(
         required=True,
         write_only=True,
         style={'input_type': 'password'}
     )
+
+    def validate(self, data):
+        login = data.get('login')
+        password = data.get('password')
+
+        if login and password:
+            # Authentication attempt first as username
+            user = authenticate(username=login, password=password)
+
+            # If unsuccessful, we will try to find the user by email and authenticate by username.
+            if user is None:
+                try:
+                    user_obj = User.objects.get(email=login)
+                    user = authenticate(username=user_obj.username, password=password)
+                except User.DoesNotExist:
+                    pass
+
+            if user is None:
+                raise serializers.ValidationError("Incorrect credentials")
+
+            data['user'] = user
+            return data
+        else:
+            raise serializers.ValidationError("Both fields are required: login and password")

@@ -9,8 +9,8 @@
     }
 
     form {
-        @include flex(none, flex-end, column);  
-        gap: 15px;
+        @include flex(space-between, flex-end, column);  
+        gap: 20px;
     }
 }
 
@@ -42,18 +42,20 @@
     height: 50px;
     @include flex (center, center, row);
     font-size: 20px;
-    
+    margin-right: 35px;
 
     .material-icons {
         margin-right: 10px;
         font-size: 30px
     }
+
 }
 
 
 label {
     @extend %mainFont;
     margin-right: 10px;
+    margin-bottom: 10px;;
 }
 
 input {
@@ -68,13 +70,13 @@ input {
 
 .show-password-btn {
     position: absolute;
-    top: 30%;
+    top: 60%;
     right: 5%;
     border: none;
     padding: 0;
     margin: 0;
     cursor: 'pointer';
-    color: $black;
+    // color: $black;
     background-color: $bgLightColor;
 }
 

@@ -4,7 +4,7 @@ from .serializers import (UserSerializer, EmailVerificationSerializer, UserLogin
 from .models import User, EmailVerification
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.contrib.auth import get_user_model, logout
+from django.contrib.auth import get_user_model, login, logout, authenticate
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -18,23 +18,33 @@ class EmailVerificationViewSet(viewsets.ModelViewSet):
     
 
 class UserLoginAPIView(APIView):
+    permission_classes = []  # или AllowAny
+
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        # username = serializer.validated_data['username']
-        email = serializer.validated_data['email']
-        password = serializer.validated_data['password']
 
-        User = get_user_model()
-        try:
-            user = User.objects.get(email=email)
-            if user.check_password(password):
-                # Return token or user data
-                return Response({'success': True, 'username': user.username, 'email': user.email})
-            else:
-                return Response({'success': False, 'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-        except User.DoesNotExist:
-            return Response({'success': False, 'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        login_data = serializer.validated_data.get('login')
+        password = serializer.validated_data.get('password')
+
+        user = authenticate(request, username=login_data, password=password)
+        if not user:
+            User = get_user_model()
+            try:
+                user_obj = User.objects.get(email=login_data)
+                user = authenticate(request, username=user_obj.username, password=password)
+                if user is None:
+                    return Response({'success': False, 'error': 'Invalid password'}, status=status.HTTP_401_UNAUTHORIZED)
+                if not user.is_active:
+                    return Response({'success': False, 'error': 'Account inactive'}, status=status.HTTP_403_FORBIDDEN)
+            except User.DoesNotExist:
+                return Response({'success': False, 'error': 'User not found. No account? Sign up!'}, status=status.HTTP_404_NOT_FOUND)
+
+        if user:
+            login(request, user)
+            return Response({'success': True, 'username': user.username})
+        else:
+            return Response({'success': False, 'error': 'Login failed!'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class UserLogoutAPIView(APIView):
