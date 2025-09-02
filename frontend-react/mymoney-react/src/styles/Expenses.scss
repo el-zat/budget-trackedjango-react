@@ -41,6 +41,38 @@
   
   }
 
+  #edit-icon {
+    font-size: 15px;
+    margin-left: 10px;
+    color: $textAreaColor;
+  }
+
+
+  .tooltip-icon-container {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+  }
+  
+  .tooltip-icon-text {
+    visibility: hidden;
+    width: 80px;
+    color: $textAreaColor;
+    text-align: center;
+    font-size: 15px;
+    position: absolute;
+    bottom: 100%;
+    left: 100%;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  
+  .tooltip-icon-container:hover .tooltip-icon-text {
+    visibility: visible;
+    opacity: 1;
+  }
 
 
   & th {

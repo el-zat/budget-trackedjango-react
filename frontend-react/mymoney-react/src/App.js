@@ -21,7 +21,7 @@ function App() {
   const [name, setName] = useState('');
   const [miscExpense, setMiscExpense] = useState('');
   const [rows, setRows] = useState([]);
-  const [newRecord, setNewRecord] = useState(null);
+  const [newExpense, setNewExpense] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   
 
@@ -363,7 +363,7 @@ function App() {
           e.preventDefault();
 
       
-      // Мalidation and creation of newJangoExpense    
+      //Validation and creation of newJangoExpense    
       const selectedCategoryObj = categories.find(
           cat => String(cat.id) === String(selectedCategory)
       );
@@ -448,16 +448,16 @@ function App() {
   }
 
   useEffect(() => {
-      if (newRecord && filteredRows.length > 0) {
-        const index = filteredRows.findIndex(row => row.id === newRecord.id);
+      if (newExpense && filteredRows.length > 0) {
+        const index = filteredRows.findIndex(row => row.id === newExpense.id);
         if (index !== -1) {
           const rowsPerPage = 5;
           const page = Math.floor(index / rowsPerPage) + 1;
           setCurrentPage(page);
-          setNewRecord(null); 
+          setNewExpense(null); 
         }
       }
-    }, [filteredRows, newRecord]);
+    }, [filteredRows, newExpense]);
       
 
   const deleteExpense = async (id) => {
