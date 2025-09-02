@@ -5,35 +5,102 @@ import { ExpensesContext } from "../context/ExpensesContext";
 import { FilterContext } from "../context/FilterContext";
 import { AuthContext } from "../context/AuthContext";
 import { ModalContext } from "../context/ModalContext";
+import { SortContext } from "../context/SortContext";
+import { Sort } from "./Sort"
 
 
 const Expenses = () => {
 
-    
     
     const expensesProviderValues = useContext(ExpensesContext)
     const filterProviderValues = useContext(FilterContext)
     const authProviderValues = useContext(AuthContext)
     const modalProviderValues = useContext(ModalContext)
 
-
-    // const [currentPage, setCurrentPage] = useState(1);
-    const rowsPerPage = 5;
-
+    //Sorting
+    const [selectedSort, setSelectedSort] = useState([])
 
 
+    console.log("Filtered and sorted rows:", filterProviderValues.filteredRows)
+
+    const sortCategoriesAlphabetically = () => {
+        const sorted = expensesProviderValues.rows.slice().sort((a, b) => {
+          const aKey = expensesProviderValues.categoriesMap[a.category]?.name.toLowerCase() || "";
+          const bKey = expensesProviderValues.categoriesMap[b.category]?.name.toLowerCase() || ""      
+          const comparison = aKey.localeCompare(bKey, 'en', { sensitivity: 'base', numeric: true });
+    
+          return comparison;
+        });
+        filterProviderValues.setFilteredRows(sorted);
+      };
+
+    
+    const handleSort = (selectedSort) => {
+        switch (selectedSort) {
+            case "date-dec":
+            filterProviderValues.setFilteredRows(filterProviderValues.filteredRows.slice().sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date)));
+            break;
+            case "date-inc":
+            filterProviderValues.setFilteredRows(filterProviderValues.filteredRows.slice().sort((a, b) => new Date(a.payment_date) - new Date(b.payment_date)));
+            break;
+            case "category":
+            sortCategoriesAlphabetically("category");
+            break;
+            case "price-inc":
+            filterProviderValues.setFilteredRows(filterProviderValues.filteredRows.slice().sort((a, b) => a.price - b.price));
+            break;
+            case "price-dec":
+            filterProviderValues.setFilteredRows(filterProviderValues.filteredRows.slice().sort((a, b) => b.price - a.price));
+            break;
+            default:
+            filterProviderValues.setFilteredRows(filterProviderValues.filteredRows.slice().sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date)));
+            break;
+        }     
+        setSelectedSort(selectedSort);
+    };
+
+
+    const onSortChange = (value) => {
+        setSelectedSort(value);
+        handleSort(value);  
+    };
+
+
+    //Pagination   
+    const rowsPerPage = 5;  
     const totalRows = filterProviderValues.filteredRows.length;
     const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
-
 
     const paginatedRows = filterProviderValues.filteredRows.slice(
         (expensesProviderValues.currentPage - 1) * rowsPerPage,
         expensesProviderValues.currentPage * rowsPerPage
     );
 
+    //Reset sort on selecting another interval filter
+    useEffect(() => {
+        return () => {
+            setSelectedSort([]);
+        };
+    }, [filterProviderValues.selectedInterval]);
+
+
+    //Reset categories checkbox on selecting another interval filter
+    useEffect(() => {
+        return () => {
+            filterProviderValues.setCheckedCategories([]);;
+        };
+    }, [filterProviderValues.selectedInterval]);
+
+
+    const sortProviderValues = {
+      selectedSort, 
+      onSortChange,
+    }
+
 
 
     return  <React.Fragment>
+        <SortContext.Provider value={sortProviderValues}>
         <div className="expenses-wrapper">
             <div className="expenses-header">
                 {authProviderValues.isLoggedIn &&                
@@ -59,16 +126,19 @@ const Expenses = () => {
                 </div>  
                 }
 
-                {!modalProviderValues.isModalSortOpen  && authProviderValues.isLoggedIn &&
-                <div className="sort">
-                    <button className="sort-btn" 
-                        onClick={() => modalProviderValues.setIsModalSortOpen(true)}>
-                        <i className="material-icons">sort</i>
-                        Sort                   
-                    </button> 
-                </div>
+                {!modalProviderValues.isModalSortOpen  && authProviderValues.isLoggedIn &&                              
+                    <div className="sort">
+                        <button className="sort-btn" 
+                            onClick={() => modalProviderValues.setIsModalSortOpen(true)}>
+                            <i className="material-icons">sort</i>
+                            Sort                   
+                        </button> 
+                    </div>                                         
                 }
-                
+                <SortContext.Provider value={sortProviderValues}>
+                    <Sort />
+                </SortContext.Provider>
+
                 {!filterProviderValues.isFilterOpen  && authProviderValues.isLoggedIn &&
                 <button className="filter-btn" 
                     onClick={() => filterProviderValues.setIsFilterOpen(true)}>
@@ -309,6 +379,7 @@ const Expenses = () => {
             }           
                                         
         </div>
+        </SortContext.Provider>
   
             </React.Fragment>
 }

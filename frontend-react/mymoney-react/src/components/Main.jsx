@@ -9,35 +9,15 @@ import {DescriptionContext} from '../context/DescriptionContext'
 import {ModalContext} from '../context/ModalContext'
 import { Registration } from './users/Registration'
 import { Login } from './users/Login'
-import { Sort } from "./Sort"
 import { FilterContext } from "../context/FilterContext";
-import { SortContext } from "../context/SortContext";
 
 
 function Main() {
-
-    // const [isModalLoginOpen, setModalLoginIsOpen] = useState(false);
-    // const [isModalRegistrationOpen, setModalRegistrationIsOpen] = useState(false);
-    // const [registrationUsername, setRegistrationUsername] = useState('');
-    // const [isModalSortOpen, setIsModalSortOpen] = useState(false); 
-
-
-    // const modalProviderValues = {
-    //     isModalLoginOpen,     
-    //     isModalRegistrationOpen,
-    //     registrationUsername,
-    //     isModalSortOpen, 
-    //     setIsModalSortOpen,
-    //     setModalLoginIsOpen,
-    //     setModalRegistrationIsOpen,
-    //     setRegistrationUsername,
-    //   };
 
 
     const authProviderValues = useContext(AuthContext)
     const descriptionProviderValues = useContext(DescriptionContext)
     const filterProviderValues = useContext(FilterContext)
-    const sortProviderValues = useContext(SortContext)
     const modalProviderValues = useContext(ModalContext)
 
 
@@ -46,9 +26,7 @@ function Main() {
                 <FilterContext.Provider value={filterProviderValues}>
                     <Filter />
                     <ModalContext.Provider value={modalProviderValues}>
-                        <SortContext.Provider value={sortProviderValues}>
-                            <Expenses />
-                        </SortContext.Provider>  
+                        <Expenses />
                     </ModalContext.Provider>                                    
                 </FilterContext.Provider>
                 
@@ -66,7 +44,6 @@ function Main() {
                             <Login />
                             <Registration />
                         </AuthContext.Provider>                        
-                        <Sort />
                     </FilterContext.Provider>
                 </ModalContext.Provider>
                        
