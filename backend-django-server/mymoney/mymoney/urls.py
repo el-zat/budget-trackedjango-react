@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.http import HttpResponse
 from rest_framework.routers import DefaultRouter
 from expenses.views import CategoryViewSet, ExpenseViewSet, MyExpenseViewSet
 from users.views import (UserViewSet, EmailVerificationViewSet, UserLoginAPIView,
@@ -20,7 +21,7 @@ def home(request):
 
 urlpatterns = [
     path('', home, name='home'),
-    
+
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
 
