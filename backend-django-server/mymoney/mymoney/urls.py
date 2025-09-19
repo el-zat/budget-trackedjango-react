@@ -5,6 +5,8 @@ from rest_framework.routers import DefaultRouter
 from expenses.views import CategoryViewSet, ExpenseViewSet, MyExpenseViewSet
 from users.views import (UserViewSet, EmailVerificationViewSet, UserLoginAPIView,
                          UserProfileViewSet, UserRegistrationView, UserLogoutAPIView)
+from django.urls import re_path
+from expenses.views import FrontendAppView
 
 
 router = DefaultRouter()
@@ -29,4 +31,8 @@ urlpatterns = [
     path('api/registration/', UserRegistrationView.as_view(), name='user-registration'),
     path('api/logout/', UserLogoutAPIView.as_view(), name='user-logout'),
 
+]
+
+urlpatterns += [
+    re_path(r'^(?!api/|admin/).*$', FrontendAppView.as_view(), name='frontend'),
 ]
