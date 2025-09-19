@@ -18,7 +18,7 @@ function Description( {id} ) {
     useEffect(() => {
         if (!id) return;
         // Load description from server
-        fetch(`http://116.203.101.149:8000/api/myexpenses/${id}/`)
+        fetch(`https://116.203.101.149:8000/api/myexpenses/${id}/`)
           .then(res => res.json())
           .then(data => {
             setDescription(data.description || "");
@@ -35,7 +35,7 @@ function Description( {id} ) {
 
     const handleSaveDescription = async () => {       
         if (!id) return;
-        await fetch(`http://116.203.101.149:8000/api/myexpenses/${id}/`, {
+        await fetch(`https://116.203.101.149:8000/api/myexpenses/${id}/`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ description }),
