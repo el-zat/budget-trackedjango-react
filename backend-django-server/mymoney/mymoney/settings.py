@@ -139,7 +139,7 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [
     BASE_DIR / "static",
-    BASE_DIR / "frontend-react" / "mymoney-react" / "build" / "static",
+    Path("/home/zatykina/budget-trackedjango-react/frontend-react/mymoney-react/build/static"),
 
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
