@@ -65,7 +65,7 @@ ROOT_URLCONF = "mymoney.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        'DIRS': [BASE_DIR /'build'],
+        'DIRS': [BASE_DIR / 'frontend-react' / 'mymoney-react' / 'build'],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -139,7 +139,7 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [
     BASE_DIR / "static",
-    BASE_DIR / "frontend-react" / "mymoney-react" / "build" / "static",
+
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
