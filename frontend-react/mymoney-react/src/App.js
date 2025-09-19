@@ -73,7 +73,7 @@ function App() {
 
   //Fetch expenses from django server
   const fetchExpenses = async () => {
-      const response = await fetch('http://127.0.0.1:8000/api/myexpenses/');
+      const response = await fetch('http://116.203.101.149:8000/api/myexpenses/');
       const data = await response.json();
       // console.log("data:", data)
       setRows(data);
@@ -90,7 +90,7 @@ function App() {
 
 
   useEffect(() => {
-      fetch('http://127.0.0.1:8000/api/categories/')
+      fetch('http://116.203.101.149:8000/api/categories/')
           .then(res => res.json())
           .then(data => {
           setCategories(data);
@@ -102,7 +102,7 @@ function App() {
 
 
   useEffect(() => {
-      fetch('http://127.0.0.1:8000/api/expenses/')
+      fetch('http://116.203.101.149:8000/api/expenses/')
           .then(res => res.json())
           .then(data => {
           setExpenses(data);
@@ -260,7 +260,7 @@ function App() {
       console.log("login value: ",loginValue)
               
       try {
-          const response = await fetch('http://127.0.0.1:8000/api/login/', {
+          const response = await fetch('http://116.203.101.149:8000/api/login/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(loginPayload),
@@ -393,7 +393,7 @@ function App() {
   
       if (isLoggedIn) {
           try {
-              const response = await fetch('http://127.0.0.1:8000/api/myexpenses/', {
+              const response = await fetch('http://116.203.101.149:8000/api/myexpenses/', {
                   method: 'POST',
                   headers: {
                       'Content-Type': 'application/json',
@@ -466,7 +466,7 @@ function App() {
         return;
       }
       try {
-        const response = await fetch(`http://127.0.0.1:8000/api/myexpenses/${id}/`, {
+        const response = await fetch(`http://116.203.101.149:8000/api/myexpenses/${id}/`, {
           method: 'DELETE',
         });
     
@@ -506,7 +506,7 @@ function App() {
           }
           
           // Send to server (PATCH)
-          const response = await fetch(`http://127.0.0.1:8000/api/myexpenses/${id}/`, {
+          const response = await fetch(`http://116.203.101.149:8000/api/myexpenses/${id}/`, {
               method: 'PATCH',
               headers: {
                   'Content-Type': 'application/json'
