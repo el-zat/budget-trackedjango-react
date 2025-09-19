@@ -18,11 +18,11 @@ router.register(r'emailverifications', EmailVerificationViewSet)
 router.register(r'userprofile', UserProfileViewSet, basename='userprofile')
 
 
-def home(request):
-    return HttpResponse("Home page")
+# def home(request):
+#     return HttpResponse("Home page")
 
 urlpatterns = [
-    path('', home, name='home'),
+    # path('', home, name='home'),
 
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
