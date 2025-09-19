@@ -65,7 +65,7 @@ ROOT_URLCONF = "mymoney.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        'DIRS': [BASE_DIR / 'frontend-react' / 'mymoney-react' / 'build'],
+        'DIRS': [BASE_DIR /'build'],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
