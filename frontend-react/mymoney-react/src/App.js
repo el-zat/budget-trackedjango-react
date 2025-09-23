@@ -73,7 +73,6 @@ function App() {
 
   //Fetch expenses from django server
   const fetchExpenses = async () => {
-      // const response = await fetch('http://127.0.0.1:8000/api/myexpenses/');
       const response = await fetch('https://116.203.101.149:8000/api/myexpenses/');
       const data = await response.json();
       // console.log("data:", data)
@@ -91,7 +90,6 @@ function App() {
 
 
   useEffect(() => {
-      // fetch('http://127.0.0.1:8000/api/categories/')
       fetch('https://116.203.101.149:8000/api/categories/')
           .then(res => res.json())
           .then(data => {
@@ -104,7 +102,6 @@ function App() {
 
 
   useEffect(() => {
-      // fetch('http://127.0.0.1:8000/api/expenses/')
       fetch('https://116.203.101.149:8000/api/expenses/')
           .then(res => res.json())
           .then(data => {
