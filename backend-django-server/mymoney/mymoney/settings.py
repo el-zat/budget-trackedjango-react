@@ -63,7 +63,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://116.203.101.149:8000",
     "http://192.168.72.1:3000",
     "https://zatykina.com",
-    "www.zatykina.com",
+    "https://www.zatykina.com",
 ]
 
 ROOT_URLCONF = "mymoney.urls"
