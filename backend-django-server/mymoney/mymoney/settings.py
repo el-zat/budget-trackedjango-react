@@ -58,7 +58,12 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "https://localhost:3000",
     "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
     "https://116.203.101.149:8000",
+    "http://192.168.72.1:3000",
+    "https://zatykina.com",
+    "www.zatykina.com",
 ]
 
 ROOT_URLCONF = "mymoney.urls"
