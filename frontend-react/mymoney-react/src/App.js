@@ -250,6 +250,8 @@ function App() {
 
   const handleLogin = async (e) => {
       e.preventDefault();
+      const csrfToken = getCookie('csrftoken');  // Get the token 
+
       setMessage('');
 
       const loginPayload = {
@@ -264,6 +266,7 @@ function App() {
           const response = await fetch('/api/login/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            'X-CSRFToken': csrfToken,  // Add the token to the headers
             body: JSON.stringify(loginPayload),
           });
     
@@ -759,6 +762,22 @@ function App() {
   }), [descriptionMap, setHasDescription])
 
 
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+  }
+
+
   const authProviderValues = {
       isLoggedIn,
       loginEmail, 
@@ -766,6 +785,7 @@ function App() {
       loginPassword, 
       loginValue,
       registrationUsername,
+      getCookie,
       setIsSignupMessageShown,
       setRegistrationUsername,
       setLoginUsername,
