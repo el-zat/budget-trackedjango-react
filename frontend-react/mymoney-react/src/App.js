@@ -412,6 +412,8 @@ function App() {
           price: getCleanPrice(price),
           payment_date: paymentDate ? paymentDate : getToday(),
       };
+
+      const csrfToken = getCookie('csrftoken');  // Get the token 
   
       if (isLoggedIn) {
           try {
@@ -419,6 +421,7 @@ function App() {
                   method: 'POST',
                   headers: {
                       'Content-Type': 'application/json',
+                      'X-CSRFToken': csrfToken,  // Add the token to the headers 
                   },
                   body: JSON.stringify(newJangoExpense),
               });
@@ -483,28 +486,30 @@ function App() {
       
 
   const deleteExpense = async (id) => {
-      if (!id) {
-        alert('Error: id undefined!');
+    const csrfToken = getCookie('csrftoken');  // Get the token 
+    if (!id) {
+      alert('Error: id undefined!');
+      return;
+    }
+    try {
+      const response = await fetch(`/api/myexpenses/${id}/`, {
+        method: 'DELETE',
+        'X-CSRFToken': csrfToken,  // Add the token
+      });
+  
+      if (!response.ok) {
+        const errorText = await response.text();
+        alert(`Delete error on server! Status: ${response.status}, Message: ${errorText}`);
         return;
-      }
-      try {
-        const response = await fetch(`/api/myexpenses/${id}/`, {
-          method: 'DELETE',
-        });
-    
-        if (!response.ok) {
-          const errorText = await response.text();
-          alert(`Delete error on server! Status: ${response.status}, Message: ${errorText}`);
-          return;
-        }      
-        setRows(rows => rows.filter(row => row.id !== id));
-      } 
-      catch (error) {
-        alert('Error: ' + error.message);
-      }
+      }      
+      setRows(rows => rows.filter(row => row.id !== id));
+    } 
+    catch (error) {
+      alert('Error: ' + error.message);
+    }
 
-      // Update the table from django server
-      await fetchExpenses();
+    // Update the table from django server
+    await fetchExpenses();
   };
 
   //Update editDate after paymentDate was updated
@@ -514,51 +519,53 @@ function App() {
 
 
   const applyChanges = async (id, field) => {
-      if (editingField.id === id) {     
-          // Edit name, price or date     
-          let bodyData = {};
-          if (field === 'price') {
-              bodyData = { price: Number(editPrice) };
-          } 
-          else if (field === 'date') {
-              bodyData = { payment_date: editDate };
-          }
-          else if (field === 'name') {
-              bodyData = { name: editName};
-          }
-          
-          // Send to server (PATCH)
-          const response = await fetch(`/api/myexpenses/${id}/`, {
-              method: 'PATCH',
-              headers: {
-                  'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(bodyData)
-          });
-          const result = await response.json().catch(() => ({}));
-          console.log('Server response:', response.status, result);
-  
-          // Update the local table
-          setRows(rows.map(row =>
-              row.id === id ? {  ...row, ...bodyData} : row
-          ));
-  
-          setEditingField({id: null, field: null});
-          setEditPrice('');
-          setEditDate('');
-      } else {
-          // Edit price and payment date
-          const expense = rows.find(row => row.id === id);
-
-          if (!expense) {
-              alert('Row with this id not found!');
-              return;
-          }
-
-          setEditPrice(expense.price);
-          setEditDate(expense.payment_date);
-          setEditingField({id: id, field: null});
+    const csrfToken = getCookie('csrftoken');  // Get the token 
+    if (editingField.id === id) {     
+      // Edit name, price or date     
+      let bodyData = {};
+      if (field === 'price') {
+          bodyData = { price: Number(editPrice) };
+      } 
+      else if (field === 'date') {
+          bodyData = { payment_date: editDate };
       }
+      else if (field === 'name') {
+          bodyData = { name: editName};
+      }
+      
+      // Send to server (PATCH)
+      const response = await fetch(`/api/myexpenses/${id}/`, {
+          method: 'PATCH',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrfToken,  // Add the token to the headers
+          },
+          body: JSON.stringify(bodyData)
+      });
+      const result = await response.json().catch(() => ({}));
+      console.log('Server response:', response.status, result);
+
+      // Update the local table
+      setRows(rows.map(row =>
+          row.id === id ? {  ...row, ...bodyData} : row
+      ));
+
+      setEditingField({id: null, field: null});
+      setEditPrice('');
+      setEditDate('');
+    } else {
+        // Edit price and payment date
+        const expense = rows.find(row => row.id === id);
+
+        if (!expense) {
+            alert('Row with this id not found!');
+            return;
+        }
+
+        setEditPrice(expense.price);
+        setEditDate(expense.payment_date);
+        setEditingField({id: id, field: null});
+    }
   };
 
 
