@@ -18,47 +18,63 @@ function Registration() {
 
   const modalProviderValues = useContext(ModalContext);
   const authProviderValues = useContext(AuthContext)
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
   
 
-  const handleRegistration = async (e) => {
-    e.preventDefault();
-    console.log(modalProviderValues.isModalRegistrationOpen)
-    
-    try {
-      const response = await fetch('/api/registration/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username : authProviderValues.registrationUsername,
-          password1: registrationPassword1,
-          password2: registrationPassword2,
-          email: registrationEmail,
-          first_name: registrationFirstName,
-          last_name: registrationLastName,
-          
-        }),
-      });
+const handleRegistration = async (e) => {
+  e.preventDefault();
 
-      if (response.ok) {
-        setMessage('Account successfully created! You can sing in.');
-        authProviderValues.setRegistrationUsername('');
-        setRegistrationPassword1('');
-        setRegistrationPassword2('');
-        setRegistrationEmail('');
-        setRegistrationFirstName('');
-        setRegistrationLastName('');
-        modalProviderValues.setIsModalRegistrationOpen(false) // Close modal window after susessful registration
-        
-      } else {
-        const data = await response.json();
-        setMessage('Error: ' + (data.detail || JSON.stringify(data)));
-      }
-    } catch (error) {
-      setMessage('Server error: ' + error.message);
+  const csrfToken = getCookie('csrftoken');  // Get the token 
+
+  try {
+    const response = await fetch('/api/registration/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken,  // Add the token to the headers
+      },
+      body: JSON.stringify({
+        username: authProviderValues.registrationUsername,
+        password1: registrationPassword1,
+        password2: registrationPassword2,
+        email: registrationEmail,
+        first_name: registrationFirstName,
+        last_name: registrationLastName,
+      }),
+    });
+
+    if (response.ok) {
+      setMessage('Account successfully created! You can sign in.');
+      authProviderValues.setRegistrationUsername('');
+      setRegistrationPassword1('');
+      setRegistrationPassword2('');
+      setRegistrationEmail('');
+      setRegistrationFirstName('');
+      setRegistrationLastName('');
+      modalProviderValues.setIsModalRegistrationOpen(false);
+    } else {
+      const data = await response.json();
+      setMessage('Error: ' + (data.detail || JSON.stringify(data)));
     }
-  };
+  } catch (error) {
+    setMessage('Server error: ' + error.message);
+  }
+};
 
 
   return  <React.Fragment>
