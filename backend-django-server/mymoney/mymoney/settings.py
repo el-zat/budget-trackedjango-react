@@ -146,8 +146,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static'
 STATICFILES_DIRS = [
-    BASE_DIR.parent / 'frontend-react' / 'mymoney-react' / 'build' / 'static'
+    BASE_DIR.parent.parent / 'frontend-react' / 'mymoney-react' / 'build' / 'static'
 ]
+
 
 
 # Default primary key field type
