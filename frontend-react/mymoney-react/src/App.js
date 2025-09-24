@@ -145,6 +145,22 @@ function App() {
   useEffect(() => {
       localStorage.setItem('selectedInterval', selectedInterval);
   }, [selectedInterval]);
+
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+  }
    
 
   const totalPrice = () => {      
@@ -265,8 +281,10 @@ function App() {
           // const response = await fetch('http://127.0.0.1:8000/api/login/', {
           const response = await fetch('/api/login/', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            'X-CSRFToken': csrfToken,  // Add the token to the headers
+            headers: { 'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,  // Add the token to the headers          
+          },
+            
             body: JSON.stringify(loginPayload),
           });
     
@@ -762,20 +780,7 @@ function App() {
   }), [descriptionMap, setHasDescription])
 
 
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-            cookie = cookie.trim();
-            if (cookie.startsWith(name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-  }
+  
 
 
   const authProviderValues = {
