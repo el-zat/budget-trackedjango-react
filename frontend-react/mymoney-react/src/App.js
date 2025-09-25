@@ -379,12 +379,10 @@ function App() {
   const handleSave = async (e) => {
       console.log(isLoggedIn)
       if (!isLoggedIn) {
-          alert('Your entries will not be saved! Please log in')
+          alert('Your entries will not be saved! Please log in');
+          return;
       }
-      else {
-          e.preventDefault();
 
-      
       //Validation and creation of newJangoExpense    
       const selectedCategoryObj = categories.find(
           cat => String(cat.id) === String(selectedCategory)
@@ -451,17 +449,6 @@ function App() {
               alert(error.message);
           }
       }
-
-      else {
-          const newLocalExpense = {
-              id: Date.now(),
-              category: selectedCategoryObj?.id || '',
-              name: expenseName,
-              price: getCleanPrice(price),
-              payment_date: paymentDate ? paymentDate : getToday(),  
-          }
-          setRows(prevRows => [newLocalExpense, ...prevRows]);   
-      }    
 
           // Clear form
           setSelectedCategory('all');
