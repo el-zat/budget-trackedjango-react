@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-lhycw0u$y-=vp@q$9pyh@-u&80c8xc&w%8dvy0eo58p*897=o#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['116.203.101.149', 'localhost', '127.0.0.1', 'zatykina.com', 'www.zatykina.com']
+ALLOWED_HOSTS = ['116.203.101.149', 'localhost', '127.0.0.1', 'zatykina.com', 'www.zatykina.com', 'budjet.zatykina.com', 'www.budjet.zatykina.com']
 
 
 
@@ -63,8 +63,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3001",
     "https://116.203.101.149:8000",
     "http://192.168.72.1:3000",
-    "https://zatykina.com",
+    "https://zatykina.com",   
     "https://www.zatykina.com",
+    "https://budjet.zatykina.com",
+    "https://www.budjet.zatykina.com",
 ]
 
 ROOT_URLCONF = "mymoney.urls"
