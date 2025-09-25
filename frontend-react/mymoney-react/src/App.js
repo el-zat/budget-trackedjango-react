@@ -377,86 +377,85 @@ function App() {
   
 
   const handleSave = async (e) => {
-      console.log(isLoggedIn)
-      if (!isLoggedIn) {
-          alert('Your entries will not be saved! Please log in');
-          return;
+    console.log(isLoggedIn)
+    if (!isLoggedIn) {
+        alert('Your entries will not be saved! Please log in');
+        return;
+    }
+
+    //Validation and creation of newJangoExpense    
+    const selectedCategoryObj = categories.find(
+        cat => String(cat.id) === String(selectedCategory)
+    );
+
+    const isMisc = selectedCategoryObj?.name === "Miscellaneous";
+    const expenseName = isMisc ? miscExpense : selectedExpense;
+
+    const paymentDate = document.querySelector('input[name="paymentDate"]')?.value;
+
+    if (
+        selectedCategory === 'all' ||
+        (selectedCategoryObj?.name === "Miscellaneous" ? !miscExpense : selectedExpense === 'all') ||
+        !price ||
+        !paymentDate
+    ) {
+        alert('Please fill out all fields!');
+        return;
+    }
+
+    const newJangoExpense = {
+        user_email: loginEmail,
+        category: selectedCategoryObj?.id || '',
+        name: expenseName,
+        price: getCleanPrice(price),
+        payment_date: paymentDate ? paymentDate : getToday(),
+    };
+
+    const csrfToken = getCookie('csrftoken');  // Get the token 
+
+    if (isLoggedIn) {
+      try {
+        const response = await fetch('/api/myexpenses/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,  // Add the token to the headers 
+            },
+            body: JSON.stringify(newJangoExpense),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert('Error!: ' + JSON.stringify(data));
+            return;
+        }
+
+        const newRecord = data;
+
+        await fetchExpenses();
+
+        // After updating the list, searching for the index of the added entry
+        const newRecordIndex = filterProviderValues.filteredRows.findIndex(row => row.id === newRecord.id);
+
+        if (newRecordIndex !== -1) {
+        const rowsPerPage = 5;
+        const newPage = Math.floor(newRecordIndex / rowsPerPage) + 1;
+        setCurrentPage(newPage);
+        }               
+
+      } 
+      catch (error) {
+          alert(error.message);
       }
+    }
 
-      //Validation and creation of newJangoExpense    
-      const selectedCategoryObj = categories.find(
-          cat => String(cat.id) === String(selectedCategory)
-      );
-  
-      const isMisc = selectedCategoryObj?.name === "Miscellaneous";
-      const expenseName = isMisc ? miscExpense : selectedExpense;
-  
-      const paymentDate = document.querySelector('input[name="paymentDate"]')?.value;
-  
-      if (
-          selectedCategory === 'all' ||
-          (selectedCategoryObj?.name === "Miscellaneous" ? !miscExpense : selectedExpense === 'all') ||
-          !price ||
-          !paymentDate
-      ) {
-          alert('Please fill out all fields!');
-          return;
-      }
-  
-      const newJangoExpense = {
-          user_email: loginEmail,
-          category: selectedCategoryObj?.id || '',
-          name: expenseName,
-          price: getCleanPrice(price),
-          payment_date: paymentDate ? paymentDate : getToday(),
-      };
-
-      const csrfToken = getCookie('csrftoken');  // Get the token 
-  
-      if (isLoggedIn) {
-          try {
-              const response = await fetch('/api/myexpenses/', {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/json',
-                      'X-CSRFToken': csrfToken,  // Add the token to the headers 
-                  },
-                  body: JSON.stringify(newJangoExpense),
-              });
-
-              const data = await response.json();
-      
-              if (!response.ok) {
-                  alert('Error!: ' + JSON.stringify(data));
-                  return;
-              }
-
-              const newRecord = data;
-
-              await fetchExpenses();
-
-              // After updating the list, searching for the index of the added entry
-              const newRecordIndex = filterProviderValues.filteredRows.findIndex(row => row.id === newRecord.id);
-
-              if (newRecordIndex !== -1) {
-              const rowsPerPage = 5;
-              const newPage = Math.floor(newRecordIndex / rowsPerPage) + 1;
-              setCurrentPage(newPage);
-              }               
-
-          } 
-          catch (error) {
-              alert(error.message);
-          }
-      }
-
-          // Clear form
-          setSelectedCategory('all');
-          setSelectedExpense('all');
-          setName('');
-          setPrice('');
-          setPaymentDate(getToday());
-      }   
+    // Clear form
+    setSelectedCategory('all');
+    setSelectedExpense('all');
+    setName('');
+    setPrice('');
+    setPaymentDate(getToday());  
   }
 
   useEffect(() => {
@@ -772,9 +771,6 @@ function App() {
       closeDescription: closeDescription,
       setHasDescription: setHasDescription,
   }), [descriptionMap, setHasDescription])
-
-
-  
 
 
   const authProviderValues = {
