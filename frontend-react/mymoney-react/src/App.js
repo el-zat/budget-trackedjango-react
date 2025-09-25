@@ -480,7 +480,9 @@ function App() {
     try {
       const response = await fetch(`/api/myexpenses/${id}/`, {
         method: 'DELETE',
-        'X-CSRFToken': csrfToken,  // Add the token
+        headers: {
+          'X-CSRFToken': csrfToken,
+        },
       });
   
       if (!response.ok) {

@@ -12,17 +12,13 @@ from expenses.views import FrontendAppView
 router = DefaultRouter()
 router.register(r'categories', CategoryViewSet)
 router.register(r'expenses', ExpenseViewSet)
-router.register(r'myexpenses', MyExpenseViewSet)
+router.register(r'myexpenses', MyExpenseViewSet, basename='myexpense')
 router.register(r'users', UserViewSet)
 router.register(r'emailverifications', EmailVerificationViewSet)
 router.register(r'userprofile', UserProfileViewSet, basename='userprofile')
 
 
-# def home(request):
-#     return HttpResponse("Home page")
-
 urlpatterns = [
-    # path('', home, name='home'),
 
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),

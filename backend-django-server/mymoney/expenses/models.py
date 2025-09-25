@@ -1,6 +1,7 @@
 from django.db import models
 from datetime import date
-
+from django.contrib.auth.models import User
+from django.conf import settings
 
 class Category(models.Model):
     name = models.CharField(max_length=128, unique=True)
@@ -39,6 +40,7 @@ class MyExpense(models.Model):
     payment_date = models.DateField(default=date.today)
     bill = models.ImageField(upload_to='expenses_images', blank=True)
     category = models.ForeignKey(to=Category, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.name} | Category: {self.category.name}"
