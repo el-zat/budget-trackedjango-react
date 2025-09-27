@@ -40,7 +40,7 @@ class MyExpense(models.Model):
     payment_date = models.DateField(default=date.today)
     bill = models.ImageField(upload_to='expenses_images', blank=True)
     category = models.ForeignKey(to=Category, on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return f"{self.name} | Category: {self.category.name}"
