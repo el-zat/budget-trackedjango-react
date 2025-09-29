@@ -17,7 +17,7 @@ class EmailVerificationViewSet(viewsets.ModelViewSet):
     queryset = EmailVerification.objects.all()
     serializer_class = EmailVerificationSerializer
     
-
+@method_decorator(csrf_exempt, name='dispatch')
 class UserLoginAPIView(APIView):
     permission_classes = []  # или AllowAny
 
