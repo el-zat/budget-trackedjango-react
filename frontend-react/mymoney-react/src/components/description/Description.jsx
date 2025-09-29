@@ -39,8 +39,7 @@ function Description( {id} ) {
     if (!id) return;
     await fetch(`/api/myexpenses/${id}/`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        'Authorization': 'Token ' + authProviderValues.token,  // Add the token to the headers 
+        headers: authProviderValues.getAuthHeaders(),
         body: JSON.stringify({ description }),
       });
       setIsEditing(false);

@@ -50,8 +50,6 @@ function App() {
   const [isSignupMessageShown, setIsSignupMessageShown] = useState(true);
   const [registrationUsername, setRegistrationUsername] = useState('');
 
-  const token = localStorage.getItem('token');
-
   //Filtering
   const [isFilterOpen, setIsFilterOpen] = useState(() => {
       const saved = localStorage.getItem('isFilterOpen');
@@ -73,6 +71,15 @@ function App() {
   const [isModalRegistrationOpen, setIsModalRegistrationOpen] = useState(false);
 
 
+  function getAuthHeaders() {
+    const token = localStorage.getItem('token');
+    return {
+      'Authorization': 'Token ' + token,
+      'Content-Type': 'application/json',
+    };
+  }
+
+  
   //Fetch expenses from django server
   const fetchExpenses = async () => {
       const response = await fetch('/api/myexpenses/');
@@ -279,13 +286,9 @@ function App() {
       console.log("login value: ",loginValue)
               
       try {
-          // const response = await fetch('http://127.0.0.1:8000/api/login/', {
           const response = await fetch('/api/login/', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json',
-            'Authorization': 'Token ' + token,      // Add the token to the headers   
-          },
-            
+            headers: getAuthHeaders(),   
             body: JSON.stringify(loginPayload),
           });
     
@@ -416,10 +419,7 @@ function App() {
       try {
         const response = await fetch('/api/myexpenses/', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Token ' + token,  // Add the token to the headers 
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify(newJangoExpense),
         });
 
@@ -478,9 +478,7 @@ function App() {
     try {
       const response = await fetch(`/api/myexpenses/${id}/`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': 'Token ' + token,
-        },
+        headers: getAuthHeaders(),
       });
   
       if (!response.ok) {
@@ -521,10 +519,7 @@ function App() {
       // Send to server (PATCH)
       const response = await fetch(`/api/myexpenses/${id}/`, {
           method: 'PATCH',
-          headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Token ' + token,  // Add the token to the headers
-          },
+          headers: getAuthHeaders(),
           body: JSON.stringify(bodyData)
       });
       const result = await response.json().catch(() => ({}));
@@ -779,7 +774,7 @@ function App() {
       loginPassword, 
       loginValue,
       registrationUsername,
-      token,
+      getAuthHeaders,
       getCookie,
       setIsSignupMessageShown,
       setRegistrationUsername,

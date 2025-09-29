@@ -27,10 +27,7 @@ function Registration() {
     try {
       const response = await fetch('/api/registration/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Token ' + authProviderValues.token,  // Add the token to the headers
-        },
+        headers: authProviderValues.getAuthHeaders(),
         body: JSON.stringify({
           username: authProviderValues.registrationUsername,
           password1: registrationPassword1,
