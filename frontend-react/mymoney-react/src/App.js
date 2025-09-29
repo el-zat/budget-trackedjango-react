@@ -71,14 +71,6 @@ function App() {
   const [isModalRegistrationOpen, setIsModalRegistrationOpen] = useState(false);
 
 
-  function getAuthHeaders() {
-    const token = localStorage.getItem('token');
-    return {
-      'Authorization': 'Token ' + token,
-      'Content-Type': 'application/json',
-    };
-  }
-
   
   //Fetch expenses from django server
   const fetchExpenses = async () => {
@@ -288,12 +280,15 @@ function App() {
       try {
           const response = await fetch('/api/login/', {
             method: 'POST',
-            headers: getAuthHeaders(),   
+            headers: {
+              'Content-Type': 'application/json', 
+            },  
             body: JSON.stringify(loginPayload),
           });
     
         if (response.ok) {
           const data = await response.json(); //Get username from response
+          localStorage.setItem('token', data.token);  //Save token in local storage
           setMessage('Login successful!');
           setIsSignupMessageShown(false);
           setLoginEmail(data.email);            
@@ -346,6 +341,14 @@ function App() {
         setMessage('Server error: ' + error.message);
       }
   };
+
+  function getAuthHeaders() {
+    const token = localStorage.getItem('token');
+    return {
+      'Authorization': 'Token ' + token,
+      'Content-Type': 'application/json',
+    };
+  }
 
   //Restore the state when loading the page
   useEffect(() => {
