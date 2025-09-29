@@ -23,14 +23,13 @@ function Registration() {
   const handleRegistration = async (e) => {
     e.preventDefault();
 
-    const csrfToken = authProviderValues.getCookie('csrftoken');  // Get the token 
 
     try {
       const response = await fetch('/api/registration/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken,  // Add the token to the headers
+          'Authorization': 'Token ' + authProviderValues.token,  // Add the token to the headers
         },
         body: JSON.stringify({
           username: authProviderValues.registrationUsername,

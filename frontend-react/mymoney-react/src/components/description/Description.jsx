@@ -35,13 +35,12 @@ function Description( {id} ) {
   }, [id]);
 
 
-  const handleSaveDescription = async () => {  
-    const csrfToken = authProviderValues.getCookie('csrftoken');  // Get the token      
+  const handleSaveDescription = async () => {       
     if (!id) return;
     await fetch(`/api/myexpenses/${id}/`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        'X-CSRFToken': csrfToken,  // Add the token to the headers 
+        'Authorization': 'Token ' + authProviderValues.token,  // Add the token to the headers 
         body: JSON.stringify({ description }),
       });
       setIsEditing(false);

@@ -50,6 +50,8 @@ function App() {
   const [isSignupMessageShown, setIsSignupMessageShown] = useState(true);
   const [registrationUsername, setRegistrationUsername] = useState('');
 
+  const token = localStorage.getItem('token');
+
   //Filtering
   const [isFilterOpen, setIsFilterOpen] = useState(() => {
       const saved = localStorage.getItem('isFilterOpen');
@@ -266,7 +268,6 @@ function App() {
 
   const handleLogin = async (e) => {
       e.preventDefault();
-      const csrfToken = getCookie('csrftoken');  // Get the token 
 
       setMessage('');
 
@@ -282,7 +283,7 @@ function App() {
           const response = await fetch('/api/login/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken,  // Add the token to the headers          
+            'Authorization': 'Token ' + token,      // Add the token to the headers   
           },
             
             body: JSON.stringify(loginPayload),
@@ -411,15 +412,13 @@ function App() {
         payment_date: paymentDate ? paymentDate : getToday(),
     };
 
-    const csrfToken = getCookie('csrftoken');  // Get the token 
-
     if (isLoggedIn) {
       try {
         const response = await fetch('/api/myexpenses/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken,  // Add the token to the headers 
+                'Authorization': 'Token ' + token,  // Add the token to the headers 
             },
             body: JSON.stringify(newJangoExpense),
         });
@@ -471,8 +470,7 @@ function App() {
     }, [filteredRows, newExpense]);
       
 
-  const deleteExpense = async (id) => {
-    const csrfToken = getCookie('csrftoken');  // Get the token 
+  const deleteExpense = async (id) => { 
     if (!id) {
       alert('Error: id undefined!');
       return;
@@ -481,7 +479,7 @@ function App() {
       const response = await fetch(`/api/myexpenses/${id}/`, {
         method: 'DELETE',
         headers: {
-          'X-CSRFToken': csrfToken,
+          'Authorization': 'Token ' + token,
         },
       });
   
@@ -507,7 +505,6 @@ function App() {
 
 
   const applyChanges = async (id, field) => {
-    const csrfToken = getCookie('csrftoken');  // Get the token 
     if (editingField.id === id) {     
       // Edit name, price or date     
       let bodyData = {};
@@ -526,7 +523,7 @@ function App() {
           method: 'PATCH',
           headers: {
               'Content-Type': 'application/json',
-              'X-CSRFToken': csrfToken,  // Add the token to the headers
+              'Authorization': 'Token ' + token,  // Add the token to the headers
           },
           body: JSON.stringify(bodyData)
       });
@@ -782,6 +779,7 @@ function App() {
       loginPassword, 
       loginValue,
       registrationUsername,
+      token,
       getCookie,
       setIsSignupMessageShown,
       setRegistrationUsername,
