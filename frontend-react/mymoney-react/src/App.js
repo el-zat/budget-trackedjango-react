@@ -283,6 +283,7 @@ function App() {
             headers: {
               'Content-Type': 'application/json', 
             },  
+            credentials: 'include',
             body: JSON.stringify(loginPayload),
           });
     
@@ -422,6 +423,7 @@ function App() {
       try {
         const response = await fetch('/api/myexpenses/', {
             method: 'POST',
+            credentials: 'include',
             headers: getAuthHeaders(),
             body: JSON.stringify(newJangoExpense),
         });
@@ -481,6 +483,7 @@ function App() {
     try {
       const response = await fetch(`/api/myexpenses/${id}/`, {
         method: 'DELETE',
+        credentials: 'include',
         headers: getAuthHeaders(),
       });
   
@@ -523,6 +526,7 @@ function App() {
       const response = await fetch(`/api/myexpenses/${id}/`, {
           method: 'PATCH',
           headers: getAuthHeaders(),
+          credentials: 'include',
           body: JSON.stringify(bodyData)
       });
       const result = await response.json().catch(() => ({}));

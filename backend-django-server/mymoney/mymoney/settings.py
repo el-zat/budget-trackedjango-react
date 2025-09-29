@@ -69,6 +69,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://www.budget.zatykina.com",
 ]
 
+CORS_ALLOW_CREDENTIALS = True
+
 ROOT_URLCONF = "mymoney.urls"
 
 TEMPLATES = [

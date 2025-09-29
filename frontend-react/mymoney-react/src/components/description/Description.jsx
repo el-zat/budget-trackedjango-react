@@ -39,6 +39,7 @@ function Description( {id} ) {
     if (!id) return;
     await fetch(`/api/myexpenses/${id}/`, {
         method: 'PATCH',
+        credentials: 'include',
         headers: authProviderValues.getAuthHeaders(),
         body: JSON.stringify({ description }),
       });

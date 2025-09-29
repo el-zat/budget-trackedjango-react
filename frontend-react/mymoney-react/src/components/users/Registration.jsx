@@ -28,6 +28,7 @@ function Registration() {
       const response = await fetch('/api/registration/', {
         method: 'POST',
         headers: authProviderValues.getAuthHeaders(),
+        credentials: 'include',
         body: JSON.stringify({
           username: authProviderValues.registrationUsername,
           password1: registrationPassword1,
