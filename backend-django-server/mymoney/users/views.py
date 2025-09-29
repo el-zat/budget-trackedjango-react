@@ -4,6 +4,7 @@ from .serializers import (UserSerializer, EmailVerificationSerializer, UserLogin
 from .models import User, EmailVerification
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model, login, logout, authenticate
 
 
@@ -41,7 +42,7 @@ class UserLoginAPIView(APIView):
                 return Response({'success': False, 'error': 'User not found. No account? Sign up!'}, status=status.HTTP_404_NOT_FOUND)
 
         if user:
-            login(request, user)
+            token, created = Token.objects.get_or_create(user=user)
             return Response({'success': True, 'username': user.username})
         else:
             return Response({'success': False, 'error': 'Login failed!'}, status=status.HTTP_401_UNAUTHORIZED)
