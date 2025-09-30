@@ -344,12 +344,13 @@ const Expenses = () => {
                                     value={expensesProviderValues.selectedExpense} 
                                     onChange={e => expensesProviderValues.setSelectedExpense(e.target.value)}>
                                     <option value="all">Select Expense</option>
-                                    {expensesProviderValues.expenses.filter(
+                                    {(Array.isArray(expensesProviderValues.expenses) ? expensesProviderValues.expenses : []).filter(
                                         exp => expensesProviderValues.selectedCategory === 'all' ||
-                                        String(exp.category) === String(expensesProviderValues.selectedCategory)
-                                    ).map(exp => (
+                                            String(exp.category) === String(expensesProviderValues.selectedCategory)
+                                        ).map(exp => (
                                         <option key={exp.id} value={exp.name}>{exp.name}</option>
                                     ))}
+
                                 </select>
                             </div>
                             )}
