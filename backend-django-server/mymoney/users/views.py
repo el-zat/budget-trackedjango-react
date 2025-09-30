@@ -45,7 +45,7 @@ class UserLoginAPIView(APIView):
 
         if user:
             token, created = Token.objects.get_or_create(user=user)
-            return Response({'success': True, 'username': user.username})
+            return Response({'success': True, 'username': user.username, 'token': token.key,})
         else:
             return Response({'success': False, 'error': 'Login failed!'}, status=status.HTTP_401_UNAUTHORIZED)
 
