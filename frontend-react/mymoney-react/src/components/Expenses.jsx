@@ -316,13 +316,16 @@ const Expenses = () => {
                                     >
                                     <option value="all">Select Category</option>
                                     console.log('row:', row)  
-                                    {expensesProviderValues.categories.map(cat => (
-                                        <option 
-                                            key={cat.id} 
-                                            value={cat.id}>
+                                    {Array.isArray(expensesProviderValues.categories) ? (
+                                        expensesProviderValues.categories.map(cat => (
+                                            <option key={cat.id} value={cat.id}>
                                             {cat.name}
-                                        </option>
-                                    ))}                                 
+                                            </option>
+                                        ))
+                                        ) : (
+                                        <option>Loading...</option> // или другой fallback
+                                        )}
+                                 
                                 </select>
                             </div>               
                         </td>
