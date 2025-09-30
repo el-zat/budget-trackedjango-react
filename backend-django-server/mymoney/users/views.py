@@ -21,7 +21,7 @@ class EmailVerificationViewSet(viewsets.ModelViewSet):
     
 @method_decorator(csrf_exempt, name='dispatch')
 class UserLoginAPIView(APIView):
-    permission_classes = []  # или AllowAny
+    permission_classes = []  
 
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)

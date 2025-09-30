@@ -70,7 +70,14 @@ function App() {
   const [isModalLoginOpen, setIsModalLoginOpen] = useState(false);
   const [isModalRegistrationOpen, setIsModalRegistrationOpen] = useState(false);
 
-
+  // Get token
+  function getAuthHeaders() {
+    const token = localStorage.getItem('token');
+    return {
+      'Authorization': 'Token ' + token,
+      'Content-Type': 'application/json',
+    };
+  }
   
   //Fetch expenses from django server
   const fetchExpenses = async () => {
@@ -89,29 +96,59 @@ function App() {
       }
       }, [isLoggedIn]);
 
-
+    
   useEffect(() => {
-      fetch('/api/categories/')
-          .then(res => res.json())
-          .then(data => {
-          setCategories(data);
-          })
-          .catch(error => {
-          console.error('Fetch error:', error);
-          });
-      }, []);
+    if (isLoggedIn) {
+      fetch('/api/categories/', {
+        headers: getAuthHeaders(),
+      })
+        .then(res => res.json())
+        .then(data => {
+            setCategories(data);
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+        });
+    }
+  }, [isLoggedIn]);
+    
+    useEffect(() => {
+      if (isLoggedIn) {
+        fetch('/api/expenses/', {
+            headers: getAuthHeaders(),
+        })
+            .then(res => res.json())
+            .then(data => {
+                setExpenses(data);
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+            });
+        }
+    }, [isLoggedIn]);
+
+  // useEffect(() => {
+  //     fetch('/api/categories/')
+  //         .then(res => res.json())
+  //         .then(data => {
+  //         setCategories(data);
+  //         })
+  //         .catch(error => {
+  //         console.error('Fetch error:', error);
+  //         });
+  //     }, []);
 
 
-  useEffect(() => {
-      fetch('/api/expenses/')
-          .then(res => res.json())
-          .then(data => {
-          setExpenses(data);
-          })
-          .catch(error => {
-          console.error('Fetch error:', error);
-          });
-        }, []);
+  // useEffect(() => {
+  //     fetch('/api/expenses/')
+  //         .then(res => res.json())
+  //         .then(data => {
+  //         setExpenses(data);
+  //         })
+  //         .catch(error => {
+  //         console.error('Fetch error:', error);
+  //         });
+  //       }, []);
 
 
   useEffect(() => {
@@ -343,13 +380,6 @@ function App() {
       }
   };
 
-  function getAuthHeaders() {
-    const token = localStorage.getItem('token');
-    return {
-      'Authorization': 'Token ' + token,
-      'Content-Type': 'application/json',
-    };
-  }
 
   //Restore the state when loading the page
   useEffect(() => {
