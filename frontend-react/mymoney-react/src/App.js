@@ -73,19 +73,45 @@ function App() {
   // Get token
   function getAuthHeaders() {
     const token = localStorage.getItem('token');
+    if (!token || token === 'undefined') {
+      return { 'Content-Type': 'application/json' };
+    }
     return {
       'Authorization': 'Token ' + token,
       'Content-Type': 'application/json',
     };
   }
   
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      const token = localStorage.getItem('token');
+      console.log("Token for auth:", token);
+  
+      if (token) {
+        fetch('/api/categories/', {
+          headers: getAuthHeaders(),
+        })
+        .then(res => res.json())
+        .then(data => setCategories(data))
+        .catch(console.error);
+      } else {
+        console.warn("No token - skipping fetch categories");
+      }
+    }
+  }, [isLoggedIn]);
+  
+  
   //Fetch expenses from django server
   const fetchExpenses = async () => {
-      const response = await fetch('/api/myexpenses/');
-      const data = await response.json();
-      // console.log("data:", data)
-      setRows(data);
+    const response = await fetch('/api/myexpenses/', {
+      headers: getAuthHeaders(),
+      credentials: 'include'
+    });
+    const data = await response.json();
+    setRows(data);
   };
+  
 
   //Inintial state (logged out)
   useEffect(() => {
