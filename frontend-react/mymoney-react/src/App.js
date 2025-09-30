@@ -73,6 +73,7 @@ function App() {
   // Get token
   function getAuthHeaders() {
     const token = localStorage.getItem('token');
+    console.log("Current auth token:", token);
     if (!token || token === 'undefined') {
       return { 'Content-Type': 'application/json' };
     }
@@ -276,9 +277,10 @@ function App() {
   }
 
 
-  const selectedCategoryObj = categories.find(
-      cat => String(cat.id) === String(selectedCategory)
-  );
+  const selectedCategoryObj = Array.isArray(categories) 
+    ? categories.find(cat => String(cat.id) === String(selectedCategory))
+    : null;
+
 
   const getCleanPrice = (price) => {
       let cleanPrice = price;
@@ -315,6 +317,7 @@ function App() {
     
         if (response.ok) {
           const data = await response.json(); //Get username from response
+          console.log("Login response data:", data);
           localStorage.setItem('token', data.token);  //Save token in local storage
           setMessage('Login successful!');
           setIsSignupMessageShown(false);
