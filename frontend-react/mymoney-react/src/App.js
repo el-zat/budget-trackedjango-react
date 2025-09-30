@@ -123,60 +123,23 @@ function App() {
       }, [isLoggedIn]);
 
     
+    
   useEffect(() => {
     if (isLoggedIn) {
-      fetch('/api/categories/', {
-        headers: getAuthHeaders(),
+      fetch('/api/expenses/', {
+          headers: getAuthHeaders(),
       })
-        .then(res => res.json())
-        .then(data => {
-            setCategories(data);
-        })
-        .catch(error => {
-            console.error('Fetch error:', error);
-        });
-    }
+          .then(res => res.json())
+          .then(data => {
+              setExpenses(data);
+          })
+          .catch(error => {
+              console.error('Fetch error:', error);
+          });
+      }
   }, [isLoggedIn]);
-    
-    useEffect(() => {
-      if (isLoggedIn) {
-        fetch('/api/expenses/', {
-            headers: getAuthHeaders(),
-        })
-            .then(res => res.json())
-            .then(data => {
-                setExpenses(data);
-            })
-            .catch(error => {
-                console.error('Fetch error:', error);
-            });
-        }
-    }, [isLoggedIn]);
 
-  // useEffect(() => {
-  //     fetch('/api/categories/')
-  //         .then(res => res.json())
-  //         .then(data => {
-  //         setCategories(data);
-  //         })
-  //         .catch(error => {
-  //         console.error('Fetch error:', error);
-  //         });
-  //     }, []);
-
-
-  // useEffect(() => {
-  //     fetch('/api/expenses/')
-  //         .then(res => res.json())
-  //         .then(data => {
-  //         setExpenses(data);
-  //         })
-  //         .catch(error => {
-  //         console.error('Fetch error:', error);
-  //         });
-  //       }, []);
-
-
+ 
   useEffect(() => {
       localStorage.setItem('isFilterOpen', JSON.stringify(isFilterOpen));
   }, [isFilterOpen]);
