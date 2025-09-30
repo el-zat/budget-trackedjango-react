@@ -601,10 +601,11 @@ function App() {
     }, [rows]);
 
 
-  const categoriesMap = {};
-      categories.forEach(category => {
-          categoriesMap[category.id] = category;
-  });
+  const categoriesMap = categories?.reduce((acc, category) => {
+    acc[category.id] = category;
+    return acc;
+  }, {}) || {};
+    
 
 
   const filterRowsByDate = (rows, selectedInterval, startDate, endDate) => {
