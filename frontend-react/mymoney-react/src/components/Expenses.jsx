@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useRef} from "react"
+import React, { useState, useContext, useEffect, useRef, useCallback} from "react"
 import  '../styles/Expenses.scss'
 import CurrencyInput from 'react-currency-input-field';
 import { ExpensesContext } from "../context/ExpensesContext";
@@ -76,6 +76,7 @@ const Expenses = () => {
         expensesProviderValues.currentPage * rowsPerPage
     );
 
+
     //Reset sort on selecting another interval filter
     useEffect(() => {
         return () => {
@@ -85,34 +86,62 @@ const Expenses = () => {
 
 
     //Reset categories checkbox on selecting another interval filter
+
+    const { selectedInterval, setCheckedCategories } = filterProviderValues;
+
     useEffect(() => {
         return () => {
-            filterProviderValues.setCheckedCategories([]);;
+            setCheckedCategories([]);
         };
-    }, [filterProviderValues.selectedInterval]);
+    }, [selectedInterval, setCheckedCategories]);
+
+
+    // Filter by current user
+    const { rows, setFilteredRows } = expensesProviderValues;
+    const { isLoggedIn, userId } = authProviderValues;
+
+    useEffect(() => {
+    if (isLoggedIn) {
+        const filtered = rows.filter(row => String(row.user_id) === String(userId));
+        setFilteredRows(filtered);
+    }
+    }, [rows, isLoggedIn, userId, setFilteredRows]);
+
+
+
+    //Reset currentPage when changing the filter
+    const { setCurrentPage } = expensesProviderValues;
+    const { filteredRows } = filterProviderValues;
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filteredRows, setCurrentPage]);
+
+
 
 
     //Close input editing on mouse click
 
     const inputRef = useRef(null);
     
-    const closeEditing = () => {
+    const closeEditing = useCallback(() => {
         expensesProviderValues.setEditingField({ id: null, field: null });
-    };
-      
+        }, [expensesProviderValues]);
+
     useEffect(() => {
-        const handleClickOutside = (event) => {
+    const handleClickOutside = (event) => {
         if (inputRef.current && !inputRef.current.contains(event.target)) {
-            closeEditing();
+        closeEditing();
         }
-        };
-    
-        document.addEventListener('mousedown', handleClickOutside);
-    
-        return () => {
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
         document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
+    };
+    }, [closeEditing]);
+
 
 
     const sortProviderValues = {
@@ -186,17 +215,6 @@ const Expenses = () => {
                 
                 <tbody>
                     {/* Expenses Table Rendering */}
-
-                    {/* {  */}
-                        {/* // !authProviderValues.isLoggedIn ?
-                        // (
-                        //     <tr>
-                        //         <td colSpan={5} style={{ textAlign: "center", color: "#888" }}>
-                        //             No data. Please log in
-                        //         </td>
-                        //     </tr>
-                        // )
-                        // : ( */}
 
                     {
                         authProviderValues.isLoggedIn
