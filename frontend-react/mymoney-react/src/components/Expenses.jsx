@@ -187,18 +187,23 @@ const Expenses = () => {
                 <tbody>
                     {/* Expenses Table Rendering */}
 
-                    { 
-                        !authProviderValues.isLoggedIn ?
-                        (
-                            <tr>
-                                <td colSpan={5} style={{ textAlign: "center", color: "#888" }}>
-                                    No data. Please log in
-                                </td>
-                            </tr>
-                        )
-                        : (
-                            paginatedRows.length ? (                    
-                            paginatedRows.map((row, idx) => (                                              
+                    {/* {  */}
+                        {/* // !authProviderValues.isLoggedIn ?
+                        // (
+                        //     <tr>
+                        //         <td colSpan={5} style={{ textAlign: "center", color: "#888" }}>
+                        //             No data. Please log in
+                        //         </td>
+                        //     </tr>
+                        // )
+                        // : ( */}
+
+                    {
+                        authProviderValues.isLoggedIn
+                            ? (
+                                paginatedRows.length > 0 
+                                ? (
+                                    paginatedRows.map((row, idx) => (
                                 <tr key={row.id || idx}>
                                     <td>
                                         {
@@ -304,15 +309,21 @@ const Expenses = () => {
                                     </td>                                
                                 </tr>
                             ) 
+                                ))
+                                :  (
+                                <tr>
+                                    <td colSpan={5} style={{ textAlign: "center", color: "#888" }}>
+                                        No data. Please enter expenses  
+                                    </td>
+                                </tr>
                             ))
-                            : (
+                            :
                             <tr>
                                 <td colSpan={5} style={{ textAlign: "center", color: "#888" }}>
-                                    No data. Please enter expenses  
+                                    No data. Please log in
                                 </td>
                             </tr>
-                            )
-                        )
+                  
                     }
                        
 
