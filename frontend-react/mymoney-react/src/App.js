@@ -206,28 +206,31 @@ function App() {
 
 
   function getCurrentMonth() {
-      const today = new Date();
-      const month = today.toLocaleString('default', { month: 'long' });
-      const year = today.getFullYear();
-      return `${month} ${year}`;
-    }
+    const today = new Date();
+    const month = today.toLocaleString('default', { month: 'long' });
+    const year = today.getFullYear();
+    return `${month} ${year}`;
+  }
 
   function getCurrentYear() {
-      const today = new Date();
-      const year = today.getFullYear();
-      return `${year}`;
+    const today = new Date();
+    const year = today.getFullYear();
+    return `${year}`;
   }
 
   function getToday() {
-      const today = new Date();
-      return today.toLocaleString('en', { day: 'numeric', month: 'long', year: 'numeric' });
-  }
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  return `${dd}-${mm}-${yyyy}`;
+}
 
   function getFirstDayOfMonth() {
-      const today = new Date();
-      const yyyy = today.getFullYear();
-      const mm = String(today.getMonth() + 1).padStart(2, '0');
-      return `${yyyy}-${mm}-01`;
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    return `${yyyy}-${mm}-01`;
   }
 
   function getFirstDayOfYear() {
