@@ -101,6 +101,12 @@ function App() {
       }
     }
   }, [isLoggedIn]);
+
+  useEffect(() => {
+    if (isLoggedIn && rows.length > 0) {
+      setFilteredRows(rows);
+    }
+  }, [isLoggedIn, rows]);
   
   
   //Fetch expenses from django server
@@ -408,6 +414,7 @@ function App() {
 
   const handleSave = async (e) => {
     console.log(isLoggedIn)
+    await fetchExpenses();
     if (!isLoggedIn) {
         alert('Your entries will not be saved! Please log in');
         return;
