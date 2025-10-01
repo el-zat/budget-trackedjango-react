@@ -1,4 +1,5 @@
 from rest_framework import viewsets, status, generics, permissions
+from rest_framework.permissions import AllowAny
 from .serializers import (UserSerializer, EmailVerificationSerializer, UserLoginSerializer, 
                           UserProfileSerializer, UserRegistrationSerializer)                   
 from .models import User, EmailVerification
@@ -65,3 +66,4 @@ class UserProfileViewSet(viewsets.ModelViewSet):
 @method_decorator(csrf_exempt, name='dispatch')
 class UserRegistrationView(generics.CreateAPIView):
     serializer_class = UserRegistrationSerializer
+    permission_classes = [AllowAny]
