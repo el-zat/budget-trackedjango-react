@@ -96,16 +96,16 @@ const Expenses = () => {
     }, [selectedInterval, setCheckedCategories]);
 
 
-    // Filter by current user
-    const { rows, setFilteredRows } = expensesProviderValues;
-    const { isLoggedIn, userId } = authProviderValues;
+    // // Filter by current user
+    // const { rows, setFilteredRows } = expensesProviderValues;
+    // const { isLoggedIn, userId } = authProviderValues;
 
-    useEffect(() => {
-    if (isLoggedIn) {
-        const filtered = rows.filter(row => String(row.user_id) === String(userId));
-        setFilteredRows(filtered);
-    }
-    }, [rows, isLoggedIn, userId, setFilteredRows]);
+    // useEffect(() => {
+    // if (isLoggedIn) {
+    //     const filtered = rows.filter(row => String(row.user_id) === String(userId));
+    //     setFilteredRows(filtered);
+    // }
+    // }, [rows, isLoggedIn, userId, setFilteredRows]);
 
 
 
@@ -129,10 +129,10 @@ const Expenses = () => {
         }, [expensesProviderValues]);
 
     useEffect(() => {
-    const handleClickOutside = (event) => {
-        if (inputRef.current && !inputRef.current.contains(event.target)) {
-        closeEditing();
-        }
+        const handleClickOutside = (event) => {
+            if (inputRef.current && !inputRef.current.contains(event.target)) {
+            closeEditing();
+            }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
