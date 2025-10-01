@@ -22,12 +22,12 @@ function Registration() {
 
   const handleRegistration = async (e) => {
     e.preventDefault();
-
-
     try {
       const response = await fetch('/api/registration/', {
         method: 'POST',
-        headers: authProviderValues.getAuthHeaders(),
+        headers: {
+          'Content-Type': 'application/json',
+        },
         credentials: 'include',
         body: JSON.stringify({
           username: authProviderValues.registrationUsername,

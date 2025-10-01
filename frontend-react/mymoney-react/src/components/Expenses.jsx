@@ -96,19 +96,6 @@ const Expenses = () => {
     }, [selectedInterval, setCheckedCategories]);
 
 
-    // // Filter by current user
-    // const { rows, setFilteredRows } = expensesProviderValues;
-    // const { isLoggedIn, userId } = authProviderValues;
-
-    // useEffect(() => {
-    // if (isLoggedIn) {
-    //     const filtered = rows.filter(row => String(row.user_id) === String(userId));
-    //     setFilteredRows(filtered);
-    // }
-    // }, [rows, isLoggedIn, userId, setFilteredRows]);
-
-
-
     //Reset currentPage when changing the filter
     const { setCurrentPage } = expensesProviderValues;
     const { filteredRows } = filterProviderValues;
@@ -116,8 +103,6 @@ const Expenses = () => {
     useEffect(() => {
         setCurrentPage(1);
     }, [filteredRows, setCurrentPage]);
-
-
 
 
     //Close input editing on mouse click
