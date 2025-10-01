@@ -185,122 +185,134 @@ const Expenses = () => {
                 </thead>
                 
                 <tbody>
-                    {/* Render Expenses table */}
+                    {/* Expenses Table Rendering */}
 
-                    { paginatedRows.length ? (                    
-                        paginatedRows.map((row, idx) => (                                              
-                            <tr key={row.id || idx}>
-                                <td>
-                                    {
-                                        expensesProviderValues.categories.find(
-                                            cat => String(cat.id) === String(row.category))?.name 
-                                        || 'Unknown'
-                                    }                                   
+                    { 
+                        !authProviderValues.isLoggedIn ?
+                        (
+                            <tr>
+                                <td colSpan={5} style={{ textAlign: "center", color: "#888" }}>
+                                    No data. Please log in
                                 </td>
+                            </tr>
+                        )
+                        : (
+                            paginatedRows.length ? (                    
+                            paginatedRows.map((row, idx) => (                                              
+                                <tr key={row.id || idx}>
+                                    <td>
+                                        {
+                                            expensesProviderValues.categories.find(
+                                                cat => String(cat.id) === String(row.category))?.name 
+                                            || 'Unknown'
+                                        }                                   
+                                    </td>
 
-                                <td>
-                                    {/* Inputs "name", "date" and "price" are editable     */}
-                                    {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'name' ? (                                                                                            
-                                        <input id="edit-name"
-                                            type="text"
-                                            name="name"
-                                            placeholder="Fill out expense name"
+                                    <td>
+                                        {/* Inputs "name", "date" and "price" are editable     */}
+                                        {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'name' ? (                                                                                            
+                                            <input id="edit-name"
+                                                type="text"
+                                                name="name"
+                                                placeholder="Fill out expense name"
+                                                ref={inputRef}
+                                                value={expensesProviderValues.editName || ""}
+                                                onChange={e => expensesProviderValues.setEditName(e.target.value)}
+                                                onKeyDown={e => {
+                                                    if (e.key === 'Enter') {
+                                                        expensesProviderValues.applyChanges(row.id, 'name')
+                                                    }
+                                                }}
+                                            />
+                                        ) : (                                        
+                                            <div className="tooltip-icon-container" onClick={() => {
+                                                expensesProviderValues.setEditingField({id: row.id, field: 'name'});
+                                                expensesProviderValues.setEditName(row.name);
+                                                }}> {row.name } 
+                                                    <i className="material-icons" id="edit-icon">edit</i>
+                                                    <div className="tooltip-icon-text">Edit name</div>                                                                                 
+                                            </div>                                                                                                                  
+                                            )}
+                                    </td>                
+                                    
+                                    <td>
+                                    {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'date' ? (                                                              
+                                        <input id="edit-date"
+                                            type="date"
                                             ref={inputRef}
-                                            value={expensesProviderValues.editName || ""}
-                                            onChange={e => expensesProviderValues.setEditName(e.target.value)}
+                                            value={expensesProviderValues.editDate || ""}
+                                            onChange={e => expensesProviderValues.setEditDate(e.target.value)}
                                             onKeyDown={e => {
                                                 if (e.key === 'Enter') {
-                                                    expensesProviderValues.applyChanges(row.id, 'name')
+                                                    expensesProviderValues.applyChanges(row.id, 'date')
                                                 }
                                             }}
                                         />
-                                    ) : (                                        
+                                        ) : (
                                         <div className="tooltip-icon-container" onClick={() => {
-                                            expensesProviderValues.setEditingField({id: row.id, field: 'name'});
-                                            expensesProviderValues.setEditName(row.name);
-                                            }}> {row.name } 
-                                                <i className="material-icons" id="edit-icon">edit</i>
-                                                <div className="tooltip-icon-text">Edit name</div>                                                                                 
-                                        </div>                                                                                                                  
-                                        )}
-                                </td>                
-                                
-                                <td>
-                                {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'date' ? (                                                              
-                                    <input id="edit-date"
-                                        type="date"
-                                        ref={inputRef}
-                                        value={expensesProviderValues.editDate || ""}
-                                        onChange={e => expensesProviderValues.setEditDate(e.target.value)}
-                                        onKeyDown={e => {
-                                            if (e.key === 'Enter') {
-                                                expensesProviderValues.applyChanges(row.id, 'date')
-                                            }
-                                        }}
-                                    />
-                                    ) : (
-                                    <div className="tooltip-icon-container" onClick={() => {
-                                        expensesProviderValues.setEditingField({id: row.id, field: 'date'});
-                                        expensesProviderValues.setEditDate(row.date);
-                                    }}> {row.payment_date} 
-                                        <i className="material-icons" id="edit-icon">edit</i> 
-                                        <div className="tooltip-icon-text">Edit date</div> 
-                                    </div>
-                                    )}
-                                </td>
-                                <td>
-                                {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'price' ? (                           
-                                    <CurrencyInput id="edit-price"
-                                        prefix="€ "
-                                        decimalsLimit={2} 
-                                        intlConfig={{ locale: 'de-DE', currency: 'EUR' }} 
-                                        placeholder="Enter new price"
-                                        ref={inputRef}
-                                        value={expensesProviderValues.editPrice}
-                                        onBlur={() => expensesProviderValues.setEditingField({ id: null, field: null })}  //No editing on blur
-                                        onValueChange={value => expensesProviderValues.setEditPrice(value)}
-                                        onKeyDown={e => {
-                                            if (e.key === 'Enter') {
-                                                expensesProviderValues.applyChanges(row.id, 'price')
-                                            }
-                                        }}
-                                    />
-                                    ) : (
-                                        <div className="tooltip-icon-container" onClick={() => {
-                                            expensesProviderValues.setEditingField({id: row.id, field: 'price'});
-                                            expensesProviderValues.setEditPrice(row.price);
-                                        }}>
-                                            € {row.price} 
-                                            <i className="material-icons" id="edit-icon">edit</i>
-                                            <div className="tooltip-icon-text">Edit price</div>  
+                                            expensesProviderValues.setEditingField({id: row.id, field: 'date'});
+                                            expensesProviderValues.setEditDate(row.date);
+                                        }}> {row.payment_date} 
+                                            <i className="material-icons" id="edit-icon">edit</i> 
+                                            <div className="tooltip-icon-text">Edit date</div> 
                                         </div>
-                                    )}
-                                </td>
-                                <td>        
-                                    <button className="add-show-description-btn"
-                                        onClick={() => {
-                                            expensesProviderValues.setIsDescriptionShown(true);
-                                            expensesProviderValues.setCurrentDescriptionId(row.id);
-                                        }}
-                                        >
-                                        {expensesProviderValues.descriptionMap[row.id]? "Show description" : "Add description"}
+                                        )}
+                                    </td>
+                                    <td>
+                                    {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'price' ? (                           
+                                        <CurrencyInput id="edit-price"
+                                            prefix="€ "
+                                            decimalsLimit={2} 
+                                            intlConfig={{ locale: 'de-DE', currency: 'EUR' }} 
+                                            placeholder="Enter new price"
+                                            ref={inputRef}
+                                            value={expensesProviderValues.editPrice}
+                                            onBlur={() => expensesProviderValues.setEditingField({ id: null, field: null })}  //No editing on blur
+                                            onValueChange={value => expensesProviderValues.setEditPrice(value)}
+                                            onKeyDown={e => {
+                                                if (e.key === 'Enter') {
+                                                    expensesProviderValues.applyChanges(row.id, 'price')
+                                                }
+                                            }}
+                                        />
+                                        ) : (
+                                            <div className="tooltip-icon-container" onClick={() => {
+                                                expensesProviderValues.setEditingField({id: row.id, field: 'price'});
+                                                expensesProviderValues.setEditPrice(row.price);
+                                            }}>
+                                                € {row.price} 
+                                                <i className="material-icons" id="edit-icon">edit</i>
+                                                <div className="tooltip-icon-text">Edit price</div>  
+                                            </div>
+                                        )}
+                                    </td>
+                                    <td>        
+                                        <button className="add-show-description-btn"
+                                            onClick={() => {
+                                                expensesProviderValues.setIsDescriptionShown(true);
+                                                expensesProviderValues.setCurrentDescriptionId(row.id);
+                                            }}
+                                            >
+                                            {expensesProviderValues.descriptionMap[row.id]? "Show description" : "Add description"}
+                                        </button>
+                                        <button className="delete-expense-btn"
+                                        onClick={() => expensesProviderValues.deleteExpense(row.id)}
+                                    >
+                                        Delete
                                     </button>
-                                    <button className="delete-expense-btn"
-                                    onClick={() => expensesProviderValues.deleteExpense(row.id)}
-                                >
-                                    Delete
-                                </button>
-                                
-                                </td>                                
+                                    
+                                    </td>                                
+                                </tr>
+                            ) 
+                            ))
+                            : (
+                            <tr>
+                                <td colSpan={5} style={{ textAlign: "center", color: "#888" }}>
+                                    No data. Please enter expenses  
+                                </td>
                             </tr>
-                        ) 
-                        ))
-                        : 
-                        <tr>
-                            <td colSpan={5} style={{ textAlign: "center", color: "#888" }}>
-                                No data. Please log in
-                            </td>
-                        </tr>
+                            )
+                        )
                     }
                        
 
@@ -315,7 +327,6 @@ const Expenses = () => {
                                     required
                                     >
                                     <option value="all">Select Category</option>
-                                    console.log('row:', row)  
                                     {Array.isArray(expensesProviderValues.categories) ? (
                                         expensesProviderValues.categories.map(cat => (
                                             <option key={cat.id} value={cat.id}>
@@ -323,7 +334,7 @@ const Expenses = () => {
                                             </option>
                                         ))
                                         ) : (
-                                        <option>Loading...</option> // или другой fallback
+                                        <option>Loading...</option> 
                                         )}
                                  
                                 </select>
