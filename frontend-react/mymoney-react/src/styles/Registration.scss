@@ -1,22 +1,48 @@
 @import './vars';
 @import './mixins';
 
-
-
 .registration-container {
+    padding: 24px;
+    
     h2 {
-        margin-bottom: 20px;
+        margin-bottom: 24px;
         text-align: center;
+        font-size: 24px;
+        font-weight: 600;
     }
 
     form {
-        @include flex(none, flex-end, column);  
-        gap: 15px;
+        @include flex(flex-start, stretch, column);  
+        gap: 20px;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        
+        label {
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        input {
+            @extend %input_select;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid $borderColor;
+            
+            &:focus {
+                outline: none;
+                border-color: $btnColor;
+                background: rgba(255, 255, 255, 0.08);
+            }
+        }
     }
 }
 
 .submit-registration {
     @extend %btn;
-    width: 150px;
-    border-radius: 5px;
+    width: 100%;
+    margin-top: 8px;
 }

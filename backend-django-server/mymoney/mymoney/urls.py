@@ -6,7 +6,7 @@ from expenses.views import CategoryViewSet, ExpenseViewSet, MyExpenseViewSet
 from users.views import (UserViewSet, EmailVerificationViewSet, UserLoginAPIView,
                          UserProfileViewSet, UserRegistrationView, UserLogoutAPIView)
 from django.urls import re_path
-from expenses.views import FrontendAppView
+# from expenses.views import FrontendAppView  # Commented out for development
 
 
 router = DefaultRouter()
@@ -29,6 +29,8 @@ urlpatterns = [
 
 ]
 
-urlpatterns += [
-    re_path(r'^(?!api/|admin/).*$', FrontendAppView.as_view(), name='frontend'),
-]
+# Commented out for development - the frontend runs on port 3000
+# Uncomment for production
+# urlpatterns += [
+#     re_path(r'^(?!api/|admin/).*$', FrontendAppView.as_view(), name='frontend'),
+# ]

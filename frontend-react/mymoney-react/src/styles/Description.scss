@@ -1,34 +1,47 @@
 @import './vars';
 @import './mixins';
 
-
 .description {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: $textAreaColor;
-    width: 40%;
-    border-radius: 5px;
-    border: 1px solid black;
-    @extend %border;
-    box-shadow:  5px 5px 10px rgba(0, 0, 0, 0.5);
-    color: black;
-    @include flex(none, flex-end, column);
+    @extend %card;
+    width: 90%;
+    max-width: 600px;
+    padding: 24px;
+    z-index: 1001;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    @include flex(flex-start, stretch, column);
+    gap: 16px;
 }
 
 textarea {
     width: 100%;
-    background-color: $textAreaColor;
-    resize: none;
-    height: auto;
-    border: none;
-    font-size: 18px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid $borderColor;
+    border-radius: 8px;
+    resize: vertical;
+    min-height: 150px;
+    padding: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    color: $white;
+    transition: all 0.2s ease;
+    
+    &:focus {
+        outline: none;
+        border-color: $btnColor;
+        background: rgba(255, 255, 255, 0.08);
+    }
+    
+    &::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
 }
 
 .save-btn,
 .close-description {
     @extend %btn;
-    margin: 5px;
 }
 

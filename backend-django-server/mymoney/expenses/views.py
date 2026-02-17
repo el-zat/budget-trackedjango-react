@@ -1,7 +1,9 @@
 from rest_framework import viewsets
+from rest_framework.response import Response
 from .serializers import CategorySerializer, ExpenseSerializer, MyExpenseSerializer
 from .models import Category, Expense, MyExpense
 from django.views.generic import TemplateView
+from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -29,4 +31,4 @@ class MyExpenseViewSet(viewsets.ModelViewSet):
 
 
 class FrontendAppView(TemplateView):
-    template_name = "index.html" 
+    template_name = "index.html"

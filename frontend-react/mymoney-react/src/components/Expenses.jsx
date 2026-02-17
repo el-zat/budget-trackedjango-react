@@ -139,61 +139,147 @@ const Expenses = () => {
     return  <React.Fragment>
         <SortContext.Provider value={sortProviderValues}>
         <div className="expenses-wrapper">
-            <div className="expenses-header">
-                {authProviderValues.isLoggedIn &&                
-                <div className="show-interval">
-                    {
-                    filterProviderValues.selectedInterval === "month" ? (
-                        <p>{filterProviderValues.currentMonth}</p>
-                    ) : filterProviderValues.selectedInterval === "year" ? (
-                        <p>{filterProviderValues.currentYear}</p>
-                    ) : filterProviderValues.selectedInterval === "today" ? (
-                        <p>{filterProviderValues.today}</p>
-                    ) : filterProviderValues.selectedInterval === "custom" ? (
-                        <div className="show-custom-interval">
-                            <div className="show-custom">
-                                <p>From: </p> {filterProviderValues.formatDate(filterProviderValues.startDate)}
-                            </div>
-                            <div className="show-custom">
-                                <p>To: </p> {filterProviderValues.formatDate(filterProviderValues.endDate)}
-                            </div>
-                        </div>             
-                    ) : null 
-                    }
-                </div>  
-                }
-
-                {!modalProviderValues.isModalSortOpen  && authProviderValues.isLoggedIn &&                              
-                    <div className="sort">
-                        <button className="sort-btn" 
-                            onClick={() => modalProviderValues.setIsModalSortOpen(true)}>
-                            <i className="material-icons">sort</i>
-                            Sort                   
-                        </button> 
-                    </div>                                         
-                }
-                <SortContext.Provider value={sortProviderValues}>
-                    <Sort />
-                </SortContext.Provider>
-
-                {!filterProviderValues.isFilterOpen  && authProviderValues.isLoggedIn &&
-                <button className="filter-btn" 
-                    onClick={() => filterProviderValues.setIsFilterOpen(true)}>
-                    <i className="material-icons">tune</i>
-                    Filter                   
-                </button> 
-                }
-            </div>        
             
-            <table className="expenses-table">                
+            {/* Add New Expense Section */}
+            {authProviderValues.isLoggedIn && (
+                <div className="add-expense-section">
+                    <h2>➕ Add New Expense</h2>
+                    <div className="add-expense-form">
+                        <div className="form-field">
+                            <label>Category</label>
+                            <select
+                                value={expensesProviderValues.selectedCategory}
+                                onChange={e => expensesProviderValues.setSelectedCategory(e.target.value)}
+                                required
+                            >
+                                <option value="all">Select Category</option>
+                                {Array.isArray(expensesProviderValues.categories) ? (
+                                    expensesProviderValues.categories.map(cat => (
+                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                    ))
+                                ) : (
+                                    <option>Loading...</option> 
+                                )}
+                            </select>
+                        </div>
+
+                        <div className="form-field">
+                            <label>Expense</label>
+                            {expensesProviderValues.selectedCategoryObj?.name === "Miscellaneous" ? (
+                                <input
+                                    type="text"
+                                    name="miscellaneous-expense"
+                                    placeholder="Enter expense name"
+                                    value={expensesProviderValues.miscExpense}
+                                    onChange={e => expensesProviderValues.setMiscExpense(e.target.value)}
+                                />
+                            ) : (
+                                <select 
+                                    value={expensesProviderValues.selectedExpense} 
+                                    onChange={e => expensesProviderValues.setSelectedExpense(e.target.value)}
+                                >
+                                    <option value="all">Select Expense</option>
+                                    {(Array.isArray(expensesProviderValues.expenses) ? expensesProviderValues.expenses : [])
+                                        .filter(exp => 
+                                            expensesProviderValues.selectedCategory === 'all' ||
+                                            String(exp.category) === String(expensesProviderValues.selectedCategory)
+                                        )
+                                        .map(exp => (
+                                            <option key={exp.id} value={exp.name}>{exp.name}</option>
+                                        ))
+                                    }
+                                </select>
+                            )}
+                        </div>
+
+                        <div className="form-field">
+                            <label>Date</label>
+                            <input 
+                                type="date" 
+                                name="paymentDate"
+                                value={expensesProviderValues.paymentDate} 
+                                onChange={e => expensesProviderValues.setPaymentDate(e.target.value)} 
+                            />
+                        </div>
+
+                        <div className="form-field">
+                            <label>Price (€)</label>
+                            <CurrencyInput 
+                                id="euro-input"
+                                name="euro-input"
+                                placeholder="0.00"
+                                decimalsLimit={2} 
+                                intlConfig={{ locale: 'de-DE', currency: 'EUR' }} 
+                                prefix="€ "
+                                value={expensesProviderValues.price}
+                                onValueChange={(value) => expensesProviderValues.setPrice(value)} 
+                            />
+                        </div>
+
+                        <button className="add-expense-btn" onClick={expensesProviderValues.handleSave}>
+                            + Add Expense
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            <div className="expenses-table-container">
+                <div className="expenses-header">
+                    {authProviderValues.isLoggedIn &&                
+                    <div className="show-interval">
+                        <i className="material-icons calendar-icon">event</i>
+                        {
+                        filterProviderValues.selectedInterval === "month" ? (
+                            <span>{filterProviderValues.currentMonth}</span>
+                        ) : filterProviderValues.selectedInterval === "year" ? (
+                            <span>{filterProviderValues.currentYear}</span>
+                        ) : filterProviderValues.selectedInterval === "today" ? (
+                            <span>{filterProviderValues.today}</span>
+                        ) : filterProviderValues.selectedInterval === "custom" ? (
+                            <div className="show-custom-interval">
+                                <div className="show-custom">
+                                    <p>From: </p> {filterProviderValues.formatDate(filterProviderValues.startDate)}
+                                </div>
+                                <div className="show-custom">
+                                    <p>To: </p> {filterProviderValues.formatDate(filterProviderValues.endDate)}
+                                </div>
+                            </div>             
+                        ) : null 
+                        }
+                    </div>  
+                    }
+
+                    <div className="header-actions">
+                        {!modalProviderValues.isModalSortOpen  && authProviderValues.isLoggedIn &&                              
+                            <button className="sort-btn" 
+                                onClick={() => modalProviderValues.setIsModalSortOpen(true)}>
+                                <i className="material-icons">swap_vert</i>
+                                Sort                   
+                            </button>                                         
+                        }
+                        <SortContext.Provider value={sortProviderValues}>
+                            <Sort />
+                        </SortContext.Provider>
+
+                        {!filterProviderValues.isFilterOpen  && authProviderValues.isLoggedIn &&
+                        <button className="filter-btn" 
+                            onClick={() => filterProviderValues.setIsFilterOpen(true)}>
+                            <i className="material-icons">filter_list</i>
+                            Filter                   
+                        </button> 
+                        }
+                    </div>
+                </div>        
+            
+                <table className="expenses-table">                
                 <thead>
                     {authProviderValues.isLoggedIn &&
                     <tr>                       
-                        <th> Category </th>                      
-                        <th> Expense </th>                                           
-                        <th> Date </th>
-                        <th> Price, € </th>
-                        <th></th>
+                        <th>CATEGORY</th>                      
+                        <th>EXPENSE</th>                                           
+                        <th>DATE</th>
+                        <th>PRICE €</th>
+                        <th>ACTIONS</th>
                     </tr>
                     }
                 </thead>
@@ -294,21 +380,24 @@ const Expenses = () => {
                                             </div>
                                         )}
                                     </td>
-                                    <td>        
-                                        <button className="add-show-description-btn"
-                                            onClick={() => {
-                                                expensesProviderValues.setIsDescriptionShown(true);
-                                                expensesProviderValues.setCurrentDescriptionId(row.id);
-                                            }}
-                                            >
-                                            {expensesProviderValues.descriptionMap[row.id]? "Show description" : "Add description"}
+                                    <td>
+                                        <div className="action-buttons">
+                                            <button className="edit-btn"
+                                                onClick={() => {
+                                                    expensesProviderValues.setIsDescriptionShown(true);
+                                                    expensesProviderValues.setCurrentDescriptionId(row.id);
+                                                }}
+                                                >
+                                                <i className="material-icons">edit</i>
+                                                Edit
+                                            </button>
+                                            <button className="delete-btn"
+                                            onClick={() => expensesProviderValues.deleteExpense(row.id)}
+                                        >
+                                            <i className="material-icons">delete</i>
+                                            Delete
                                         </button>
-                                        <button className="delete-expense-btn"
-                                        onClick={() => expensesProviderValues.deleteExpense(row.id)}
-                                    >
-                                        Delete
-                                    </button>
-                                    
+                                        </div>
                                     </td>                                
                                 </tr>
                             ) 
@@ -328,115 +417,28 @@ const Expenses = () => {
                             </tr>
                   
                     }
-                       
-
-                    {/* Input expenses  */}
-                    {authProviderValues.isLoggedIn &&
-                    <tr>                       
-                        <td>                           
-                            <div className="categories-input">
-                                <select
-                                    value={expensesProviderValues.selectedCategory}
-                                    onChange={e => expensesProviderValues.setSelectedCategory(e.target.value)}
-                                    required
-                                    >
-                                    <option value="all">Select Category</option>
-                                    {Array.isArray(expensesProviderValues.categories) ? (
-                                        expensesProviderValues.categories.map(cat => (
-                                            <option key={cat.id} value={cat.id}>
-                                            {cat.name}
-                                            </option>
-                                        ))
-                                        ) : (
-                                        <option>Loading...</option> 
-                                        )}
-                                 
-                                </select>
-                            </div>               
-                        </td>
-                      
-                        <td>
-                        {expensesProviderValues.selectedCategoryObj?.name === "Miscellaneous" ? (
-                            <div className="expenses-input">
-                                <input
-                                    type="text"
-                                    name="miscellaneous-expense"
-                                    placeholder="Enter expense"
-                                    value={expensesProviderValues.miscExpense}
-                                    onChange={e => expensesProviderValues.setMiscExpense(e.target.value)}
-                                />
-                            </div>
-                        ) : (
-                            <div className="expenses-select">
-                                <select 
-                                    value={expensesProviderValues.selectedExpense} 
-                                    onChange={e => expensesProviderValues.setSelectedExpense(e.target.value)}>
-                                    <option value="all">Select Expense</option>
-                                    {(Array.isArray(expensesProviderValues.expenses) ? expensesProviderValues.expenses : []).filter(
-                                        exp => expensesProviderValues.selectedCategory === 'all' ||
-                                            String(exp.category) === String(expensesProviderValues.selectedCategory)
-                                        ).map(exp => (
-                                        <option key={exp.id} value={exp.name}>{exp.name}</option>
-                                    ))}
-
-                                </select>
-                            </div>
-                            )}
-                        </td>   
-                        <td>
-                            <div className="date-input">
-                                <input 
-                                    type="date" 
-                                    name="paymentDate"
-                                    value={expensesProviderValues.paymentDate} 
-                                    onChange={e => {expensesProviderValues.setPaymentDate(e.target.value)}} 
-                                />
-                            </div>                           
-                        </td>                                     
-                        <td>
-                            <div className="euro-input">
-                                <CurrencyInput id="euro-input"
-                                    name="euro-input"
-                                    placeholder="Input Price in Euro"
-                                    decimalsLimit={2} 
-                                    intlConfig={{ locale: 'de-DE', currency: 'EUR' }} 
-                                    prefix="€ "
-                                    value={expensesProviderValues.price}
-                                    onValueChange={(value) => expensesProviderValues.setPrice(value)} 
-                                    />
-                            </div>                           
-                        </td>                                    
-                        <td>
-                            <button className="save-btn"
-                                onClick={expensesProviderValues.handleSave}>Save
-                            </button>                         
-                        </td>                             
-                    </tr> 
-                    }                                                          
+                                                          
                 </tbody>               
-            </table>
+                </table>
+            </div>
             
             {authProviderValues.isLoggedIn &&    
             <div className="pagination">
-                <button
+                <button className="pagination-btn"
                     onClick={() => expensesProviderValues.setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={expensesProviderValues.currentPage === 1}
                 >
+                    <i className="material-icons">chevron_left</i>
                     Prev 
                 </button>
-                <span> Page {expensesProviderValues.currentPage} of {totalPages > 1 ? totalPages : 1} </span>
-                <button
+                <span className="page-info">Page <strong>{expensesProviderValues.currentPage}</strong> of <strong>{totalPages > 1 ? totalPages : 1}</strong></span>
+                <button className="pagination-btn"
                     onClick={() => expensesProviderValues.setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={expensesProviderValues.currentPage === totalPages || totalPages === 1}
                 >
                     Next
+                    <i className="material-icons">chevron_right</i>
                 </button>               
-            </div>
-            }
-              
-            {authProviderValues.isLoggedIn &&    
-            <div className="expenses-total">                               
-                <div className="total">Total: € {expensesProviderValues.totalPrice()} </div>
             </div>
             }           
                                         

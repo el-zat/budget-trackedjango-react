@@ -58,6 +58,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
     "https://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:3001",
@@ -71,6 +72,12 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "https://localhost:3000",
+    "http://127.0.0.1:3000",
+]
 
 ROOT_URLCONF = "mymoney.urls"
 
@@ -108,7 +115,7 @@ DATABASES = {
         "NAME": "expenses_db",
         "USER": "zatykina",
         "PASSWORD": "zatykina",
-        "HOST": "localhost",
+        "HOST": "116.203.101.149",
         "PORT": "5432",
     }
 }

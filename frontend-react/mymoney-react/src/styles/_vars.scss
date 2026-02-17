@@ -1,20 +1,28 @@
 //colors
-$bgColor:  #22306b;
+$bgColor: #1a1d3f;
+$bgGradient: linear-gradient(135deg, #2d2f5e 0%, #1a1d3f 50%, #2a1d4f 100%);
 $white: #fff;
 $black: #000000;
-$tableLinesOddColor: #060914;
-$bgLightColor:  lighten($bgColor, 5%);
-$inputColor:  lighten($bgColor, 10%);
-$btnColor:$bgColor;
-$btnHoverColor: $bgLightColor;
-$textAreaColor: lighten($bgLightColor, 20%);
+$cardBg: rgba(255, 255, 255, 0.05);
+$cardBgHover: rgba(255, 255, 255, 0.08);
+$tableLinesOddColor: rgba(255, 255, 255, 0.02);
+$bgLightColor: rgba(255, 255, 255, 0.1);
+$inputColor: rgba(255, 255, 255, 0.08);
+$btnColor: #5865f2;
+$btnHoverColor: #4752c4;
+$textAreaColor: rgba(255, 255, 255, 0.15);
+$borderColor: rgba(255, 255, 255, 0.1);
+$accentPurple: #9c4fff;
+$accentBlue: #4dabf7;
+$successGreen: #51cf66;
+$dangerRed: #ff6b6b;
 
 
 //fonts
 %mainFont {
-    font-family: "Segoe UI", Arial, sans-serif;
+    font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
     color: $white;
-    line-height: 1;
+    line-height: 1.5;
     text-decoration: none;
 }
 
@@ -32,30 +40,50 @@ $textAreaColor: lighten($bgLightColor, 20%);
 
 
 %border {
-    border: solid 3px black;
-    border-style: ridge;
-    border-radius: 5px;
+    border: 1px solid $borderColor;
+    border-radius: 12px;
+}
+
+%card {
+    background: $cardBg;
+    backdrop-filter: blur(10px);
+    border: 1px solid $borderColor;
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.3s ease;
+    
+    &:hover {
+        background: $cardBgHover;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
 }
 
 //buttons
 %btn {
     @extend %mainFont;
-    @extend %border;
     background-color: $btnColor;
     font-size: 15px;
     cursor: pointer;
     text-align: center;
     user-select: none;
     text-decoration: none;
-    height: 30px;
-    padding: 2px;
-
+    height: 40px;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(88, 101, 242, 0.3);
 
     &:hover {
         background-color: $btnHoverColor;
+        box-shadow: 0 4px 12px rgba(88, 101, 242, 0.4);
     }
     &:focus {
         outline: none;
+    }
+    &:active {
+        box-shadow: 0 2px 8px rgba(88, 101, 242, 0.3);
     }
 }
 

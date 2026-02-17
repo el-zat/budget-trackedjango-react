@@ -1,98 +1,119 @@
 @import './vars';
 @import './mixins';
 
-
 .login-container {
+    padding: 24px;
+    
     h2 {
-        margin-bottom: 20px;
+        margin-bottom: 24px;
         text-align: center;
+        font-size: 24px;
+        font-weight: 600;
     }
 
     form {
-        @include flex(space-between, flex-end, column);  
+        @include flex(space-between, stretch, column);  
         gap: 20px;
     }
 }
 
-
 .loggedout,
 .loggedin {  
-    @include flex(none, center, row);  
-    gap: 10px;
-    position: absolute;   
-    font-size: 20px;
-    top: 50px;
-    right: 50px;
+    @include flex(center, center, row);  
+    gap: 12px;
 
     .login-btn,
     .logout-btn {
         @extend %btn;
-        position: relative;
-        right: 0;
-        width: 100px;
-        height: 50px;   
-        font-size: 20px;
-        background-color: $inputColor;   
+        padding: 8px 20px;
+        height: 40px;   
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        
+        .material-icons {
+            font-size: 18px;
+        }
     }
 }
-
 
 .greeting {    
-    width: 100px;
-    height: 50px;
-    @include flex (center, center, row);
-    font-size: 20px;
-    margin-right: 35px;
+    @include flex(center, center, row);
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid $borderColor;
 
     .material-icons {
-        margin-right: 10px;
-        font-size: 30px
+        font-size: 24px;
+        color: $accentPurple;
     }
-
+    
+    span {
+        font-weight: 600;
+        font-size: 14px;
+    }
 }
-
 
 label {
     @extend %mainFont;
-    margin-right: 10px;
-    margin-bottom: 10px;;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 8px;
 }
 
 input {
-    color: $black;;
+    @extend %input_select;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid $borderColor;
+    
+    &:focus {
+        outline: none;
+        border-color: $btnColor;
+        background: rgba(255, 255, 255, 0.08);
+    }
 }
-
 
 .form-group {
     position: relative;
-    width: max-content;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .show-password-btn {
     position: absolute;
-    top: 60%;
-    right: 5%;
+    top: 50%;
+    right: 12px;
     border: none;
-    padding: 0;
-    margin: 0;
-    cursor: 'pointer';
-    // color: $black;
-    background-color: $bgLightColor;
+    padding: 4px;
+    background: transparent;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.5);
+    transition: color 0.2s ease;
+    
+    &:hover {
+        color: rgba(255, 255, 255, 0.9);
+    }
 }
 
-
 .login-message {
-    margin-top: 12;
-    padding: 10;
-    background: '#ffecec';
-    color: $white;
-    border: '1px solid #f5aca6';
-    border-radius: 4;
-    @include flex (none, center, none) 
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(255, 107, 107, 0.1);
+    color: #fca5a5;
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    border-radius: 8px;
+    text-align: center;
+    font-size: 14px;
 }
 
 .submit-login {
     @extend %btn;
-    width: 80px;
-    border-radius: 5px;
+    width: 100%;
+    margin-top: 8px;
 }

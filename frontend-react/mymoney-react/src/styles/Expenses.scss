@@ -1,91 +1,222 @@
 @import './vars';
 @import './mixins';
 
-
 .expenses-wrapper {
-  margin: 30px;
+  margin: 0;
+}
+
+// Add New Expense Section
+.add-expense-section {
+  @extend %card;
+  margin-bottom: 30px;
+  
+  h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+}
+
+.add-expense-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  align-items: end;
+  
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    input, select {
+      @extend %input_select;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid $borderColor;
+      transition: all 0.2s ease;
+      
+      &:focus {
+        outline: none;
+        border-color: $btnColor;
+        background: rgba(255, 255, 255, 0.08);
+      }
+    }
+    
+    select {
+      cursor: pointer;
+      
+      option {
+        background: #1a1d3f;
+        color: rgba(255, 255, 255, 0.9);
+        padding: 10px;
+      }
+    }
+  }
+  
+  .add-expense-btn {
+    @extend %btn;
+    height: 40px;
+    align-self: end;
+  }
 }
 
 .expenses-header {
-  @include flex(flex-start, center, row);
-  margin-top: 100px;
-  margin-bottom: 20px;
-  gap: 50px;
+  @include flex(space-between, center, row);
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid $borderColor;
 }
 
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
 
 .filter-btn,
 .sort-btn {
-  @include flex(space-between, center, row);
-  background-color: $bgColor;   
-  border: none;
-  @extend %mainFont;
-  font-size: 18px;
-  gap: 5px;
+  @include flex(center, center, row);
+  @extend %btn;
+  gap: 8px;
+  padding: 8px 16px;
+  height: 40px;
+  font-size: 14px;
+  font-weight: 500;
+  background: rgba(88, 101, 242, 0.15);
+  border: 1px solid rgba(88, 101, 242, 0.3);
+  
+  i {
+    font-size: 20px;
+  }
+  
+  &:hover {
+    background: rgba(88, 101, 242, 0.25);
+    border-color: rgba(88, 101, 242, 0.4);
+  }
 }
 
-.expenses-table {
-  @extend %border;
-  border-color: $tableLinesOddColor;
-  border-style: ridge;
+// Table with Header Container
+.expenses-table-container {
+  @extend %card;
   width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 0;
+}
 
-  & td {
-    height: 50px;
-    border-color: $tableLinesOddColor;
-    padding-left: 20px;
-    text-align: left;
-  
+// Table Styles
+.expenses-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: transparent;
+
+  thead {
+    tr {
+      background: rgba(255, 255, 255, 0.05);
+      border-bottom: 2px solid rgba(88, 101, 242, 0.2);
+    }
+    
+    th {
+      font-weight: 600;
+      font-size: 11px;
+      height: 48px;
+      padding: 12px 20px;
+      text-align: left;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+  }
+
+  tbody {
+    tr {
+      transition: background 0.2s ease;
+      
+      &:hover {
+        background: rgba(88, 101, 242, 0.05);
+      }
+    }
+    
+    td {
+      height: 64px;
+      padding: 16px 20px;
+      text-align: left;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.9);
+      border-bottom: 1px solid $borderColor;
+      
+      // Price column - green color
+      &:nth-child(4) {
+        color: #51cf66;
+        font-weight: 600;
+        font-size: 15px;
+      }
+    }
   }
 
   #edit-icon {
-    font-size: 15px;
-    margin-left: 10px;
-    color: $textAreaColor;
+    font-size: 16px;
+    margin-left: 8px;
+    color: rgba(255, 255, 255, 0.4);
+    transition: color 0.2s ease;
+    
+    &:hover {
+      color: $btnColor;
+    }
   }
-
 
   .tooltip-icon-container {
     position: relative;
     display: inline-block;
     cursor: pointer;
+    
+    &:hover {
+      color: $btnColor;
+    }
   }
   
   .tooltip-icon-text {
     visibility: hidden;
-    width: 80px;
-    color: $textAreaColor;
+    background: rgba(0, 0, 0, 0.9);
+    color: $white;
     text-align: center;
-    font-size: 15px;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
     position: absolute;
-    bottom: 100%;
-    left: 100%;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 1000;
     opacity: 0;
     transition: opacity 0.3s;
+    white-space: nowrap;
     pointer-events: none;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: rgba(0, 0, 0, 0.9);
+    }
   }
   
   .tooltip-icon-container:hover .tooltip-icon-text {
     visibility: visible;
     opacity: 1;
-  }
-
-
-  & th {
-    background: $bgLightColor;
-    font-weight: 600;
-    font-size: 18px;
-    height: 40px;
-    padding-left: 20px;
-    text-align: left;
-  }
-
-  tr:nth-child(even) {
-    background: $bgLightColor;
   }
 }
 
@@ -93,93 +224,256 @@ select,
 input,
 #edit-price, 
 #edit-name, 
-#edit-date {
+#edit-date,
+#euro-input {
   @extend %input_select;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid $borderColor;
 
   &:-webkit-autofill,
   &:-webkit-autofill:hover,
   &:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px  #263b7a inset !important;
-  -webkit-text-fill-color: $white !important;
-  caret-color: $white!important;
-  transition: background-color 5000s ease-in-out 0s !important;
-  }
-  &:-webkit-autofill:focus {
-    border-color: $white !important;
+    -webkit-box-shadow: 0 0 0 1000px rgba(42, 29, 79, 0.9) inset !important;
+    -webkit-text-fill-color: $white !important;
+    caret-color: $white !important;
+    transition: background-color 5000s ease-in-out 0s !important;
   }
   
+  &:focus {
+    outline: none;
+    border-color: $btnColor;
+    background: rgba(255, 255, 255, 0.08);
+  }
 }
 
+select {
+  cursor: pointer;
+  
+  option {
+    background: #1a1d3f;
+    color: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+  }
+}
 
-.add-show-description-btn {
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.edit-btn,
+.delete-btn {
   @extend %btn;
-  width: 150px;
-  margin-right: 5px;
+  padding: 8px 12px;
+  height: 36px;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  
+  i {
+    font-size: 18px;
+  }
 }
 
-.save-btn,
+.edit-btn {
+  background: rgba(77, 171, 247, 0.15);
+  color: #74c0fc;
+  border: 1px solid rgba(77, 171, 247, 0.3);
+  
+  &:hover {
+   background: rgba(77, 171, 247, 0.25);
+   border-color: rgba(77, 171, 247, 0.4);
+  }
+}
+
+.delete-btn {
+  background: rgba(255, 107, 107, 0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  
+  &:hover {
+    background: rgba(255, 107, 107, 0.25);
+    border-color: rgba(255, 107, 107, 0.4);
+  }
+}
+
+.add-show-description-btn,
 .delete-expense-btn {
   @extend %btn;
-  width: 80px;
-  margin-right: 5px;
+  padding: 8px 12px;
+  height: 36px;
+  font-size: 13px;
+  margin-right: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  
+  i {
+    font-size: 18px;
+  }
 }
 
+.add-show-description-btn {
+  background: rgba(88, 101, 242, 0.2);
+  color: #a5b4fc;
+  border: 1px solid rgba(88, 101, 242, 0.3);
+  
+  &:hover {
+   background: rgba(88, 101, 242, 0.3);
+   border-color: rgba(88, 101, 242, 0.4);
+  }
+}
 
+.delete-expense-btn {
+  background: rgba(255, 107, 107, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  
+  &:hover {
+    background: rgba(255, 107, 107, 0.3);
+    border-color: rgba(255, 107, 107, 0.4);
+  }
+}
 
 .pagination {
-  @include flex(center, none, row);
-  margin-top: 10px;
+  @include flex(space-between, center, row);
+  margin-top: 20px;
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border: 1px solid $borderColor;
 
-  button {
-    margin: 0 10px;
+  .pagination-btn {
+    @extend %btn;
+    padding: 8px 16px;
+    height: 40px;
+    min-width: 100px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid $borderColor;
     
-    &:hover {
-      background-color: $btnHoverColor;
+    i {
+      font-size: 20px;
+    }
+    
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.05);
+      }
+    }
+  }
+  
+  .page-info {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    
+    strong {
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
     }
   }
 }
 
 .expenses-total {
-  @include flex(center, center, row);
-  
+  @include flex(flex-end, center, row);
+  margin-top: 20px;
 }
 
-
 .total {
-
-  background-color: $bgLightColor;
-  width: 150px;
-  height: 50px;
-  position: absolute;
-  right: 30px;
+  @extend %card;
+  padding: 16px 24px;
   font-size: 18px;
-  font-weight: bolder;
-  align-content: center;
-  cursor: default;
-  text-align: center;
-
+  font-weight: 700;
+  background: linear-gradient(135deg, rgba(88, 101, 242, 0.2), rgba(156, 79, 255, 0.2));
+  border: 1px solid rgba(88, 101, 242, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  
   &:hover {
-    background-color: $btnColor;
+    background: linear-gradient(135deg, rgba(88, 101, 242, 0.3), rgba(156, 79, 255, 0.3));
+  }
+  
+  .total-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .total-amount {
+    font-size: 28px;
+    font-weight: 700;
+    
+    &.positive {
+      color: $successGreen;
+    }
+    
+    &.negative {
+      color: $dangerRed;
+    }
   }
 }
 
-.show-interval{ 
-  width: auto;
-  height: auto;
+.show-interval {
+  font-size: 18px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  gap: 10px;
   
-  font-size: 20px;
- 
+  .calendar-icon {
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  span {
+    color: rgba(255, 255, 255, 0.95);
+  }
 }
 
 .show-custom {
-  @include flex(space-between, center, row);
-  gap: 10px;
-  width: 100%;
-
+  @include flex(flex-start, center, row);
+  gap: 8px;
+  font-size: 14px;
   
+  p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    font-weight: 500;
+  }
 }
 
 .show-custom-interval {
-  @include flex(space-between, flex-start, column);
-  gap: 12px;
+  @include flex(flex-start, flex-start, row);
+  gap: 16px;
+  margin-left: 34px;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .add-expense-form {
+    grid-template-columns: 1fr;
+  }
+  
+  .expenses-table {
+    font-size: 12px;
+    
+    th, td {
+      padding: 8px 12px;
+    }
+  }
 }

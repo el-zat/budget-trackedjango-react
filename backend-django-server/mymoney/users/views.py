@@ -67,3 +67,21 @@ class UserProfileViewSet(viewsets.ModelViewSet):
 class UserRegistrationView(generics.CreateAPIView):
     serializer_class = UserRegistrationSerializer
     permission_classes = [AllowAny]
+    
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response({
+                'success': True,
+                'message': 'User registered successfully',
+                'user': serializer.data
+            }, status=status.HTTP_201_CREATED, headers=headers)
+        except Exception as e:
+            return Response({
+                'success': False,
+                'error': str(e),
+                'details': serializer.errors if hasattr(serializer, 'errors') else {}
+            }, status=status.HTTP_400_BAD_REQUEST)

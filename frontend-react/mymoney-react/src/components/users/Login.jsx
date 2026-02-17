@@ -118,7 +118,8 @@ function Login() {
                 </div> 
                 <button className="logout-btn"
                   onClick={() => {handleLogout()}}>
-                    Logout
+                    <i className="material-icons">logout</i>
+                    <span>Logout</span>
                 </button>                                                         
               </div>                    
               }
