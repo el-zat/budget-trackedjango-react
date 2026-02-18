@@ -105,6 +105,14 @@ const Expenses = () => {
     }, [filteredRows, setCurrentPage]);
 
 
+    //Auto-open custom date modal when custom interval is selected
+    useEffect(() => {
+        if (filterProviderValues.selectedInterval === 'custom') {
+            modalProviderValues.setIsModalCustomDateOpen(true);
+        }
+    }, [filterProviderValues.selectedInterval]);
+
+
     //Close input editing on mouse click
 
     const inputRef = useRef(null);
@@ -140,89 +148,6 @@ const Expenses = () => {
         <SortContext.Provider value={sortProviderValues}>
         <div className="expenses-wrapper">
             
-            {/* Add New Expense Section */}
-            {authProviderValues.isLoggedIn && (
-                <div className="add-expense-section">
-                    <h2>➕ Add New Expense</h2>
-                    <div className="add-expense-form">
-                        <div className="form-field">
-                            <label>Category</label>
-                            <select
-                                value={expensesProviderValues.selectedCategory}
-                                onChange={e => expensesProviderValues.setSelectedCategory(e.target.value)}
-                                required
-                            >
-                                <option value="all">Select Category</option>
-                                {Array.isArray(expensesProviderValues.categories) ? (
-                                    expensesProviderValues.categories.map(cat => (
-                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                    ))
-                                ) : (
-                                    <option>Loading...</option> 
-                                )}
-                            </select>
-                        </div>
-
-                        <div className="form-field">
-                            <label>Expense</label>
-                            {expensesProviderValues.selectedCategoryObj?.name === "Miscellaneous" ? (
-                                <input
-                                    type="text"
-                                    name="miscellaneous-expense"
-                                    placeholder="Enter expense name"
-                                    value={expensesProviderValues.miscExpense}
-                                    onChange={e => expensesProviderValues.setMiscExpense(e.target.value)}
-                                />
-                            ) : (
-                                <select 
-                                    value={expensesProviderValues.selectedExpense} 
-                                    onChange={e => expensesProviderValues.setSelectedExpense(e.target.value)}
-                                >
-                                    <option value="all">Select Expense</option>
-                                    {(Array.isArray(expensesProviderValues.expenses) ? expensesProviderValues.expenses : [])
-                                        .filter(exp => 
-                                            expensesProviderValues.selectedCategory === 'all' ||
-                                            String(exp.category) === String(expensesProviderValues.selectedCategory)
-                                        )
-                                        .map(exp => (
-                                            <option key={exp.id} value={exp.name}>{exp.name}</option>
-                                        ))
-                                    }
-                                </select>
-                            )}
-                        </div>
-
-                        <div className="form-field">
-                            <label>Date</label>
-                            <input 
-                                type="date" 
-                                name="paymentDate"
-                                value={expensesProviderValues.paymentDate} 
-                                onChange={e => expensesProviderValues.setPaymentDate(e.target.value)} 
-                            />
-                        </div>
-
-                        <div className="form-field">
-                            <label>Price (€)</label>
-                            <CurrencyInput 
-                                id="euro-input"
-                                name="euro-input"
-                                placeholder="0.00"
-                                decimalsLimit={2} 
-                                intlConfig={{ locale: 'de-DE', currency: 'EUR' }} 
-                                prefix="€ "
-                                value={expensesProviderValues.price}
-                                onValueChange={(value) => expensesProviderValues.setPrice(value)} 
-                            />
-                        </div>
-
-                        <button className="add-expense-btn" onClick={expensesProviderValues.handleSave}>
-                            + Add Expense
-                        </button>
-                    </div>
-                </div>
-            )}
-
             <div className="expenses-table-container">
                 <div className="expenses-header">
                     {authProviderValues.isLoggedIn &&                
@@ -235,17 +160,32 @@ const Expenses = () => {
                             <span>{filterProviderValues.currentYear}</span>
                         ) : filterProviderValues.selectedInterval === "today" ? (
                             <span>{filterProviderValues.today}</span>
+                        ) : filterProviderValues.selectedInterval === "all" ? (
+                            <span>All</span>
                         ) : filterProviderValues.selectedInterval === "custom" ? (
                             <div className="show-custom-interval">
                                 <div className="show-custom">
-                                    <p>From: </p> {filterProviderValues.formatDate(filterProviderValues.startDate)}
-                                </div>
+                                    {filterProviderValues.formatDate(filterProviderValues.startDate)}
+                                </div>/
                                 <div className="show-custom">
-                                    <p>To: </p> {filterProviderValues.formatDate(filterProviderValues.endDate)}
+                                    {filterProviderValues.formatDate(filterProviderValues.endDate)}
                                 </div>
                             </div>             
                         ) : null 
                         }
+                        <div className="interval-select-field">
+                            <select 
+                                value={filterProviderValues.selectedInterval}
+                                onChange={e => filterProviderValues.setSelectedInterval(e.target.value)}
+                            >
+                                <option value="month">Select interval</option>
+                                <option value="year">This year</option>
+                                <option value="month">This month</option>                               
+                                <option value="today">Today</option>
+                                <option value="custom">Custom interval</option>
+                                <option value="all">All</option>
+                            </select>
+                        </div>
                     </div>  
                     }
 
@@ -356,13 +296,14 @@ const Expenses = () => {
                                     {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'price' ? (                           
                                         <CurrencyInput id="edit-price"
                                             prefix="€ "
-                                            decimalsLimit={2} 
-                                            intlConfig={{ locale: 'de-DE', currency: 'EUR' }} 
-                                            placeholder="Enter new price"
+                                            decimalsLimit={2}
+                                            decimalSeparator=","
+                                            groupSeparator="."
+                                            placeholder="0,00"
                                             ref={inputRef}
                                             value={expensesProviderValues.editPrice}
-                                            onBlur={() => expensesProviderValues.setEditingField({ id: null, field: null })}  //No editing on blur
-                                            onValueChange={value => expensesProviderValues.setEditPrice(value)}
+                                            onBlur={() => expensesProviderValues.setEditingField({ id: null, field: null })}
+                                            onValueChange={value => expensesProviderValues.setEditPrice(value || '')}
                                             onKeyDown={e => {
                                                 if (e.key === 'Enter') {
                                                     expensesProviderValues.applyChanges(row.id, 'price')
@@ -397,6 +338,43 @@ const Expenses = () => {
                                             <i className="material-icons">delete</i>
                                             Delete
                                         </button>
+                                        <div style={{ position: 'relative', display: 'inline-block', marginLeft: 'auto' }}>
+                                            <input
+                                                type="file"
+                                                id={`receipt-input-${row.id}`}
+                                                accept="image/*,.pdf"
+                                                style={{ display: 'none' }}
+                                                onChange={(e) => {
+                                                    const file = e.target.files[0];
+                                                    if (file) {
+                                                        expensesProviderValues.attachReceipt(row.id, file);
+                                                    }
+                                                }}
+                                            />
+                                            <button 
+                                                className={`attach-btn ${expensesProviderValues.receipts[row.id] ? 'has-receipt' : ''}`}
+                                                onClick={() => {
+                                                    document.getElementById(`receipt-input-${row.id}`).click();
+                                                }}
+                                            >
+                                                <i className="material-icons">
+                                                    {expensesProviderValues.receipts[row.id] ? 'check_circle' : 'attach_file'}
+                                                </i>
+                                                {expensesProviderValues.receipts[row.id] ? 'Receipt Attached' : 'Attach Receipt'}
+                                            </button>
+                                            {expensesProviderValues.receipts[row.id] && (
+                                                <button
+                                                    className="remove-receipt-btn"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        expensesProviderValues.removeReceipt(row.id);
+                                                    }}
+                                                    title="Remove receipt"
+                                                >
+                                                    <i className="material-icons">close</i>
+                                                </button>
+                                            )}
+                                        </div>
                                         </div>
                                     </td>                                
                                 </tr>
@@ -405,7 +383,9 @@ const Expenses = () => {
                                 :  (
                                 <tr>
                                     <td colSpan={5} style={{ textAlign: "center", color: "#888" }}>
-                                        No data. Please enter expenses  
+                                        {expensesProviderValues.rows.length > 0 
+                                            ? "No data for specified filter" 
+                                            : "No data. Please enter expenses"}
                                     </td>
                                 </tr>
                             ))
@@ -417,6 +397,77 @@ const Expenses = () => {
                             </tr>
                   
                     }
+
+                    {/* Add New Expense Row */}
+                    {authProviderValues.isLoggedIn && (
+                        <tr className="add-expense-row">
+                            <td>
+                                <select
+                                    value={expensesProviderValues.selectedCategory}
+                                    onChange={e => expensesProviderValues.setSelectedCategory(e.target.value)}
+                                >
+                                    <option value="all">Select Category</option>
+                                    {Array.isArray(expensesProviderValues.categories) ? (
+                                        expensesProviderValues.categories.map(cat => (
+                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                        ))
+                                    ) : (
+                                        <option>Loading...</option>
+                                    )}
+                                </select>
+                            </td>
+                            <td>
+                                {expensesProviderValues.selectedCategoryObj?.name === "Miscellaneous" ? (
+                                    <input
+                                        type="text"
+                                        placeholder="Enter expense name"
+                                        value={expensesProviderValues.miscExpense}
+                                        onChange={e => expensesProviderValues.setMiscExpense(e.target.value)}
+                                    />
+                                ) : (
+                                    <select
+                                        value={expensesProviderValues.selectedExpense}
+                                        onChange={e => expensesProviderValues.setSelectedExpense(e.target.value)}
+                                    >
+                                        <option value="all">Select Expense</option>
+                                        {(Array.isArray(expensesProviderValues.expenses) ? expensesProviderValues.expenses : [])
+                                            .filter(exp =>
+                                                expensesProviderValues.selectedCategory === 'all' ||
+                                                String(exp.category) === String(expensesProviderValues.selectedCategory)
+                                            )
+                                            .map(exp => (
+                                                <option key={exp.id} value={exp.name}>{exp.name}</option>
+                                            ))
+                                        }
+                                    </select>
+                                )}
+                            </td>
+                            <td>
+                                <input
+                                    type="date"
+                                    value={expensesProviderValues.paymentDate}
+                                    onChange={e => expensesProviderValues.setPaymentDate(e.target.value)}
+                                />
+                            </td>
+                            <td>
+                                <CurrencyInput
+                                    placeholder="0,00"
+                                    decimalsLimit={2}
+                                    decimalSeparator=","
+                                    groupSeparator="."
+                                    prefix="€ "
+                                    value={expensesProviderValues.price}
+                                    onValueChange={(value) => expensesProviderValues.setPrice(value || '')}
+                                />
+                            </td>
+                            <td>
+                                <button className="add-btn" onClick={expensesProviderValues.handleSave}>
+                                    <i className="material-icons">add</i>
+                                    Add Expense
+                                </button>
+                            </td>
+                        </tr>
+                    )}
                                                           
                 </tbody>               
                 </table>

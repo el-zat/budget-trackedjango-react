@@ -3,37 +3,67 @@
 
 .sort-container {
     width: 100%;
+    padding: 32px;
+    background: rgba(156, 79, 255, 0.12);
+    border-radius: 12px;
+    min-width: 450px;
     
-    form {
-        @include flex(flex-start, flex-start, column);
-        gap: 12px;
+    h2 {
+        margin-bottom: 24px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: 600;
+        font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    > div {
+        width: 100%;
+        margin-bottom: 12px;
         
-        > div {
-            width: 100%;
+        label {
+            @include flex(flex-start, center, row);
+            gap: 12px;
+            padding: 14px 16px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 15px;
+            font-weight: 500;
             
-            label {
-                @include flex(flex-start, center, row);
-                gap: 10px;
-                padding: 10px;
+            &:hover {
+                background: rgba(255, 255, 255, 0.08);
+                border-color: rgba(156, 79, 255, 0.3);
+                transform: translateY(-1px);
+            }
+            
+            input[type="radio"] {
                 cursor: pointer;
-                border-radius: 8px;
-                transition: all 0.2s ease;
-                
-                &:hover {
-                    background: rgba(255, 255, 255, 0.05);
-                }
-                
-                input[type="radio"] {
-                    cursor: pointer;
-                    width: 16px;
-                    height: 16px;
-                }
-                
-                i {
-                    margin-left: auto;
-                    font-size: 18px;
-                    color: rgba(255, 255, 255, 0.5);
-                }
+                width: 18px;
+                height: 18px;
+                accent-color: $accentPurple;
+            }
+            
+            input[type="radio"]:checked + span {
+                color: $accentPurple;
+            }
+            
+            i {
+                margin-left: auto;
+                font-size: 20px;
+                color: rgba(255, 255, 255, 0.6);
+                transition: color 0.2s ease;
+            }
+        }
+        
+        label:has(input:checked) {
+            background: rgba(156, 79, 255, 0.15);
+            border-color: $accentPurple;
+            
+            i {
+                color: $accentPurple;
             }
         }
     }

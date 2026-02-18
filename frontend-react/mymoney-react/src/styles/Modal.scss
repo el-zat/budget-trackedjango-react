@@ -27,7 +27,7 @@
 .modal-content {
   @extend %mainFont;
   @extend %card;
-  padding: 32px;
+  padding: 0;
   min-width: 400px;
   max-width: 600px;
   position: relative;

@@ -23,6 +23,10 @@ function App() {
   const [rows, setRows] = useState([]);
   const [newExpense, setNewExpense] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [receipts, setReceipts] = useState(() => {
+    const saved = localStorage.getItem('receipts');
+    return saved ? JSON.parse(saved) : {};
+  }); // { [expenseId]: { fileName, fileUrl, ... } }
   
 
   //Description
@@ -59,8 +63,12 @@ function App() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [checkedCategories, setCheckedCategories] = useState([]);
+  const [checkedExpenses, setCheckedExpenses] = useState([]);
   const [selectedInterval, setSelectedInterval] = useState('month')
   const [searchWord, setSearchWord] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [priceError, setPriceError] = useState('');
   const [filteredRowsByDate, setFilteredRowsByDate] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
 
@@ -69,6 +77,7 @@ function App() {
   const [isModalSortOpen, setIsModalSortOpen] = useState(false);
   const [isModalLoginOpen, setIsModalLoginOpen] = useState(false);
   const [isModalRegistrationOpen, setIsModalRegistrationOpen] = useState(false);
+  const [isModalCustomDateOpen, setIsModalCustomDateOpen] = useState(false);
 
   // Get token
   function getAuthHeaders() {
@@ -180,6 +189,10 @@ function App() {
       localStorage.setItem('selectedInterval', selectedInterval);
   }, [selectedInterval]);
 
+  useEffect(() => {
+      localStorage.setItem('receipts', JSON.stringify(receipts));
+  }, [receipts]);
+
 
   function getCookie(name) {
     let cookieValue = null;
@@ -199,9 +212,39 @@ function App() {
 
   const totalPrice = () => {      
       if (isLoggedIn) {
-          return filteredRows.reduce((prevTotal, row) => prevTotal + Number(row.price), 0)
+          return filteredRows.reduce((prevTotal, row) => {
+              const price = Number(row.price) || 0;
+              return prevTotal + price;
+          }, 0)
       } 
       else { return ''}
+  }
+
+  const allRowsTotalPrice = () => {      
+      if (isLoggedIn) {
+          return rows.reduce((prevTotal, row) => {
+              const price = Number(row.price) || 0;
+              return prevTotal + price;
+          }, 0)
+      } 
+      else { return 0}
+  }
+
+  const monthlyTotalPrice = () => {      
+      if (isLoggedIn) {
+          const today = new Date();
+          const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+          
+          return rows.reduce((prevTotal, row) => {
+              const rowDate = new Date(row.payment_date);
+              if (rowDate >= firstDayOfMonth && rowDate <= today) {
+                  const price = Number(row.price) || 0;
+                  return prevTotal + price;
+              }
+              return prevTotal;
+          }, 0)
+      } 
+      else { return 0 }
   }
 
 
@@ -249,6 +292,8 @@ function App() {
           return getFirstDayOfMonth();
         case 'year':
           return getFirstDayOfYear();
+        case 'all':
+          return "";
         default:
           return "";
       }
@@ -264,6 +309,8 @@ function App() {
               return getToday();
           case 'year':
               return getToday();
+          case 'all':
+              return "";
           default:
               return "";
       }
@@ -292,11 +339,15 @@ function App() {
 
 
   const getCleanPrice = (price) => {
+      if (!price || price === '' || price === null || price === undefined) {
+          return 0;
+      }
       let cleanPrice = price;
       if (typeof cleanPrice === 'string') {
           cleanPrice = cleanPrice.replace(',', '.').replace(/[^\d.]/g, '');
       }
-      return cleanPrice;
+      const parsed = Number(cleanPrice);
+      return isNaN(parsed) ? 0 : parsed;
   }
 
 
@@ -545,7 +596,8 @@ function App() {
       // Edit name, price or date     
       let bodyData = {};
       if (field === 'price') {
-          bodyData = { price: Number(editPrice) };
+          const priceValue = getCleanPrice(editPrice);
+          bodyData = { price: priceValue };
       } 
       else if (field === 'date') {
           bodyData = { payment_date: editDate };
@@ -598,6 +650,35 @@ function App() {
       setIsDescriptionShown(false)
   }
 
+  const attachReceipt = (expenseId, file) => {
+    if (!file) return;
+    
+    // Create a URL for preview (in real app, you'd upload to server)
+    const fileUrl = URL.createObjectURL(file);
+    
+    setReceipts(prev => ({
+      ...prev,
+      [expenseId]: {
+        fileName: file.name,
+        fileUrl: fileUrl,
+        fileType: file.type,
+        fileSize: file.size,
+        attachedAt: new Date().toISOString()
+      }
+    }));
+  };
+
+  const removeReceipt = (expenseId) => {
+    setReceipts(prev => {
+      const updated = { ...prev };
+      if (updated[expenseId]?.fileUrl) {
+        URL.revokeObjectURL(updated[expenseId].fileUrl);
+      }
+      delete updated[expenseId];
+      return updated;
+    });
+  };
+
   const setHasDescription = (id, value) => {
       console.log('setHasDescription called with:', id, typeof id);
       setDescriptionMap(prev => ({ ...prev, [id]: value }));
@@ -645,6 +726,8 @@ function App() {
             case "custom":
                 if (!startDate || !endDate) return true;
                 return new Date(rowDate) >= new Date(startDate) && new Date(rowDate) <= new Date(endDate);
+            case "all":
+                return true;
             default:
                 return rowDate >= firstDayOfMonth && rowDate <= today;
         }
@@ -680,20 +763,22 @@ function App() {
         }
       let newChecked = [];
       if (checkedCategories.includes(checkedID)) {
-          newChecked = checkedCategories.filter(id => id !== checkedID);  //If the category is already selected, it is removed from the list
+          newChecked = checkedCategories.filter(id => id !== checkedID);
       } else {
-          newChecked = [...checkedCategories, checkedID]; //Otherwise, it is added to the list of selected categories
+          newChecked = [...checkedCategories, checkedID];
       }
       setCheckedCategories(newChecked);
       console.log("new checked: ", newChecked)
 
       const rowsToFilter = filteredRowsByDate.length ? filteredRowsByDate : expensesProviderValues.rows || [];
 
-      const filtered = rowsToFilter.filter(row =>
-          newChecked.length === 0 ||
-          newChecked.map(String).includes(String(row.category))
-        );
-        setFilteredRows(filtered);
+      const filtered = rowsToFilter.filter(row => {
+          const categoryMatch = newChecked.length === 0 || newChecked.map(String).includes(String(row.category));
+          const expenseMatch = checkedExpenses.length === 0 || checkedExpenses.includes(row.name);
+          const priceMatch = filterByPrice(row);
+          return categoryMatch && expenseMatch && priceMatch;
+      });
+      setFilteredRows(filtered);
 
       console.log("rows:", filteredRows)
   };
@@ -701,8 +786,132 @@ function App() {
 
   const handleAllCategories = () => {
       setCheckedCategories([]);
-      setFilteredRows(rows || []);
+      
+      // Apply filters immediately with empty categories array
+      const rowsToFilter = filteredRowsByDate.length ? filteredRowsByDate : rows || [];
+      
+      const filtered = rowsToFilter.filter(row => {
+          const categoryMatch = true; // Empty array means all categories
+          const expenseMatch = checkedExpenses.length === 0 || checkedExpenses.includes(row.name);
+          const priceMatch = filterByPrice(row);
+          return categoryMatch && expenseMatch && priceMatch;
+      });
+      
+      setFilteredRows(filtered);
   };
+
+  const handleExpenseCheckbox = (checkedExpenseName) => {
+      if (!checkedExpenseName) {
+          console.warn("checkedExpenseName is undefined", checkedExpenseName);
+          return;
+        }
+      let newChecked = [];
+      if (checkedExpenses.includes(checkedExpenseName)) {
+          newChecked = checkedExpenses.filter(name => name !== checkedExpenseName);
+      } else {
+          newChecked = [...checkedExpenses, checkedExpenseName];
+      }
+      setCheckedExpenses(newChecked);
+      console.log("new checked expenses: ", newChecked)
+
+      const rowsToFilter = filteredRowsByDate.length ? filteredRowsByDate : expensesProviderValues.rows || [];
+
+      const filtered = rowsToFilter.filter(row => {
+          const categoryMatch = checkedCategories.length === 0 || checkedCategories.map(String).includes(String(row.category));
+          const expenseMatch = newChecked.length === 0 || newChecked.includes(row.name);
+          const priceMatch = filterByPrice(row);
+          return categoryMatch && expenseMatch && priceMatch;
+      });
+      setFilteredRows(filtered);
+  };
+
+  const handleAllExpenses = () => {
+      setCheckedExpenses([]);
+      
+      // Apply filters immediately with empty expenses array
+      const rowsToFilter = filteredRowsByDate.length ? filteredRowsByDate : rows || [];
+      
+      const filtered = rowsToFilter.filter(row => {
+          const categoryMatch = checkedCategories.length === 0 || checkedCategories.map(String).includes(String(row.category));
+          const expenseMatch = true; // Empty array means all expenses
+          const priceMatch = filterByPrice(row);
+          return categoryMatch && expenseMatch && priceMatch;
+      });
+      
+      setFilteredRows(filtered);
+  };
+
+  // Helper function to convert price string to number (accepts both . and , as decimal separator)
+  const parsePrice = (priceStr) => {
+      if (!priceStr || priceStr === '') return null;
+      // Replace comma with dot for parsing
+      const normalized = String(priceStr).replace(',', '.');
+      const num = Number(normalized);
+      return isNaN(num) ? null : num;
+  };
+
+  // Filter by price range
+  const filterByPrice = (row) => {
+      const rowPrice = Number(row.price) || 0;
+      
+      const minNum = parsePrice(minPrice);
+      const maxNum = parsePrice(maxPrice);
+      
+      // Check if both prices are set and min > max (invalid range)
+      if (minNum !== null && maxNum !== null && minNum > maxNum) {
+          console.warn("Min Price should be less than Max Price");
+          return true; // Don't filter if invalid range
+      }
+      
+      // Check if minPrice is set
+      if (minNum !== null && rowPrice < minNum) {
+          return false;
+      }
+      
+      // Check if maxPrice is set
+      if (maxNum !== null && rowPrice > maxNum) {
+          return false;
+      }
+      
+      return true;
+  };
+
+  // Apply all filters together
+  const applyAllFilters = () => {
+      const rowsToFilter = filteredRowsByDate.length ? filteredRowsByDate : rows || [];
+      
+      const filtered = rowsToFilter.filter(row => {
+          const categoryMatch = checkedCategories.length === 0 || checkedCategories.map(String).includes(String(row.category));
+          const expenseMatch = checkedExpenses.length === 0 || checkedExpenses.includes(row.name);
+          const priceMatch = filterByPrice(row);
+          return categoryMatch && expenseMatch && priceMatch;
+      });
+      
+      setFilteredRows(filtered);
+  };
+
+  // Validate price range
+  useEffect(() => {
+      const minNum = parsePrice(minPrice);
+      const maxNum = parsePrice(maxPrice);
+      
+      if (minNum !== null && maxNum !== null) {
+          if (minNum > maxNum) {
+              setPriceError('Min Price must be less than Max Price');
+          } else {
+              setPriceError('');
+          }
+      } else {
+          setPriceError('');
+      }
+  }, [minPrice, maxPrice]);
+
+  // Apply price filter when minPrice or maxPrice changes
+  useEffect(() => {
+      if (isLoggedIn && rows.length > 0) {
+          applyAllFilters();
+      }
+  }, [minPrice, maxPrice]);
 
 
   useEffect(() => {
@@ -732,16 +941,34 @@ function App() {
       setIsFilterOpen(false)
   }
 
-  const filterProviderValues = {       
+  const resetAllFilters = () => {
+      setCheckedCategories([]);
+      setCheckedExpenses([]);
+      setMinPrice('');
+      setMaxPrice('');
+      setPriceError('');
+      setSearchWord('');
+      setSelectedInterval('month');
+      setDateFrom('');
+      setDateTo('');
+      setFilteredRows(rows || []);
+  }
+
+  const filterProviderValues = useMemo(() => ({       
       selectedInterval: selectedInterval,
       dateFrom: dateFrom,
       dateTo: dateTo,       
       startDate: startDate,
       endDate: endDate,       
       categories: categories,
+      expenses: expenses,
       checkedCategories, 
+      checkedExpenses,
       isFilterOpen, 
-      searchWord, 
+      searchWord,
+      minPrice,
+      maxPrice,
+      priceError,
       today,
       currentMonth,
       currentYear,
@@ -749,12 +976,19 @@ function App() {
       filteredRows,
       setFilteredRows,
       closeFilter,
+      resetAllFilters,
+      applyAllFilters,
       filterBySearchWord,
       setSearchWord,
+      setMinPrice,
+      setMaxPrice,
       setIsFilterOpen,
       setCheckedCategories,
+      setCheckedExpenses,
       handleCategoryCheckbox,
+      handleExpenseCheckbox,
       handleAllCategories,
+      handleAllExpenses,
       setSelectedCategory: setSelectedCategory,
       handleDateFilter: handleDateFilter,
       formatDate: formatDate,
@@ -763,7 +997,15 @@ function App() {
       setSelectedInterval: setSelectedInterval,
       setDateFrom: setDateFrom,
       setDateTo: setDateTo,
-  }
+  }), [
+      selectedInterval, dateFrom, dateTo, startDate, endDate,
+      categories, expenses, checkedCategories, checkedExpenses,
+      isFilterOpen, searchWord, minPrice, maxPrice, priceError,
+      today, currentMonth, currentYear, filteredRowsByDate, filteredRows,
+      closeFilter, resetAllFilters, applyAllFilters, filterBySearchWord,
+      handleCategoryCheckbox, handleExpenseCheckbox, handleAllCategories, handleAllExpenses,
+      handleDateFilter, formatDate, getToday, getFirstDayOfMonth
+  ])
 
   const expensesProviderValues = useMemo(() =>  ({       
       selectedCategory: selectedCategory,
@@ -784,6 +1026,8 @@ function App() {
       categoriesMap,
       setCurrentPage,
       totalPrice: totalPrice,
+      monthlyTotalPrice: monthlyTotalPrice,
+      allRowsTotalPrice: allRowsTotalPrice,
       setEditDate: setEditDate,       
       getToday: getToday,
       getFirstDayOfYear: getFirstDayOfYear,
@@ -806,7 +1050,10 @@ function App() {
       setCurrentDescriptionId: setCurrentDescriptionId,
       closeDescription: closeDescription,
       setHasDescription: setHasDescription,
-  }), [descriptionMap, setHasDescription])
+      receipts: receipts,
+      attachReceipt: attachReceipt,
+      removeReceipt: removeReceipt,
+  }), [descriptionMap, setHasDescription, receipts, rows])
 
 
   const authProviderValues = {
@@ -837,10 +1084,12 @@ function App() {
   const modalProviderValues = {
       isModalLoginOpen,     
       isModalRegistrationOpen,     
-      isModalSortOpen,       
+      isModalSortOpen,
+      isModalCustomDateOpen,
       setIsModalSortOpen,
       setIsModalLoginOpen,
-      setIsModalRegistrationOpen,      
+      setIsModalRegistrationOpen,
+      setIsModalCustomDateOpen,
     };
 
 

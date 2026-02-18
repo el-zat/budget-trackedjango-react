@@ -82,7 +82,7 @@ function Login() {
                           {/* {authProviderValues.isSignupMessageShown && */}
                             <p className="mt-3 text-center" >
                               No account?  
-                              <a href="#" style={{ color: '#000', marginLeft: '10px' }}
+                              <a href="#" style={{ color: '#5865f2', marginLeft: '10px' }}
                                   onClick={e => {
                                       e.preventDefault();
                                       modalProviderValues.setIsModalLoginOpen(false); 

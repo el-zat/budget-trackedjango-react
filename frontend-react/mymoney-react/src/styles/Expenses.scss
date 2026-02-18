@@ -5,68 +5,6 @@
   margin: 0;
 }
 
-// Add New Expense Section
-.add-expense-section {
-  @extend %card;
-  margin-bottom: 30px;
-  
-  h2 {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 20px;
-  }
-}
-
-.add-expense-form {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  align-items: end;
-  
-  .form-field {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    
-    label {
-      font-size: 13px;
-      font-weight: 500;
-      color: rgba(255, 255, 255, 0.7);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    input, select {
-      @extend %input_select;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid $borderColor;
-      transition: all 0.2s ease;
-      
-      &:focus {
-        outline: none;
-        border-color: $btnColor;
-        background: rgba(255, 255, 255, 0.08);
-      }
-    }
-    
-    select {
-      cursor: pointer;
-      
-      option {
-        background: #1a1d3f;
-        color: rgba(255, 255, 255, 0.9);
-        padding: 10px;
-      }
-    }
-  }
-  
-  .add-expense-btn {
-    @extend %btn;
-    height: 40px;
-    align-self: end;
-  }
-}
-
 .expenses-header {
   @include flex(space-between, center, row);
   gap: 20px;
@@ -220,6 +158,72 @@
   }
 }
 
+// Add new expense row at bottom of table
+.add-expense-row {
+  background: rgba(88, 101, 242, 0.05) !important;
+  border-top: 2px solid rgba(88, 101, 242, 0.2);
+  
+  &:hover {
+    background: rgba(88, 101, 242, 0.08) !important;
+  }
+  
+  td {
+    padding: 12px 20px !important;
+    
+    input, select {
+      @extend %input_select;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid $borderColor;
+      width: 100%;
+      
+      &:focus {
+        outline: none;
+        border-color: $btnColor;
+        background: rgba(255, 255, 255, 0.08);
+      }
+    }
+    
+    input[type="date"] {
+      &::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        cursor: pointer;
+      }
+    }
+    
+    select {
+      cursor: pointer;
+      
+      option {
+        background: #1a1d3f;
+        color: rgba(255, 255, 255, 0.9);
+        padding: 10px;
+      }
+    }
+  }
+  
+  .add-btn {
+    @extend %btn;
+    padding: 8px 16px;
+    height: 36px;
+    font-size: 13px;
+    font-weight: 500;
+    background: rgba(88, 101, 242, 0.35);
+    border: 1px solid rgba(88, 101, 242, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    
+    &:hover {
+      background: rgba(88, 101, 242, 0.45);
+      border-color: rgba(88, 101, 242, 0.6);
+    }
+    
+    i {
+      font-size: 18px;
+    }
+  }
+}
+
 select,
 input,
 #edit-price, 
@@ -263,7 +267,8 @@ select {
 }
 
 .edit-btn,
-.delete-btn {
+.delete-btn,
+.attach-btn {
   @extend %btn;
   padding: 8px 12px;
   height: 36px;
@@ -293,6 +298,52 @@ select {
   background: rgba(255, 107, 107, 0.15);
   color: #fca5a5;
   border: 1px solid rgba(255, 107, 107, 0.3);
+  
+  &:hover {
+    background: rgba(255, 107, 107, 0.25);
+    border-color: rgba(255, 107, 107, 0.4);
+  }
+}
+
+.attach-btn {
+  background: rgba(156, 79, 255, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(156, 79, 255, 0.3);
+  
+  &:hover {
+    background: rgba(156, 79, 255, 0.25);
+    border-color: rgba(156, 79, 255, 0.4);
+  }
+  
+  &.has-receipt {
+    background: rgba(81, 207, 108, 0.15);
+    color: #69db7c;
+    border: 1px solid rgba(81, 207, 108, 0.3);
+    
+    &:hover {
+      background: rgba(81, 207, 108, 0.25);
+      border-color: rgba(81, 207, 108, 0.4);
+    }
+  }
+}
+
+.remove-receipt-btn {
+  @extend %btn;
+  padding: 4px;
+  height: 28px;
+  width: 28px;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 107, 107, 0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  margin-left: 4px;
+  
+  i {
+    font-size: 16px;
+  }
   
   &:hover {
     background: rgba(255, 107, 107, 0.25);
@@ -432,48 +483,91 @@ select {
   font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 10px;
+  flex: 1;
   
   .calendar-icon {
     font-size: 24px;
     color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 8px;
+  }
+  
+  .interval-select-field {
+    margin-left: 30px;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    select {
+      @extend %input_select;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid $borderColor;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      
+      &:focus {
+        outline: none;
+        border-color: $btnColor;
+        background: rgba(255, 255, 255, 0.08);
+      }
+      
+      option {
+        background: #1a1d3f;
+        color: rgba(255, 255, 255, 0.9);
+        padding: 10px;
+      }
+    }
   }
   
   span {
     color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 8px;
+    min-width: 150px;
   }
 }
 
 .show-custom {
   @include flex(flex-start, center, row);
   gap: 8px;
-  font-size: 14px;
+  font-size: 16px;
   
   p {
     color: rgba(255, 255, 255, 0.6);
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 500;
   }
 }
 
 .show-custom-interval {
-  @include flex(flex-start, flex-start, row);
+  @include flex(flex-start, center, row);
   gap: 16px;
   margin-left: 34px;
+  margin-bottom: 8px;
 }
 
 // Responsive
 @media (max-width: 768px) {
-  .add-expense-form {
-    grid-template-columns: 1fr;
-  }
-  
   .expenses-table {
     font-size: 12px;
     
     th, td {
       padding: 8px 12px;
+    }
+  }
+  
+  .add-expense-row {
+    td {
+      padding: 8px 12px !important;
     }
   }
 }

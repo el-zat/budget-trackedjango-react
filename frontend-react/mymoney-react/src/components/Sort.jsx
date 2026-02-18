@@ -16,7 +16,8 @@ const Sort = () => {
     return      <React.Fragment>                
                     <Modal isOpen={modalProviderValues.isModalSortOpen} onClose={() => 
                         modalProviderValues.setIsModalSortOpen(false)}>
-                            <div className="sort-container">                                                        
+                            <div className="sort-container">   
+                                <h2>Sort Expenses</h2>                                                     
                                 <div className="sort-date">
                                     <label>
                                     <input
@@ -28,7 +29,7 @@ const Sort = () => {
                                             sortProviderValues.onSortChange(e.target.value);
                                         }}
                                     />
-                                    By date: newest first 
+                                    <span>By date: newest first</span>
                                     </label>
                                 </div>                                
                                 <div className="sort-date">
@@ -42,7 +43,7 @@ const Sort = () => {
                                             sortProviderValues.onSortChange(e.target.value);
                                         }}
                                     />
-                                    By date: oldest first 
+                                    <span>By date: oldest first</span>
                                     </label>
                                 </div>                                
                                 <div className="sort-category">
@@ -56,7 +57,7 @@ const Sort = () => {
                                             sortProviderValues.onSortChange(e.target.value);
                                         }}
                                     />
-                                    By category <i className="material-icons">sort_by_alpha</i>
+                                    <span>By category</span> <i className="material-icons">sort_by_alpha</i>
                                     </label>
                                 </div>                                
                                 <div className="sort-price">
@@ -70,7 +71,7 @@ const Sort = () => {
                                             sortProviderValues.onSortChange(e.target.value);
                                         }}
                                     />
-                                    Price accending <i className="material-icons">arrow_upward</i>
+                                    <span>Price ascending</span> <i className="material-icons">arrow_upward</i>
                                     </label>
                                 </div>                                
                                 <div className="sort-price">
@@ -84,7 +85,7 @@ const Sort = () => {
                                             sortProviderValues.onSortChange(e.target.value);
                                         }}
                                     />
-                                    Price decendig <i className="material-icons">arrow_downward</i>
+                                    <span>Price descending</span> <i className="material-icons">arrow_downward</i>
                                     </label>
                                 </div>                                                
                             </div>                       

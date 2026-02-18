@@ -12,7 +12,7 @@ const Diagram = () => {
 
     // Groupe expenses by their categories
     const groupedByCategoryName = () => {
-        return filterProviderValues.filteredRows.reduce((acc, expense) => {
+        return expensesProviderValues.rows.reduce((acc, expense) => {
           const cat = expensesProviderValues.categories.find(c => String(c.id) === String(expense.category));
           const catName = cat?.name || 'Unknown';
           if (!acc[catName]) acc[catName] = [];
@@ -23,7 +23,7 @@ const Diagram = () => {
 
 
     function sumByGroup(items) {      
-      if (!expensesProviderValues.totalPrice) return 0;
+      if (!expensesProviderValues.allRowsTotalPrice) return 0;
       const sum = items.reduce((sum, item) => sum + Number(item.price || 0), 0);
       return sum
     }
@@ -31,8 +31,8 @@ const Diagram = () => {
 
     function percentByGroup(items) {
       const sum = items.reduce((sum, item) => sum + Number(item.price || 0), 0);
-      if (!expensesProviderValues.totalPrice) return 0;
-      return ((sum * 100) / expensesProviderValues.totalPrice()).toFixed(1);
+      if (!expensesProviderValues.allRowsTotalPrice) return 0;
+      return ((sum * 100) / expensesProviderValues.allRowsTotalPrice()).toFixed(1);
     }
     
     const grouped = groupedByCategoryName();
@@ -113,10 +113,18 @@ const Diagram = () => {
             {/* Total Row */}
             <div className="category-row total-row">
                 <div className="cat-header">
-                  <span><strong>Total for period</strong></span>
+                  <span><strong>Total for {
+                    filterProviderValues.selectedInterval === 'today' ? 'today' :
+                    filterProviderValues.selectedInterval === 'month' ? filterProviderValues.currentMonth :
+                    filterProviderValues.selectedInterval === 'year' ? filterProviderValues.currentYear :
+                    filterProviderValues.selectedInterval === 'all' ? 'All' :
+                    filterProviderValues.selectedInterval === 'custom' && filterProviderValues.startDate && filterProviderValues.endDate 
+                      ? `${filterProviderValues.startDate} - ${filterProviderValues.endDate}` :
+                    'Period'
+                  }</strong></span>
                 </div>
                 <div className="sum-container">
-                  <span className="sum"><strong>€ {expensesProviderValues.totalPrice().toFixed(2)}</strong></span>
+                  <span className="sum"><strong>€ {expensesProviderValues.allRowsTotalPrice().toFixed(2)}</strong></span>
                 </div>
                 <div className="bar-container"></div>
             </div>
