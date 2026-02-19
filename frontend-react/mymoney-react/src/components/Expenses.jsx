@@ -330,15 +330,15 @@ const Expenses = () => {
                                                 }}
                                                 >
                                                 <i className="material-icons">edit</i>
-                                                Edit
+                                                Add Description
                                             </button>
                                             <button className="delete-btn"
                                             onClick={() => expensesProviderValues.deleteExpense(row.id)}
                                         >
                                             <i className="material-icons">delete</i>
-                                            Delete
+                                            Delete Expense
                                         </button>
-                                        <div style={{ position: 'relative', display: 'inline-block', marginLeft: 'auto' }}>
+                                        <div className="receipt-actions">
                                             <input
                                                 type="file"
                                                 id={`receipt-input-${row.id}`}

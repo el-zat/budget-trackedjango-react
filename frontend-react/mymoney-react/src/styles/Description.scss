@@ -28,6 +28,7 @@ textarea {
     font-family: inherit;
     color: $white;
     transition: all 0.2s ease;
+    text-transform: capitalize;
     
     &:focus {
         outline: none;

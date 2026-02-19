@@ -3,7 +3,8 @@ import  '../styles/Main.scss'
 import { Filter } from "./Filter";
 import  Description  from "./description/Description";
 import { Expenses } from "./Expenses";
-import { Diagram } from "./Diagram";
+import { CategoriesPieChart } from "./CategoriesPieChart";
+import { ExpensesPieChart } from "./ExpensesPieChart";
 import {AuthContext} from '../context/AuthContext'
 import {DescriptionContext} from '../context/DescriptionContext'
 import {ModalContext} from '../context/ModalContext'
@@ -131,7 +132,10 @@ function Main() {
                 </FilterContext.Provider>
                 
                 {authProviderValues.isLoggedIn && 
-                    <Diagram />
+                    <div className="pie-charts-container">
+                        <CategoriesPieChart />
+                        <ExpensesPieChart />
+                    </div>
                 }
 
                 {descriptionProviderValues.isDescriptionShown && descriptionProviderValues.currentDescriptionId &&
