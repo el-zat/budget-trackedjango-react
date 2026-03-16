@@ -32,3 +32,4 @@ class MyExpenseViewSet(viewsets.ModelViewSet):
 
 class FrontendAppView(TemplateView):
     template_name = "index.html"
+

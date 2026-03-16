@@ -14,10 +14,21 @@
   border-bottom: 1px solid $borderColor;
 }
 
+.expenses-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  flex: 1;
+  text-align: center;
+}
+
 .header-actions {
   display: flex;
   gap: 12px;
   align-items: center;
+  flex: 1;
+  justify-content: flex-end;
 }
 
 .filter-btn,
@@ -566,6 +577,98 @@ select {
   gap: 16px;
   margin-left: 34px;
   margin-bottom: 8px;
+}
+// Beautiful custom tooltips
+[data-tooltip] {
+  position: relative;
+  cursor: pointer;
+  
+  &::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+    padding: 8px 12px;
+    background: linear-gradient(135deg, rgba(88, 101, 242, 0.95) 0%, rgba(116, 79, 168, 0.95) 100%);
+    color: white;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    border-radius: 8px;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3),
+                0 0 20px rgba(88, 101, 242, 0.2);
+    letter-spacing: 0.3px;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+    border: 6px solid transparent;
+    border-top-color: rgba(88, 101, 242, 0.95);
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 1000;
+  }
+  
+  &:hover::before,
+  &:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+// Button specific tooltip adjustments
+.edit-btn[data-tooltip],
+.delete-btn[data-tooltip],
+.attach-btn[data-tooltip] {
+  &::before {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+}
+
+.edit-btn[data-tooltip]::before {
+  background: linear-gradient(135deg, rgba(77, 171, 247, 0.95) 0%, rgba(51, 154, 240, 0.95) 100%);
+}
+
+.edit-btn[data-tooltip]::after {
+  border-top-color: rgba(77, 171, 247, 0.95);
+}
+
+.delete-btn[data-tooltip]::before {
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.95) 0%, rgba(240, 62, 62, 0.95) 100%);
+}
+
+.delete-btn[data-tooltip]::after {
+  border-top-color: rgba(255, 107, 107, 0.95);
+}
+
+.attach-btn[data-tooltip]::before {
+  background: linear-gradient(135deg, rgba(156, 79, 255, 0.95) 0%, rgba(124, 58, 237, 0.95) 100%);
+}
+
+.attach-btn[data-tooltip]::after {
+  border-top-color: rgba(156, 79, 255, 0.95);
+}
+
+.attach-btn.has-receipt[data-tooltip]::before {
+  background: linear-gradient(135deg, rgba(81, 207, 108, 0.95) 0%, rgba(51, 183, 79, 0.95) 100%);
+}
+
+.attach-btn.has-receipt[data-tooltip]::after {
+  border-top-color: rgba(81, 207, 108, 0.95);
 }
 
 // Responsive

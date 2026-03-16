@@ -4,6 +4,7 @@ import React, {useState, useEffect, useMemo, useCallback  } from "react"
 import  './styles/Main.scss'
 import {FilterContext} from './context/FilterContext'
 import {ExpensesContext} from './context/ExpensesContext'
+import {IncomeContext} from './context/IncomeContext'
 import {AuthContext} from './context/AuthContext'
 import {DescriptionContext} from './context/DescriptionContext'
 import { ModalContext } from './context/ModalContext';
@@ -43,6 +44,27 @@ function App() {
   const [editPrice, setEditPrice] = useState(price);
   const [editDate, setEditDate] = useState(paymentDate);
   const [editName, setEditName] = useState(name);
+
+  //Income
+  const [incomes, setIncomes] = useState([]);
+  const [incomeCategories, setIncomeCategories] = useState([]);
+  const [newIncome, setNewIncome] = useState({
+    name: '',
+    amount: '',
+    received_date: getToday(),
+    category: '',
+    source: '',
+    frequency: 'once'
+  });
+  
+  //Income Editing
+  const [editingIncomeField, setEditingIncomeField] = useState({ id: null, field: null });
+  const [editIncomeName, setEditIncomeName] = useState('');
+  const [editIncomeAmount, setEditIncomeAmount] = useState('');
+  const [editIncomeDate, setEditIncomeDate] = useState('');
+  const [editIncomeCategory, setEditIncomeCategory] = useState('');
+  const [editIncomeSource, setEditIncomeSource] = useState('');
+  const [editIncomeFrequency, setEditIncomeFrequency] = useState('');
   
   //Authorization
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -127,14 +149,144 @@ function App() {
     const data = await response.json();
     setRows(data);
   };
+
+  //Fetch incomes from django server
+  const fetchIncomes = async () => {
+    try {
+      const response = await fetch('/api/incomes/', {
+        headers: getAuthHeaders(),
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setIncomes(data);
+      }
+    } catch (error) {
+      console.error('Error fetching incomes:', error);
+    }
+  };
+
+  const fetchIncomeCategories = async () => {
+    try {
+      const response = await fetch('/api/incomecategories/', {
+        headers: getAuthHeaders(),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setIncomeCategories(data);
+      }
+    } catch (error) {
+      console.error('Error fetching income categories:', error);
+    }
+  };
+
+  const addIncome = async () => {
+    try {
+      console.log('Sending income data:', newIncome);
+      const response = await fetch('/api/incomes/', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(newIncome)
+      });
+      console.log('Response status:', response.status);
+      const responseData = await response.json();
+      console.log('Response data:', responseData);
+      
+      if (response.ok) {
+        await fetchIncomes();
+        setNewIncome({
+          name: '',
+          amount: '',
+          received_date: getToday(),
+          category: '',
+          source: '',
+          frequency: 'once'
+        });
+      } else {
+        console.error('Failed to add income:', responseData);
+        alert('Failed to add income: ' + JSON.stringify(responseData));
+      }
+    } catch (error) {
+      console.error('Error adding income:', error);
+      alert('Error adding income: ' + error.message);
+    }
+  };
+
+  const deleteIncome = async (id) => {
+    try {
+      const response = await fetch(`/api/incomes/${id}/`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      if (response.ok) {
+        await fetchIncomes();
+      }
+    } catch (error) {
+      console.error('Error deleting income:', error);
+    }
+  };
+
+  const applyIncomeChanges = async (id, field) => {
+    if (editingIncomeField.id === id) {
+      let bodyData = {};
+      if (field === 'name') {
+        bodyData = { name: editIncomeName };
+      } else if (field === 'amount') {
+        const amountValue = parseFloat(editIncomeAmount);
+        if (isNaN(amountValue)) {
+          alert('Invalid amount');
+          return;
+        }
+        bodyData = { amount: amountValue };
+      } else if (field === 'date') {
+        bodyData = { received_date: editIncomeDate };
+      } else if (field === 'category') {
+        bodyData = { category: editIncomeCategory };
+      } else if (field === 'source') {
+        bodyData = { source: editIncomeSource };
+      } else if (field === 'frequency') {
+        bodyData = { frequency: editIncomeFrequency };
+      }
+
+      try {
+        const response = await fetch(`/api/incomes/${id}/`, {
+          method: 'PATCH',
+          headers: getAuthHeaders(),
+          credentials: 'include',
+          body: JSON.stringify(bodyData)
+        });
+        const result = await response.json().catch(() => ({}));
+        console.log('Income update response:', response.status, result);
+
+        if (response.ok) {
+          // Update local state
+          setIncomes(incomes.map(income =>
+            income.id === id ? { ...income, ...bodyData } : income
+          ));
+          setEditingIncomeField({ id: null, field: null });
+          setEditIncomeName('');
+          setEditIncomeAmount('');
+          setEditIncomeDate('');
+          setEditIncomeCategory('');
+          setEditIncomeSource('');
+          setEditIncomeFrequency('');
+        }
+      } catch (error) {
+        console.error('Error updating income:', error);
+      }
+    }
+  };
   
 
   //Inintial state (logged out)
   useEffect(() => {
       if (isLoggedIn) {
           fetchExpenses();
+          fetchIncomes();
+          fetchIncomeCategories();
       } else {
           setRows([]); // Empty table when logged out
+          setIncomes([]);
       }
       }, [isLoggedIn]);
 
@@ -237,12 +389,12 @@ function App() {
 
   const monthlyTotalPrice = () => {      
       if (isLoggedIn) {
-          const today = new Date();
-          const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+          const start = new Date(startDate);
+          const end = new Date(endDate);
           
           return rows.reduce((prevTotal, row) => {
               const rowDate = new Date(row.payment_date);
-              if (rowDate >= firstDayOfMonth && rowDate <= today) {
+              if (rowDate >= start && rowDate <= end) {
                   const price = Number(row.price) || 0;
                   return prevTotal + price;
               }
@@ -267,12 +419,20 @@ function App() {
   }
 
   function getToday() {
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, '0');
-  const dd = String(today.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
-}
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  function getTodayFormatted() {
+    const today = new Date();
+    const day = today.getDate();
+    const year = today.getFullYear();
+    const month = today.toLocaleString('en-US', { month: 'long' });
+    return `${day} ${month} ${year}`;
+  }
 
   function getFirstDayOfMonth() {
     const today = new Date();
@@ -324,6 +484,7 @@ function App() {
   const startDate = getStartDate(selectedInterval);
   const endDate = getEndDate(selectedInterval);
   const today = getToday(selectedInterval);
+  const todayFormatted = getTodayFormatted();
   const currentMonth = getCurrentMonth(selectedInterval);
   const currentYear = getCurrentYear(selectedInterval);
 
@@ -331,10 +492,10 @@ function App() {
   function formatDate(value) {
       if (!value) return "";
       const d = new Date(value);
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, '0');
-      const dd = String(d.getDate()).padStart(2, '0');
-      return `${yyyy}-${mm}-${dd}`;
+      const day = d.getDate();
+      const year = d.getFullYear();
+      const month = d.toLocaleDateString('en-US', { month: 'long' });
+      return `${day} ${month} ${year}`;
   }
 
 
@@ -973,6 +1134,7 @@ function App() {
       maxPrice,
       priceError,
       today,
+      todayFormatted,
       currentMonth,
       currentYear,
       filteredRowsByDate,
@@ -1004,7 +1166,7 @@ function App() {
       selectedInterval, dateFrom, dateTo, startDate, endDate,
       categories, expenses, checkedCategories, checkedExpenses,
       isFilterOpen, searchWord, minPrice, maxPrice, priceError,
-      today, currentMonth, currentYear, filteredRowsByDate, filteredRows,
+      today, todayFormatted, currentMonth, currentYear, filteredRowsByDate, filteredRows,
       closeFilter, resetAllFilters, applyAllFilters, filterBySearchWord,
       handleCategoryCheckbox, handleExpenseCheckbox, handleAllCategories, handleAllExpenses,
       handleDateFilter, formatDate, getToday, getFirstDayOfMonth
@@ -1056,7 +1218,7 @@ function App() {
       receipts: receipts,
       attachReceipt: attachReceipt,
       removeReceipt: removeReceipt,
-  }), [descriptionMap, setHasDescription, receipts, rows])
+  }), [descriptionMap, setHasDescription, receipts, rows, startDate, endDate])
 
 
   const authProviderValues = {
@@ -1095,6 +1257,30 @@ function App() {
       setIsModalCustomDateOpen,
     };
 
+  const incomeProviderValues = {
+      incomes,
+      incomeCategories,
+      newIncome,
+      setNewIncome,
+      addIncome,
+      deleteIncome,
+      editingIncomeField,
+      setEditingIncomeField,
+      editIncomeName,
+      setEditIncomeName,
+      editIncomeAmount,
+      setEditIncomeAmount,
+      editIncomeDate,
+      setEditIncomeDate,
+      editIncomeCategory,
+      setEditIncomeCategory,
+      editIncomeSource,
+      setEditIncomeSource,
+      editIncomeFrequency,
+      setEditIncomeFrequency,
+      applyIncomeChanges,
+    };
+
 
   return (
     <> 
@@ -1102,9 +1288,11 @@ function App() {
         <ModalContext.Provider value={modalProviderValues}>
           <FilterContext.Provider value={filterProviderValues}>
             <ExpensesContext.Provider value={expensesProviderValues}>
-              <DescriptionContext.Provider value={descriptionProviderValues}>
-                <Main />
-              </DescriptionContext.Provider>
+              <IncomeContext.Provider value={incomeProviderValues}>
+                <DescriptionContext.Provider value={descriptionProviderValues}>
+                  <Main />
+                </DescriptionContext.Provider>
+              </IncomeContext.Provider>
             </ExpensesContext.Provider>
           </FilterContext.Provider>
         </ModalContext.Provider>

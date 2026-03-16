@@ -173,21 +173,10 @@ const Expenses = () => {
                             </div>             
                         ) : null 
                         }
-                        <div className="interval-select-field">
-                            <select 
-                                value={filterProviderValues.selectedInterval}
-                                onChange={e => filterProviderValues.setSelectedInterval(e.target.value)}
-                            >
-                                <option value="month">Select interval</option>
-                                <option value="year">This year</option>
-                                <option value="month">This month</option>                               
-                                <option value="today">Today</option>
-                                <option value="custom">Custom interval</option>
-                                <option value="all">All</option>
-                            </select>
-                        </div>
                     </div>  
                     }
+
+                    <h2 className="expenses-title">Expenses</h2>
 
                     <div className="header-actions">
                         {!modalProviderValues.isModalSortOpen  && authProviderValues.isLoggedIn &&                              
@@ -259,12 +248,14 @@ const Expenses = () => {
                                                 }}
                                             />
                                         ) : (                                        
-                                            <div className="tooltip-icon-container" onClick={() => {
-                                                expensesProviderValues.setEditingField({id: row.id, field: 'name'});
-                                                expensesProviderValues.setEditName(row.name);
-                                                }}> {row.name } 
-                                                    <i className="material-icons" id="edit-icon">edit</i>
-                                                    <div className="tooltip-icon-text">Edit name</div>                                                                                 
+                                            <div className="tooltip-icon-container" 
+                                                onClick={() => {
+                                                    expensesProviderValues.setEditingField({id: row.id, field: 'name'});
+                                                    expensesProviderValues.setEditName(row.name);
+                                                }}
+                                                data-tooltip="Edit expense"
+                                            > 
+                                                {row.name } 
                                             </div>                                                                                                                  
                                             )}
                                     </td>                
@@ -283,12 +274,14 @@ const Expenses = () => {
                                             }}
                                         />
                                         ) : (
-                                        <div className="tooltip-icon-container" onClick={() => {
-                                            expensesProviderValues.setEditingField({id: row.id, field: 'date'});
-                                            expensesProviderValues.setEditDate(row.date);
-                                        }}> {row.payment_date} 
-                                            <i className="material-icons" id="edit-icon">edit</i> 
-                                            <div className="tooltip-icon-text">Edit date</div> 
+                                        <div className="tooltip-icon-container" 
+                                            onClick={() => {
+                                                expensesProviderValues.setEditingField({id: row.id, field: 'date'});
+                                                expensesProviderValues.setEditDate(row.date);
+                                            }}
+                                            data-tooltip="Edit date"
+                                        > 
+                                            {row.payment_date} 
                                         </div>
                                         )}
                                     </td>
@@ -311,13 +304,14 @@ const Expenses = () => {
                                             }}
                                         />
                                         ) : (
-                                            <div className="tooltip-icon-container" onClick={() => {
-                                                expensesProviderValues.setEditingField({id: row.id, field: 'price'});
-                                                expensesProviderValues.setEditPrice(row.price);
-                                            }}>
+                                            <div className="tooltip-icon-container" 
+                                                onClick={() => {
+                                                    expensesProviderValues.setEditingField({id: row.id, field: 'price'});
+                                                    expensesProviderValues.setEditPrice(row.price);
+                                                }}
+                                                data-tooltip="Edit price"
+                                            >
                                                 € {row.price} 
-                                                <i className="material-icons" id="edit-icon">edit</i>
-                                                <div className="tooltip-icon-text">Edit price</div>  
                                             </div>
                                         )}
                                     </td>
@@ -328,15 +322,15 @@ const Expenses = () => {
                                                     expensesProviderValues.setIsDescriptionShown(true);
                                                     expensesProviderValues.setCurrentDescriptionId(row.id);
                                                 }}
+                                                data-tooltip="Add description"
                                                 >
                                                 <i className="material-icons">edit</i>
-                                                Add Description
                                             </button>
                                             <button className="delete-btn"
                                             onClick={() => expensesProviderValues.deleteExpense(row.id)}
+                                            data-tooltip="Delete expense"
                                         >
                                             <i className="material-icons">delete</i>
-                                            Delete Expense
                                         </button>
                                         <div className="receipt-actions">
                                             <input
@@ -356,11 +350,11 @@ const Expenses = () => {
                                                 onClick={() => {
                                                     document.getElementById(`receipt-input-${row.id}`).click();
                                                 }}
+                                                data-tooltip={expensesProviderValues.receipts[row.id] ? 'Receipt attached' : 'Attach receipt'}
                                             >
                                                 <i className="material-icons">
                                                     {expensesProviderValues.receipts[row.id] ? 'check_circle' : 'attach_file'}
                                                 </i>
-                                                {expensesProviderValues.receipts[row.id] ? 'Receipt Attached' : 'Attach Receipt'}
                                             </button>
                                             {expensesProviderValues.receipts[row.id] && (
                                                 <button

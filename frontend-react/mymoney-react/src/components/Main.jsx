@@ -3,6 +3,7 @@ import  '../styles/Main.scss'
 import { Filter } from "./Filter";
 import  Description  from "./description/Description";
 import { Expenses } from "./Expenses";
+import  Income  from "./Income";
 import { CategoriesPieChart } from "./CategoriesPieChart";
 import { ExpensesPieChart } from "./ExpensesPieChart";
 import {AuthContext} from '../context/AuthContext'
@@ -13,6 +14,7 @@ import { Login } from './users/Login'
 import { CustomDateModal } from './CustomDateModal'
 import { FilterContext } from "../context/FilterContext";
 import { ExpensesContext } from "../context/ExpensesContext";
+import { IncomeContext } from "../context/IncomeContext";
 import incomeIcon from '../assets/icons/income-icon.svg';
 import expensesIcon from '../assets/icons/expenses-icon.svg';
 import balanceIcon from '../assets/icons/balance-icon.svg';
@@ -26,60 +28,81 @@ function Main() {
     const filterProviderValues = useContext(FilterContext)
     const modalProviderValues = useContext(ModalContext)
     const expensesProviderValues = useContext(ExpensesContext)
+    const incomeProviderValues = useContext(IncomeContext)
 
-    // Income data - will be fetched from backend in the future
-    const [incomeData, setIncomeData] = useState([]);
-    // Example: [{ amount: 5000, date: '2026-01-15' }, { amount: 3000, date: '2026-02-10' }]
-
-    // Future: Fetch income data from backend when user logs in
-    // useEffect(() => {
-    //     if (authProviderValues.isLoggedIn) {
-    //         fetch('/api/income/', {
-    //             headers: getAuthHeaders(),
-    //         })
-    //         .then(res => res.json())
-    //         .then(data => setIncomeData(data))
-    //         .catch(console.error);
-    //     } else {
-    //         setIncomeData([]);
-    //     }
-    // }, [authProviderValues.isLoggedIn]);
-
-    // Calculate income for current month only (for stat cards)
-    const calculateMonthlyIncome = () => {
-        if (!authProviderValues.isLoggedIn || incomeData.length === 0) {
+    // Calculate income for selected interval from real data
+    const calculateIntervalIncome = () => {
+        if (!authProviderValues.isLoggedIn || !incomeProviderValues.incomes || incomeProviderValues.incomes.length === 0) {
             return 0;
         }
 
-        const today = new Date();
-        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        const startDate = new Date(filterProviderValues.startDate);
+        const endDate = new Date(filterProviderValues.endDate);
 
-        return incomeData.reduce((total, income) => {
-            const incomeDate = new Date(income.date);
-            const includeIncome = incomeDate >= firstDayOfMonth && incomeDate <= today;
+        return incomeProviderValues.incomes.reduce((total, income) => {
+            const incomeDate = new Date(income.received_date);
+            const includeIncome = incomeDate >= startDate && incomeDate <= endDate;
             return includeIncome ? total + Number(income.amount) : total;
         }, 0);
     };
 
-    // Calculate stats for current month only
-    const monthlyExpenses = expensesProviderValues.monthlyTotalPrice ? expensesProviderValues.monthlyTotalPrice() : 0;
-    const monthlyIncome = calculateMonthlyIncome();
-    const currentBalance = monthlyIncome - monthlyExpenses;
+    // Get period label based on selected interval
+    const getPeriodLabel = () => {
+        switch (filterProviderValues.selectedInterval) {
+            case 'month':
+                return filterProviderValues.currentMonth;
+            case 'year':
+                return filterProviderValues.currentYear;
+            case 'today':
+                return filterProviderValues.todayFormatted;
+            case 'all':
+                return 'All Time';
+            case 'custom':
+                return `${filterProviderValues.formatDate(filterProviderValues.startDate)} - ${filterProviderValues.formatDate(filterProviderValues.endDate)}`;
+            default:
+                return filterProviderValues.currentMonth;
+        }
+    };
+
+    // Calculate stats for selected interval
+    const intervalExpenses = expensesProviderValues.monthlyTotalPrice ? expensesProviderValues.monthlyTotalPrice() : 0;
+    const intervalIncome = calculateIntervalIncome();
+    const currentBalance = intervalIncome - intervalExpenses;
+    const periodLabel = getPeriodLabel();
 
     return  <main>
                 <div className="header-section">
-                    <h1>
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M11.8 10.9C9.53 10.31 8.8 9.7 8.8 8.75C8.8 7.66 9.81 6.9 11.5 6.9C13.28 6.9 13.94 7.75 14 9H16.21C16.14 7.28 15.09 5.7 13 5.19V3H10V5.16C8.06 5.58 6.5 6.84 6.5 8.77C6.5 11.08 8.41 12.23 11.2 12.9C13.7 13.5 14.2 14.38 14.2 15.31C14.2 16 13.71 17.1 11.5 17.1C9.44 17.1 8.63 16.18 8.52 15H6.32C6.44 17.19 8.08 18.42 10 18.83V21H13V18.85C14.95 18.48 16.5 17.35 16.5 15.3C16.5 12.46 14.07 11.49 11.8 10.9Z" fill="url(#gradientLogo)"/>
-                            <defs>
-                                <linearGradient id="gradientLogo" x1="11.5" y1="3" x2="11.5" y2="21" gradientUnits="userSpaceOnUse">
-                                    <stop stopColor="#ffd43b"/>
-                                    <stop offset="1" stopColor="#fab005"/>
-                                </linearGradient>
-                            </defs>
-                        </svg>
-                        Budget Tracker
-                    </h1>
+                    <div className="header-left">
+                        <h1>
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M11.8 10.9C9.53 10.31 8.8 9.7 8.8 8.75C8.8 7.66 9.81 6.9 11.5 6.9C13.28 6.9 13.94 7.75 14 9H16.21C16.14 7.28 15.09 5.7 13 5.19V3H10V5.16C8.06 5.58 6.5 6.84 6.5 8.77C6.5 11.08 8.41 12.23 11.2 12.9C13.7 13.5 14.2 14.38 14.2 15.31C14.2 16 13.71 17.1 11.5 17.1C9.44 17.1 8.63 16.18 8.52 15H6.32C6.44 17.19 8.08 18.42 10 18.83V21H13V18.85C14.95 18.48 16.5 17.35 16.5 15.3C16.5 12.46 14.07 11.49 11.8 10.9Z" fill="url(#gradientLogo)"/>
+                                <defs>
+                                    <linearGradient id="gradientLogo" x1="11.5" y1="3" x2="11.5" y2="21" gradientUnits="userSpaceOnUse">
+                                        <stop stopColor="#ffd43b"/>
+                                        <stop offset="1" stopColor="#fab005"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                            Budget Tracker
+                        </h1>
+                        {authProviderValues.isLoggedIn && (
+                            <div className="interval-selector">
+                                <i className="material-icons calendar-icon">event</i>
+                                <span className="interval-label">Select interval</span>
+                                <select 
+                                    className="interval-select"
+                                    value={filterProviderValues.selectedInterval}
+                                    onChange={e => filterProviderValues.setSelectedInterval(e.target.value)}
+                                >
+                                    <option value="today">Today</option>
+                                    <option value="month">Current month</option>
+                                    <option value="year">Current year</option>
+                                    <option value="all">All</option>
+                                    <option value="custom">Custom interval</option>
+                                </select>
+                            </div>
+                        )}
+                    </div>
                     <div className="user-actions">
                         <Login />
                     </div>
@@ -93,8 +116,8 @@ function Main() {
                             </div>
                             <div className="stat-content">
                                 <div className="stat-label">Total Income</div>
-                                <div className="stat-value">€ {monthlyIncome.toFixed(2)}</div>
-                                <div className="stat-period">{filterProviderValues.currentMonth}</div>
+                                <div className="stat-value">€ {intervalIncome.toFixed(2)}</div>
+                                <div className="stat-period">{periodLabel}</div>
                             </div>
                         </div>
                         
@@ -104,8 +127,8 @@ function Main() {
                             </div>
                             <div className="stat-content">
                                 <div className="stat-label">Total Expenses</div>
-                                <div className="stat-value">€ {monthlyExpenses.toFixed(2)}</div>
-                                <div className="stat-period">{filterProviderValues.currentMonth}</div>
+                                <div className="stat-value">€ {intervalExpenses.toFixed(2)}</div>
+                                <div className="stat-period">{periodLabel}</div>
                             </div>
                         </div>
                         
@@ -118,7 +141,7 @@ function Main() {
                                 <div className={`stat-value ${currentBalance >= 0 ? 'positive' : 'negative'}`}>
                                     € {currentBalance.toFixed(2)}
                                 </div>
-                                <div className="stat-period">{filterProviderValues.currentMonth}</div>
+                                <div className="stat-period">{periodLabel}</div>
                             </div>
                         </div>
                     </div>
@@ -127,7 +150,10 @@ function Main() {
                 <FilterContext.Provider value={filterProviderValues}>
                     <Filter />
                     <ModalContext.Provider value={modalProviderValues}>
-                        <Expenses />
+                        <div className="content-container">
+                            <Income />
+                            <Expenses />
+                        </div>
                     </ModalContext.Provider>                                    
                 </FilterContext.Provider>
                 

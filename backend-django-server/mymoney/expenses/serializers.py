@@ -18,3 +18,4 @@ class MyExpenseSerializer(serializers.ModelSerializer):
     class Meta:
         model = MyExpense
         fields = ['id', 'name', 'description', 'price', 'quantity', 'payment_date', 'bill', 'category']
+

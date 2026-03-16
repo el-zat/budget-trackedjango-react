@@ -31,3 +31,4 @@ admin.site.register(Category)
 
 # admin.site.unregister(User)
 # admin.site.register(User, CustomUserAdmin)
+
