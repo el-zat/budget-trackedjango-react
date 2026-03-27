@@ -8,6 +8,7 @@ import {IncomeContext} from './context/IncomeContext'
 import {AuthContext} from './context/AuthContext'
 import {DescriptionContext} from './context/DescriptionContext'
 import { ModalContext } from './context/ModalContext';
+import RecurringExpenseModal from './components/RecurringExpenseModal';
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
   const [price, setPrice] = useState('');
   const [name, setName] = useState('');
   const [miscExpense, setMiscExpense] = useState('');
+  const [isExpenseRecurring, setIsExpenseRecurring] = useState(false);
   const [rows, setRows] = useState([]);
   const [newExpense, setNewExpense] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -47,6 +49,7 @@ function App() {
 
   //Income
   const [incomes, setIncomes] = useState([]);
+  const [filteredIncomes, setFilteredIncomes] = useState([]);
   const [incomeCategories, setIncomeCategories] = useState([]);
   const [newIncome, setNewIncome] = useState({
     name: '',
@@ -54,7 +57,8 @@ function App() {
     received_date: getToday(),
     category: '',
     source: '',
-    frequency: 'once'
+    frequency: 'once',
+    is_recurring: false
   });
   
   //Income Editing
@@ -65,6 +69,7 @@ function App() {
   const [editIncomeCategory, setEditIncomeCategory] = useState('');
   const [editIncomeSource, setEditIncomeSource] = useState('');
   const [editIncomeFrequency, setEditIncomeFrequency] = useState('');
+  const [editIncomeRecurring, setEditIncomeRecurring] = useState(false);
   
   //Authorization
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -87,6 +92,7 @@ function App() {
   const [checkedCategories, setCheckedCategories] = useState([]);
   const [checkedExpenses, setCheckedExpenses] = useState([]);
   const [selectedInterval, setSelectedInterval] = useState('month')
+  const [customLabel, setCustomLabel] = useState('');
   const [searchWord, setSearchWord] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
@@ -100,6 +106,8 @@ function App() {
   const [isModalLoginOpen, setIsModalLoginOpen] = useState(false);
   const [isModalRegistrationOpen, setIsModalRegistrationOpen] = useState(false);
   const [isModalCustomDateOpen, setIsModalCustomDateOpen] = useState(false);
+  const [isModalRecurringOpen, setIsModalRecurringOpen] = useState(false);
+  const [selectedExpenseForRecurring, setSelectedExpenseForRecurring] = useState(null);
 
   // Get token
   function getAuthHeaders() {
@@ -200,7 +208,8 @@ function App() {
           received_date: getToday(),
           category: '',
           source: '',
-          frequency: 'once'
+          frequency: 'once',
+          is_recurring: false
         });
       } else {
         console.error('Failed to add income:', responseData);
@@ -246,6 +255,8 @@ function App() {
         bodyData = { source: editIncomeSource };
       } else if (field === 'frequency') {
         bodyData = { frequency: editIncomeFrequency };
+      } else if (field === 'is_recurring') {
+        bodyData = { is_recurring: editIncomeRecurring };
       }
 
       try {
@@ -270,6 +281,7 @@ function App() {
           setEditIncomeCategory('');
           setEditIncomeSource('');
           setEditIncomeFrequency('');
+          setEditIncomeRecurring(false);
         }
       } catch (error) {
         console.error('Error updating income:', error);
@@ -454,9 +466,11 @@ function App() {
         case 'custom':
           return dateFrom;
         case 'month':
-          return getFirstDayOfMonth();
+          // If dateFrom is set (from calendar), use it
+          return dateFrom || getFirstDayOfMonth();
         case 'year':
-          return getFirstDayOfYear();
+          // If dateFrom is set (from calendar), use it
+          return dateFrom || getFirstDayOfYear();
         case 'all':
           return "";
         default:
@@ -471,9 +485,11 @@ function App() {
           case 'custom':
               return dateTo; 
           case 'month':
-              return getToday();
+              // If dateTo is set (from calendar), use it
+              return dateTo || getToday();
           case 'year':
-              return getToday();
+              // If dateTo is set (from calendar), use it
+              return dateTo || getToday();
           case 'all':
               return "";
           default:
@@ -664,6 +680,7 @@ function App() {
         name: expenseName,
         price: getCleanPrice(price),
         payment_date: paymentDate ? paymentDate : getToday(),
+        is_recurring: isExpenseRecurring
     };
 
     if (isLoggedIn) {
@@ -706,7 +723,8 @@ function App() {
     setSelectedExpense('all');
     setName('');
     setPrice('');
-    setPaymentDate(getToday());  
+    setPaymentDate(getToday());
+    setIsExpenseRecurring(false);
   }
 
   useEffect(() => {
@@ -747,6 +765,106 @@ function App() {
 
     // Update the table from django server
     await fetchExpenses();
+  };
+
+  const copyExpense = async (id) => {
+    if (!id) {
+      alert('Error: id undefined!');
+      return;
+    }
+    
+    // Find the expense to copy
+    const expenseToCopy = rows.find(row => row.id === id);
+    if (!expenseToCopy) {
+      alert('Expense not found!');
+      return;
+    }
+
+    // Create a new expense with the same data but current date
+    const newExpenseData = {
+      user_email: loginEmail,
+      category: expenseToCopy.category,
+      name: expenseToCopy.name,
+      price: expenseToCopy.price,
+      payment_date: getToday(),
+      is_recurring: false // Don't copy recurring status
+    };
+
+    try {
+      const response = await fetch('/api/myexpenses/', {
+        method: 'POST',
+        credentials: 'include',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(newExpenseData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert('Error copying expense: ' + JSON.stringify(data));
+        return;
+      }
+
+      // Refresh expenses list
+      await fetchExpenses();
+    } catch (error) {
+      alert('Error: ' + error.message);
+    }
+  };
+
+  const createRecurringExpense = async (expenseId, frequency, startDate) => {
+    const expense = rows.find(row => row.id === expenseId);
+    if (!expense) {
+      alert('Expense not found!');
+      return;
+    }
+
+    try {
+      const bodyData = {
+        name: expense.name,
+        description: expense.description || '',
+        price: expense.price,
+        quantity: expense.quantity,
+        category: expense.category,
+        frequency: frequency,
+        start_date: startDate,
+        next_occurrence: startDate,
+        is_active: true
+      };
+
+      const response = await fetch('/api/recurringexpenses/', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        credentials: 'include',
+        body: JSON.stringify(bodyData)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        alert(`Error creating recurring expense! Status: ${response.status}, Message: ${errorText}`);
+        return;
+      }
+
+      const result = await response.json();
+      console.log('Recurring expense created:', result);
+      
+      // Update the original expense to mark it as recurring
+      await fetch(`/api/myexpenses/${expenseId}/`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        credentials: 'include',
+        body: JSON.stringify({ is_recurring: true })
+      });
+
+      // Update local state
+      setRows(rows.map(row =>
+        row.id === expenseId ? { ...row, is_recurring: true } : row
+      ));
+
+      alert('Recurring expense created successfully!');
+    } catch (error) {
+      alert('Error: ' + error.message);
+    }
   };
 
   //Update editDate after paymentDate was updated
@@ -884,8 +1002,16 @@ function App() {
                 rowDate.getDate() === today.getDate()
                 );
             case "year":
+                // If startDate and endDate are set (from calendar), use them
+                if (startDate && endDate) {
+                    return new Date(rowDate) >= new Date(startDate) && new Date(rowDate) <= new Date(endDate);
+                }
                 return rowDate >= firstDayOfYear && rowDate <= lastDayOfYear;
             case "month":
+                // If startDate and endDate are set (from calendar), use them
+                if (startDate && endDate) {
+                    return new Date(rowDate) >= new Date(startDate) && new Date(rowDate) <= new Date(endDate);
+                }
                 return rowDate >= firstDayOfMonth && rowDate <= lastDayOfMonth;
             case "custom":
                 if (!startDate || !endDate) return true;
@@ -910,6 +1036,58 @@ function App() {
           handleDateFilter(selectedInterval)
       }
     }, [selectedInterval, allRows, startDate, endDate]);
+
+  // Filter incomes by date
+  useEffect(() => {
+      if (incomes.length === 0) {
+          setFilteredIncomes([]);
+          return;
+      }
+
+      const filtered = incomes.filter(income => {
+          // Always show recurring incomes
+          if (income.is_recurring || (income.frequency && income.frequency !== 'once')) {
+              return true;
+          }
+
+          const incomeDate = new Date(income.received_date);
+          const today = new Date();
+          const firstDayOfYear = new Date(today.getFullYear(), 0, 1);
+          const lastDayOfYear = new Date(today.getFullYear(), 11, 31);
+          const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+          const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+          switch (selectedInterval) {
+              case "today":
+                  return (
+                      incomeDate.getFullYear() === today.getFullYear() &&
+                      incomeDate.getMonth() === today.getMonth() &&
+                      incomeDate.getDate() === today.getDate()
+                  );
+              case "year":
+                  // If startDate and endDate are set (from calendar), use them
+                  if (startDate && endDate) {
+                      return new Date(incomeDate) >= new Date(startDate) && new Date(incomeDate) <= new Date(endDate);
+                  }
+                  return incomeDate >= firstDayOfYear && incomeDate <= lastDayOfYear;
+              case "month":
+                  // If startDate and endDate are set (from calendar), use them
+                  if (startDate && endDate) {
+                      return new Date(incomeDate) >= new Date(startDate) && new Date(incomeDate) <= new Date(endDate);
+                  }
+                  return incomeDate >= firstDayOfMonth && incomeDate <= lastDayOfMonth;
+              case "custom":
+                  if (!startDate || !endDate) return true;
+                  return new Date(incomeDate) >= new Date(startDate) && new Date(incomeDate) <= new Date(endDate);
+              case "all":
+                  return true;
+              default:
+                  return incomeDate >= firstDayOfMonth && incomeDate <= today;
+          }
+      });
+
+      setFilteredIncomes(filtered);
+  }, [selectedInterval, incomes, startDate, endDate]);
 
   
   //filteredRows must depend on filteredRowsByDate:
@@ -1137,6 +1315,8 @@ function App() {
       todayFormatted,
       currentMonth,
       currentYear,
+      customLabel,
+      setCustomLabel,
       filteredRowsByDate,
       filteredRows,
       setFilteredRows,
@@ -1160,13 +1340,14 @@ function App() {
       getToday: getToday,
       getFirstDayOfMonth: getFirstDayOfMonth,
       setSelectedInterval: setSelectedInterval,
+      setCustomLabel: setCustomLabel,
       setDateFrom: setDateFrom,
       setDateTo: setDateTo,
   }), [
       selectedInterval, dateFrom, dateTo, startDate, endDate,
       categories, expenses, checkedCategories, checkedExpenses,
       isFilterOpen, searchWord, minPrice, maxPrice, priceError,
-      today, todayFormatted, currentMonth, currentYear, filteredRowsByDate, filteredRows,
+      today, todayFormatted, currentMonth, currentYear, customLabel, filteredRowsByDate, filteredRows,
       closeFilter, resetAllFilters, applyAllFilters, filterBySearchWord,
       handleCategoryCheckbox, handleExpenseCheckbox, handleAllCategories, handleAllExpenses,
       handleDateFilter, formatDate, getToday, getFirstDayOfMonth
@@ -1189,6 +1370,8 @@ function App() {
       descriptionMap: descriptionMap,     
       currentPage, 
       categoriesMap,
+      isExpenseRecurring,
+      setIsExpenseRecurring,
       setCurrentPage,
       totalPrice: totalPrice,
       monthlyTotalPrice: monthlyTotalPrice,
@@ -1198,6 +1381,8 @@ function App() {
       getFirstDayOfYear: getFirstDayOfYear,
       applyChanges: applyChanges,
       deleteExpense: deleteExpense,
+      copyExpense: copyExpense,
+      createRecurringExpense: createRecurringExpense,
       handleSave: handleSave,
       setSelectedCategory: setSelectedCategory,
       setSelectedExpense: setSelectedExpense,
@@ -1251,14 +1436,19 @@ function App() {
       isModalRegistrationOpen,     
       isModalSortOpen,
       isModalCustomDateOpen,
+      isModalRecurringOpen,
+      selectedExpenseForRecurring,
       setIsModalSortOpen,
       setIsModalLoginOpen,
       setIsModalRegistrationOpen,
       setIsModalCustomDateOpen,
+      setIsModalRecurringOpen,
+      setSelectedExpenseForRecurring,
     };
 
   const incomeProviderValues = {
-      incomes,
+      incomes: filteredIncomes,
+      allIncomes: incomes,
       incomeCategories,
       newIncome,
       setNewIncome,
@@ -1278,6 +1468,8 @@ function App() {
       setEditIncomeSource,
       editIncomeFrequency,
       setEditIncomeFrequency,
+      editIncomeRecurring,
+      setEditIncomeRecurring,
       applyIncomeChanges,
     };
 
@@ -1291,6 +1483,7 @@ function App() {
               <IncomeContext.Provider value={incomeProviderValues}>
                 <DescriptionContext.Provider value={descriptionProviderValues}>
                   <Main />
+                  <RecurringExpenseModal />
                 </DescriptionContext.Provider>
               </IncomeContext.Provider>
             </ExpensesContext.Provider>

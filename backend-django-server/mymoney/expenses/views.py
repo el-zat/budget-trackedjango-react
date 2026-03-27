@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
-from .serializers import CategorySerializer, ExpenseSerializer, MyExpenseSerializer
-from .models import Category, Expense, MyExpense
+from .serializers import CategorySerializer, ExpenseSerializer, MyExpenseSerializer, RecurringExpenseSerializer
+from .models import Category, Expense, MyExpense, RecurringExpense
 from django.views.generic import TemplateView
 from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
@@ -25,6 +25,18 @@ class MyExpenseViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return MyExpense.objects.filter(user=user)
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class RecurringExpenseViewSet(viewsets.ModelViewSet):
+    serializer_class = RecurringExpenseSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return RecurringExpense.objects.filter(user=user)
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

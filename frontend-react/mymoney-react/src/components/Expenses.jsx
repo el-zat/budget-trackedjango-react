@@ -66,15 +66,24 @@ const Expenses = () => {
     };
 
 
-    //Pagination   
+    //Pagination
+    // Separate recurring and regular expenses BEFORE pagination
+    const allRecurringRows = filterProviderValues.filteredRows.filter(row => row.is_recurring);
+    const allRegularRows = filterProviderValues.filteredRows.filter(row => !row.is_recurring);
+    
     const rowsPerPage = 5;  
-    const totalRows = filterProviderValues.filteredRows.length;
+    const totalRows = allRegularRows.length; // Count only regular rows for pagination
     const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
 
-    const paginatedRows = filterProviderValues.filteredRows.slice(
+    // Paginate only regular rows
+    const paginatedRegularRows = allRegularRows.slice(
         (expensesProviderValues.currentPage - 1) * rowsPerPage,
         expensesProviderValues.currentPage * rowsPerPage
     );
+
+    // Show recurring rows only on first page
+    const recurringRows = expensesProviderValues.currentPage === 1 ? allRecurringRows : [];
+    const regularRows = paginatedRegularRows;
 
 
     //Reset sort on selecting another interval filter
@@ -103,14 +112,6 @@ const Expenses = () => {
     useEffect(() => {
         setCurrentPage(1);
     }, [filteredRows, setCurrentPage]);
-
-
-    //Auto-open custom date modal when custom interval is selected
-    useEffect(() => {
-        if (filterProviderValues.selectedInterval === 'custom') {
-            modalProviderValues.setIsModalCustomDateOpen(true);
-        }
-    }, [filterProviderValues.selectedInterval]);
 
 
     //Close input editing on mouse click
@@ -155,9 +156,9 @@ const Expenses = () => {
                         <i className="material-icons calendar-icon">event</i>
                         {
                         filterProviderValues.selectedInterval === "month" ? (
-                            <span>{filterProviderValues.currentMonth}</span>
+                            <span>{filterProviderValues.customLabel || filterProviderValues.currentMonth}</span>
                         ) : filterProviderValues.selectedInterval === "year" ? (
-                            <span>{filterProviderValues.currentYear}</span>
+                            <span>{filterProviderValues.customLabel || filterProviderValues.currentYear}</span>
                         ) : filterProviderValues.selectedInterval === "today" ? (
                             <span>{filterProviderValues.today}</span>
                         ) : filterProviderValues.selectedInterval === "all" ? (
@@ -166,7 +167,7 @@ const Expenses = () => {
                             <div className="show-custom-interval">
                                 <div className="show-custom">
                                     {filterProviderValues.formatDate(filterProviderValues.startDate)}
-                                </div>/
+                                </div>-
                                 <div className="show-custom">
                                     {filterProviderValues.formatDate(filterProviderValues.endDate)}
                                 </div>
@@ -219,9 +220,21 @@ const Expenses = () => {
                     {
                         authProviderValues.isLoggedIn
                             ? (
-                                paginatedRows.length > 0 
+                                (recurringRows.length > 0 || regularRows.length > 0)
                                 ? (
-                                    paginatedRows.map((row, idx) => (
+                                    <>
+                                        {/* Recurring Expenses Section */}
+                                        {recurringRows.length > 0 && (
+                                            <>
+                                                <tr className="section-header">
+                                                    <td colSpan={5}>
+                                                        <div className="section-title">
+                                                            <i className="material-icons">repeat</i>
+                                                            Recurring Expenses
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {recurringRows.map((row, idx) => (
                                 <tr key={row.id || idx}>
                                     <td>
                                         {
@@ -255,7 +268,12 @@ const Expenses = () => {
                                                 }}
                                                 data-tooltip="Edit expense"
                                             > 
-                                                {row.name } 
+                                                {row.name}
+                                                {row.is_recurring && (
+                                                    <span className="recurring-badge">
+                                                        <i className="material-icons">repeat</i>
+                                                    </span>
+                                                )}
                                             </div>                                                                                                                  
                                             )}
                                     </td>                
@@ -307,7 +325,8 @@ const Expenses = () => {
                                             <div className="tooltip-icon-container" 
                                                 onClick={() => {
                                                     expensesProviderValues.setEditingField({id: row.id, field: 'price'});
-                                                    expensesProviderValues.setEditPrice(row.price);
+                                                    const priceValue = String(row.price).replace(',', '.');
+                                                    expensesProviderValues.setEditPrice(priceValue);
                                                 }}
                                                 data-tooltip="Edit price"
                                             >
@@ -325,6 +344,26 @@ const Expenses = () => {
                                                 data-tooltip="Add description"
                                                 >
                                                 <i className="material-icons">edit</i>
+                                            </button>
+                                            <button 
+                                                className={`recurring-btn ${row.is_recurring ? 'active' : ''}`}
+                                                onClick={() => {
+                                                    if (!row.is_recurring) {
+                                                        modalProviderValues.setSelectedExpenseForRecurring(row.id);
+                                                        modalProviderValues.setIsModalRecurringOpen(true);
+                                                    }
+                                                }}
+                                                data-tooltip={row.is_recurring ? 'Already recurring' : 'Make recurring'}
+                                                disabled={row.is_recurring}
+                                            >
+                                                <i className="material-icons">repeat</i>
+                                            </button>
+                                            <button 
+                                                className="copy-btn"
+                                                onClick={() => expensesProviderValues.copyExpense(row.id)}
+                                                data-tooltip="Copy expense"
+                                            >
+                                                <i className="material-icons">content_copy</i>
                                             </button>
                                             <button className="delete-btn"
                                             onClick={() => expensesProviderValues.deleteExpense(row.id)}
@@ -372,8 +411,203 @@ const Expenses = () => {
                                         </div>
                                     </td>                                
                                 </tr>
-                            ) 
-                                ))
+                                ))}
+                                            </>
+                                        )}
+
+                                        {/* Regular Expenses Section */}
+                                        {regularRows.length > 0 && (
+                                            <>
+                                                <tr className="section-header">
+                                                    <td colSpan={5}>
+                                                        <div className="section-title">
+                                                            <i className="material-icons">receipt</i>
+                                                            Regular Expenses
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {regularRows.map((row, idx) => (
+                                <tr key={row.id || idx}>
+                                    <td>
+                                        {
+                                            expensesProviderValues.categories.find(
+                                                cat => String(cat.id) === String(row.category))?.name 
+                                            || 'Unknown'
+                                        }                                   
+                                    </td>
+
+                                    <td>
+                                        {/* Inputs "name", "date" and "price" are editable     */}
+                                        {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'name' ? (                                                                                            
+                                            <input id="edit-name"
+                                                type="text"
+                                                name="name"
+                                                placeholder="Fill out expense name"
+                                                ref={inputRef}
+                                                value={expensesProviderValues.editName || ""}
+                                                onChange={e => expensesProviderValues.setEditName(e.target.value)}
+                                                onKeyDown={e => {
+                                                    if (e.key === 'Enter') {
+                                                        expensesProviderValues.applyChanges(row.id, 'name')
+                                                    }
+                                                }}
+                                            />
+                                        ) : (                                        
+                                            <div className="tooltip-icon-container" 
+                                                onClick={() => {
+                                                    expensesProviderValues.setEditingField({id: row.id, field: 'name'});
+                                                    expensesProviderValues.setEditName(row.name);
+                                                }}
+                                                data-tooltip="Edit expense"
+                                            > 
+                                                {row.name}
+                                                {row.is_recurring && (
+                                                    <span className="recurring-badge">
+                                                        <i className="material-icons">repeat</i>
+                                                    </span>
+                                                )}
+                                            </div>                                                                                                                  
+                                            )}
+                                    </td>                
+                                    
+                                    <td>
+                                    {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'date' ? (                                                              
+                                        <input id="edit-date"
+                                            type="date"
+                                            ref={inputRef}
+                                            value={expensesProviderValues.editDate || ""}
+                                            onChange={e => expensesProviderValues.setEditDate(e.target.value)}
+                                            onKeyDown={e => {
+                                                if (e.key === 'Enter') {
+                                                    expensesProviderValues.applyChanges(row.id, 'date')
+                                                }
+                                            }}
+                                        />
+                                        ) : (
+                                        <div className="tooltip-icon-container" 
+                                            onClick={() => {
+                                                expensesProviderValues.setEditingField({id: row.id, field: 'date'});
+                                                expensesProviderValues.setEditDate(row.date);
+                                            }}
+                                            data-tooltip="Edit date"
+                                        > 
+                                            {row.payment_date} 
+                                        </div>
+                                        )}
+                                    </td>
+                                    <td>
+                                    {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'price' ? (                           
+                                        <CurrencyInput id="edit-price"
+                                            prefix="€ "
+                                            decimalsLimit={2}
+                                            decimalSeparator=","
+                                            groupSeparator="."
+                                            placeholder="0,00"
+                                            ref={inputRef}
+                                            value={expensesProviderValues.editPrice}
+                                            onBlur={() => expensesProviderValues.setEditingField({ id: null, field: null })}
+                                            onValueChange={value => expensesProviderValues.setEditPrice(value || '')}
+                                            onKeyDown={e => {
+                                                if (e.key === 'Enter') {
+                                                    expensesProviderValues.applyChanges(row.id, 'price')
+                                                }
+                                            }}
+                                        />
+                                        ) : (
+                                            <div className="tooltip-icon-container" 
+                                                onClick={() => {
+                                                    expensesProviderValues.setEditingField({id: row.id, field: 'price'});
+                                                    const priceValue = String(row.price).replace(',', '.');
+                                                    expensesProviderValues.setEditPrice(priceValue);
+                                                }}
+                                                data-tooltip="Edit price"
+                                            >
+                                                € {row.price} 
+                                            </div>
+                                        )}
+                                    </td>
+                                    <td>
+                                        <div className="action-buttons">
+                                            <button className="edit-btn"
+                                                onClick={() => {
+                                                    expensesProviderValues.setIsDescriptionShown(true);
+                                                    expensesProviderValues.setCurrentDescriptionId(row.id);
+                                                }}
+                                                data-tooltip="Add description"
+                                                >
+                                                <i className="material-icons">edit</i>
+                                            </button>
+                                            <button 
+                                                className={`recurring-btn ${row.is_recurring ? 'active' : ''}`}
+                                                onClick={() => {
+                                                    if (!row.is_recurring) {
+                                                        modalProviderValues.setSelectedExpenseForRecurring(row.id);
+                                                        modalProviderValues.setIsModalRecurringOpen(true);
+                                                    }
+                                                }}
+                                                data-tooltip={row.is_recurring ? 'Already recurring' : 'Make recurring'}
+                                                disabled={row.is_recurring}
+                                            >
+                                                <i className="material-icons">repeat</i>
+                                            </button>
+                                            <button 
+                                                className="copy-btn"
+                                                onClick={() => expensesProviderValues.copyExpense(row.id)}
+                                                data-tooltip="Copy expense"
+                                            >
+                                                <i className="material-icons">content_copy</i>
+                                            </button>
+                                            <button className="delete-btn"
+                                            onClick={() => expensesProviderValues.deleteExpense(row.id)}
+                                            data-tooltip="Delete expense"
+                                        >
+                                            <i className="material-icons">delete</i>
+                                        </button>
+                                        <div className="receipt-actions">
+                                            <input
+                                                type="file"
+                                                id={`receipt-input-${row.id}`}
+                                                accept="image/*,.pdf"
+                                                style={{ display: 'none' }}
+                                                onChange={(e) => {
+                                                    const file = e.target.files[0];
+                                                    if (file) {
+                                                        expensesProviderValues.attachReceipt(row.id, file);
+                                                    }
+                                                }}
+                                            />
+                                            <button 
+                                                className={`attach-btn ${expensesProviderValues.receipts[row.id] ? 'has-receipt' : ''}`}
+                                                onClick={() => {
+                                                    document.getElementById(`receipt-input-${row.id}`).click();
+                                                }}
+                                                data-tooltip={expensesProviderValues.receipts[row.id] ? 'Receipt attached' : 'Attach receipt'}
+                                            >
+                                                <i className="material-icons">
+                                                    {expensesProviderValues.receipts[row.id] ? 'check_circle' : 'attach_file'}
+                                                </i>
+                                            </button>
+                                            {expensesProviderValues.receipts[row.id] && (
+                                                <button
+                                                    className="remove-receipt-btn"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        expensesProviderValues.removeReceipt(row.id);
+                                                    }}
+                                                    title="Remove receipt"
+                                                >
+                                                    <i className="material-icons">close</i>
+                                                </button>
+                                            )}
+                                        </div>
+                                        </div>
+                                    </td>                                
+                                </tr>
+                                ))}
+                                            </>
+                                        )}
+                                    </>
+                                )
                                 :  (
                                 <tr>
                                     <td colSpan={5} style={{ textAlign: "center", color: "#888" }}>
@@ -455,10 +689,20 @@ const Expenses = () => {
                                 />
                             </td>
                             <td>
-                                <button className="add-btn" onClick={expensesProviderValues.handleSave}>
-                                    <i className="material-icons">add</i>
-                                    Add Expense
-                                </button>
+                                <div className="expense-actions">
+                                    <label className="recurring-checkbox">
+                                        <input
+                                            type="checkbox"
+                                            checked={expensesProviderValues.isExpenseRecurring || false}
+                                            onChange={(e) => expensesProviderValues.setIsExpenseRecurring(e.target.checked)}
+                                        />
+                                        <span>Recurring</span>
+                                    </label>
+                                    <button className="add-btn" onClick={expensesProviderValues.handleSave}>
+                                        <i className="material-icons">add</i>
+                                        Add
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     )}

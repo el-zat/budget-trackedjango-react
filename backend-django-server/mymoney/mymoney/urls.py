@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse
 from rest_framework.routers import DefaultRouter
-from expenses.views import CategoryViewSet, ExpenseViewSet, MyExpenseViewSet
+from expenses.views import CategoryViewSet, ExpenseViewSet, MyExpenseViewSet, RecurringExpenseViewSet
 from incomes.views import IncomeCategoryViewSet, IncomeViewSet
 from users.views import (UserViewSet, EmailVerificationViewSet, UserLoginAPIView,
                          UserProfileViewSet, UserRegistrationView, UserLogoutAPIView)
@@ -14,6 +14,7 @@ router = DefaultRouter()
 router.register(r'categories', CategoryViewSet)
 router.register(r'expenses', ExpenseViewSet)
 router.register(r'myexpenses', MyExpenseViewSet, basename='myexpense')
+router.register(r'recurringexpenses', RecurringExpenseViewSet, basename='recurringexpense')
 router.register(r'incomecategories', IncomeCategoryViewSet)
 router.register(r'incomes', IncomeViewSet, basename='income')
 router.register(r'users', UserViewSet)

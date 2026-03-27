@@ -94,6 +94,36 @@
       &:hover {
         background: rgba(88, 101, 242, 0.05);
       }
+      
+      &.section-header {
+        background: rgba(88, 101, 242, 0.1);
+        
+        &:hover {
+          background: rgba(88, 101, 242, 0.15);
+        }
+        
+        td {
+          padding: 16px 20px;
+          border-bottom: 2px solid rgba(88, 101, 242, 0.3);
+          border-top: 2px solid rgba(88, 101, 242, 0.3);
+        }
+      }
+    }
+    
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      
+      i {
+        font-size: 18px;
+        color: rgba(88, 101, 242, 0.8);
+      }
     }
     
     td {
@@ -167,6 +197,37 @@
     visibility: visible;
     opacity: 1;
   }
+  
+  .recurring-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 6px;
+    background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    margin-left: 12px;
+    
+    i {
+      font-size: 14px !important;
+      color: #ffd700;
+      margin: 0;
+    }
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      border-color: rgba(255, 215, 0, 0.5);
+    }
+  }
+  
+  .expense-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
 }
 
 // Add new expense row at bottom of table
@@ -184,6 +245,7 @@
     input, select {
       @extend %input_select;
       background: rgba(255, 255, 255, 0.05);
+      color: rgba(255, 255, 255, 0.9);
       border: 1px solid $borderColor;
       width: 100%;
       
@@ -237,6 +299,46 @@
       font-size: 18px;
     }
   }
+  
+  .expense-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  
+  .recurring-checkbox {
+    display: flex;
+    align-items: center;
+    align-self: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 0 6px;
+    height: 36px;
+    background: rgba(88, 101, 242, 0.1);
+    border-radius: 5px;
+    border: 1px solid rgba(88, 101, 242, 0.3);
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    
+    &:hover {
+      background: rgba(88, 101, 242, 0.15);
+      border-color: rgba(88, 101, 242, 0.4);
+    }
+    
+    input[type="checkbox"] {
+      width: 13px;
+      height: 13px;
+      cursor: pointer;
+      accent-color: #5865f2;
+    }
+    
+    span {
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.9);
+    }
+  }
 }
 
 select,
@@ -287,7 +389,9 @@ select {
 
 .edit-btn,
 .delete-btn,
-.attach-btn {
+.attach-btn,
+.recurring-btn,
+.copy-btn {
   @extend %btn;
   padding: 8px 12px;
   height: 36px;
@@ -310,6 +414,37 @@ select {
   &:hover {
    background: rgba(77, 171, 247, 0.25);
    border-color: rgba(77, 171, 247, 0.4);
+  }
+}
+
+.recurring-btn {
+  background: rgba(255, 165, 0, 0.15);
+  color: #ffa500;
+  border: 1px solid rgba(255, 165, 0, 0.3);
+  
+  &:hover:not(:disabled) {
+    background: rgba(255, 165, 0, 0.25);
+    border-color: rgba(255, 165, 0, 0.4);
+  }
+
+  &.active,
+  &:disabled {
+    background: rgba(76, 175, 80, 0.15);
+    color: #69db7c;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+}
+
+.copy-btn {
+  background: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  
+  &:hover {
+    background: rgba(139, 92, 246, 0.25);
+    border-color: rgba(139, 92, 246, 0.4);
   }
 }
 
@@ -632,7 +767,9 @@ select {
 // Button specific tooltip adjustments
 .edit-btn[data-tooltip],
 .delete-btn[data-tooltip],
-.attach-btn[data-tooltip] {
+.attach-btn[data-tooltip],
+.copy-btn[data-tooltip],
+.recurring-btn[data-tooltip] {
   &::before {
     font-size: 11px;
     padding: 6px 10px;
@@ -645,6 +782,22 @@ select {
 
 .edit-btn[data-tooltip]::after {
   border-top-color: rgba(77, 171, 247, 0.95);
+}
+
+.recurring-btn[data-tooltip]::before {
+  background: linear-gradient(135deg, rgba(255, 165, 0, 0.95) 0%, rgba(255, 140, 0, 0.95) 100%);
+}
+
+.recurring-btn[data-tooltip]::after {
+  border-top-color: rgba(255, 165, 0, 0.95);
+}
+
+.copy-btn[data-tooltip]::before {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.95) 0%, rgba(124, 58, 237, 0.95) 100%);
+}
+
+.copy-btn[data-tooltip]::after {
+  border-top-color: rgba(139, 92, 246, 0.95);
 }
 
 .delete-btn[data-tooltip]::before {

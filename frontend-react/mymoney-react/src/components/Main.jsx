@@ -15,6 +15,7 @@ import { CustomDateModal } from './CustomDateModal'
 import { FilterContext } from "../context/FilterContext";
 import { ExpensesContext } from "../context/ExpensesContext";
 import { IncomeContext } from "../context/IncomeContext";
+import IntervalSelector from './IntervalSelector';
 import incomeIcon from '../assets/icons/income-icon.svg';
 import expensesIcon from '../assets/icons/expenses-icon.svg';
 import balanceIcon from '../assets/icons/balance-icon.svg';
@@ -39,6 +40,8 @@ function Main() {
         const startDate = new Date(filterProviderValues.startDate);
         const endDate = new Date(filterProviderValues.endDate);
 
+        // Sum only incomes that fall within the selected date range
+        // Recurring incomes are shown in the list but not counted unless their date is in range
         return incomeProviderValues.incomes.reduce((total, income) => {
             const incomeDate = new Date(income.received_date);
             const includeIncome = incomeDate >= startDate && incomeDate <= endDate;
@@ -50,9 +53,9 @@ function Main() {
     const getPeriodLabel = () => {
         switch (filterProviderValues.selectedInterval) {
             case 'month':
-                return filterProviderValues.currentMonth;
+                return filterProviderValues.customLabel || filterProviderValues.currentMonth;
             case 'year':
-                return filterProviderValues.currentYear;
+                return filterProviderValues.customLabel || filterProviderValues.currentYear;
             case 'today':
                 return filterProviderValues.todayFormatted;
             case 'all':
@@ -86,21 +89,16 @@ function Main() {
                             Budget Tracker
                         </h1>
                         {authProviderValues.isLoggedIn && (
-                            <div className="interval-selector">
-                                <i className="material-icons calendar-icon">event</i>
-                                <span className="interval-label">Select interval</span>
-                                <select 
-                                    className="interval-select"
-                                    value={filterProviderValues.selectedInterval}
-                                    onChange={e => filterProviderValues.setSelectedInterval(e.target.value)}
-                                >
-                                    <option value="today">Today</option>
-                                    <option value="month">Current month</option>
-                                    <option value="year">Current year</option>
-                                    <option value="all">All</option>
-                                    <option value="custom">Custom interval</option>
-                                </select>
-                            </div>
+                            <IntervalSelector
+                                selectedInterval={filterProviderValues.selectedInterval}
+                                setSelectedInterval={filterProviderValues.setSelectedInterval}
+                                currentMonth={filterProviderValues.currentMonth}
+                                currentYear={filterProviderValues.currentYear}
+                                customLabel={filterProviderValues.customLabel}
+                                setCustomLabel={filterProviderValues.setCustomLabel}
+                                setDateFrom={filterProviderValues.setDateFrom}
+                                setDateTo={filterProviderValues.setDateTo}
+                            />
                         )}
                     </div>
                     <div className="user-actions">
