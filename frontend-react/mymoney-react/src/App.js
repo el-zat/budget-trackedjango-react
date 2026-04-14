@@ -23,6 +23,7 @@ function App() {
   const [name, setName] = useState('');
   const [miscExpense, setMiscExpense] = useState('');
   const [isExpenseRecurring, setIsExpenseRecurring] = useState(false);
+  const [expenseFrequency, setExpenseFrequency] = useState('once');
   const [rows, setRows] = useState([]);
   const [newExpense, setNewExpense] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -46,6 +47,7 @@ function App() {
   const [editPrice, setEditPrice] = useState(price);
   const [editDate, setEditDate] = useState(paymentDate);
   const [editName, setEditName] = useState(name);
+  const [editFrequency, setEditFrequency] = useState('once');
 
   //Income
   const [incomes, setIncomes] = useState([]);
@@ -141,21 +143,40 @@ function App() {
     }
   }, [isLoggedIn]);
 
-  useEffect(() => {
-    if (isLoggedIn && rows.length > 0) {
-      setFilteredRows(rows);
-    }
-  }, [isLoggedIn, rows]);
-  
-  
   //Fetch expenses from django server
   const fetchExpenses = async () => {
-    const response = await fetch('/api/myexpenses/', {
-      headers: getAuthHeaders(),
-      credentials: 'include'
-    });
-    const data = await response.json();
-    setRows(data);
+    try {
+      // Fetch regular expenses
+      const myExpensesResponse = await fetch('/api/myexpenses/', {
+        headers: getAuthHeaders(),
+        credentials: 'include'
+      });
+      const myExpensesData = await myExpensesResponse.json();
+      const myExpenses = Array.isArray(myExpensesData) ? myExpensesData : [];
+
+      // Fetch recurring expenses
+      const recurringExpensesResponse = await fetch('/api/recurringexpenses/', {
+        headers: getAuthHeaders(),
+        credentials: 'include'
+      });
+      const recurringExpensesData = await recurringExpensesResponse.json();
+      const recurringExpenses = Array.isArray(recurringExpensesData) ? recurringExpensesData : [];
+
+      // Transform recurring expenses to match the expected format
+      const transformedRecurring = recurringExpenses.map(expense => ({
+        ...expense,
+        payment_date: expense.start_date, // Use start_date as payment_date for display
+        is_recurring: true,
+        __isRecurringExpense: true // Flag to identify this is from RecurringExpense table
+      }));
+
+      // Combine both arrays
+      const allExpenses = [...myExpenses, ...transformedRecurring];
+      setRows(allExpenses);
+    } catch (error) {
+      console.error('Error fetching expenses:', error);
+      setRows([]);
+    }
   };
 
   //Fetch incomes from django server
@@ -191,10 +212,14 @@ function App() {
   const addIncome = async () => {
     try {
       console.log('Sending income data:', newIncome);
+      const incomeData = {
+        ...newIncome,
+        amount: getCleanPrice(newIncome.amount)
+      };
       const response = await fetch('/api/incomes/', {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify(newIncome)
+        body: JSON.stringify(incomeData)
       });
       console.log('Response status:', response.status);
       const responseData = await response.json();
@@ -241,8 +266,8 @@ function App() {
       if (field === 'name') {
         bodyData = { name: editIncomeName };
       } else if (field === 'amount') {
-        const amountValue = parseFloat(editIncomeAmount);
-        if (isNaN(amountValue)) {
+        const amountValue = getCleanPrice(editIncomeAmount);
+        if (isNaN(amountValue) || amountValue === 0) {
           alert('Invalid amount');
           return;
         }
@@ -380,7 +405,7 @@ function App() {
    
 
   const totalPrice = () => {      
-      if (isLoggedIn) {
+      if (isLoggedIn && Array.isArray(filteredRows)) {
           return filteredRows.reduce((prevTotal, row) => {
               const price = Number(row.price) || 0;
               return prevTotal + price;
@@ -390,7 +415,7 @@ function App() {
   }
 
   const allRowsTotalPrice = () => {      
-      if (isLoggedIn) {
+      if (isLoggedIn && Array.isArray(rows)) {
           return rows.reduce((prevTotal, row) => {
               const price = Number(row.price) || 0;
               return prevTotal + price;
@@ -400,7 +425,7 @@ function App() {
   }
 
   const monthlyTotalPrice = () => {      
-      if (isLoggedIn) {
+      if (isLoggedIn && Array.isArray(rows)) {
           const start = new Date(startDate);
           const end = new Date(endDate);
           
@@ -524,10 +549,31 @@ function App() {
       if (!price || price === '' || price === null || price === undefined) {
           return 0;
       }
-      let cleanPrice = price;
+      let cleanPrice = String(price).trim();
+      
+      // CurrencyInput returns clean format, but handle all cases
       if (typeof cleanPrice === 'string') {
-          cleanPrice = cleanPrice.replace(',', '.').replace(/[^\d.]/g, '');
+          // Count occurrences of comma and dot
+          const lastComma = cleanPrice.lastIndexOf(',');
+          const lastDot = cleanPrice.lastIndexOf('.');
+          
+          // Both comma and dot present - determine which is decimal separator
+          if (lastComma !== -1 && lastDot !== -1) {
+              if (lastComma > lastDot) {
+                  // European format: "1.234,56" -> remove dots, replace comma with dot
+                  cleanPrice = cleanPrice.replace(/\./g, '').replace(',', '.');
+              } else {
+                  // American format: "1,234.56" -> remove commas
+                  cleanPrice = cleanPrice.replace(/,/g, '');
+              }
+          } 
+          // Only comma present - treat as decimal separator
+          else if (lastComma !== -1) {
+              cleanPrice = cleanPrice.replace(',', '.');
+          }
+          // Only dot present or neither - leave as is
       }
+      
       const parsed = Number(cleanPrice);
       return isNaN(parsed) ? 0 : parsed;
   }
@@ -674,32 +720,57 @@ function App() {
         return;
     }
 
-    const newJangoExpense = {
-        user_email: loginEmail,
-        category: selectedCategoryObj?.id || '',
-        name: expenseName,
-        price: getCleanPrice(price),
-        payment_date: paymentDate ? paymentDate : getToday(),
-        is_recurring: isExpenseRecurring
-    };
-
     if (isLoggedIn) {
       try {
-        const response = await fetch('/api/myexpenses/', {
+        let response, data, newRecord;
+        
+        // If frequency is not 'once', create a RecurringExpense
+        if (expenseFrequency !== 'once') {
+          const recurringExpenseData = {
+            category: selectedCategoryObj?.id || '',
+            name: expenseName,
+            price: getCleanPrice(price),
+            frequency: expenseFrequency,
+            start_date: paymentDate ? paymentDate : getToday(),
+            next_occurrence: paymentDate ? paymentDate : getToday(),
+            is_active: true
+          };
+
+          response = await fetch('/api/recurringexpenses/', {
+            method: 'POST',
+            credentials: 'include',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(recurringExpenseData),
+          });
+        } else {
+          // Otherwise, create a regular MyExpense
+          const newJangoExpense = {
+            user_email: loginEmail,
+            category: selectedCategoryObj?.id || '',
+            name: expenseName,
+            price: getCleanPrice(price),
+            payment_date: paymentDate ? paymentDate : getToday(),
+            frequency: expenseFrequency
+          };
+
+          response = await fetch('/api/myexpenses/', {
             method: 'POST',
             credentials: 'include',
             headers: getAuthHeaders(),
             body: JSON.stringify(newJangoExpense),
-        });
+          });
+        }
 
-        const data = await response.json();
+        data = await response.json();
 
         if (!response.ok) {
             alert('Error!: ' + JSON.stringify(data));
             return;
         }
 
-        const newRecord = data;
+        newRecord = data;
+        console.log('Created expense:', newRecord);
+        console.log('Expense frequency:', newRecord.frequency);
 
         await fetchExpenses();
 
@@ -725,6 +796,7 @@ function App() {
     setPrice('');
     setPaymentDate(getToday());
     setIsExpenseRecurring(false);
+    setExpenseFrequency('once');
   }
 
   useEffect(() => {
@@ -746,7 +818,19 @@ function App() {
       return;
     }
     try {
-      const response = await fetch(`/api/myexpenses/${id}/`, {
+      // Find the expense to determine which endpoint to use
+      const expense = rows.find(row => row.id === id);
+      if (!expense) {
+        alert('Error: expense not found!');
+        return;
+      }
+
+      // Determine the correct endpoint based on whether it's a recurring expense
+      const endpoint = expense.__isRecurringExpense 
+        ? `/api/recurringexpenses/${id}/` 
+        : `/api/myexpenses/${id}/`;
+
+      const response = await fetch(endpoint, {
         method: 'DELETE',
         credentials: 'include',
         headers: getAuthHeaders(),
@@ -757,14 +841,13 @@ function App() {
         alert(`Delete error on server! Status: ${response.status}, Message: ${errorText}`);
         return;
       }      
-      setRows(rows => rows.filter(row => row.id !== id));
+      
+      // Update the table from django server
+      await fetchExpenses();
     } 
     catch (error) {
       alert('Error: ' + error.message);
     }
-
-    // Update the table from django server
-    await fetchExpenses();
   };
 
   const copyExpense = async (id) => {
@@ -787,7 +870,7 @@ function App() {
       name: expenseToCopy.name,
       price: expenseToCopy.price,
       payment_date: getToday(),
-      is_recurring: false // Don't copy recurring status
+      frequency: 'once' // Don't copy recurring frequency
     };
 
     try {
@@ -848,17 +931,25 @@ function App() {
       const result = await response.json();
       console.log('Recurring expense created:', result);
       
-      // Update the original expense to mark it as recurring
+      // Update the original expense frequency (is_recurring will be calculated automatically)
       await fetch(`/api/myexpenses/${expenseId}/`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ is_recurring: true })
+        body: JSON.stringify({ frequency: frequency })
       });
 
-      // Update local state
+      // Fetch updated data to ensure is_recurring is synced
+      const updatedResponse = await fetch(`/api/myexpenses/${expenseId}/`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+        credentials: 'include'
+      });
+      const updatedExpense = await updatedResponse.json();
+
+      // Update local state with the server response
       setRows(rows.map(row =>
-        row.id === expenseId ? { ...row, is_recurring: true } : row
+        row.id === expenseId ? updatedExpense : row
       ));
 
       alert('Recurring expense created successfully!');
@@ -873,23 +964,137 @@ function App() {
     }, [paymentDate]);
 
 
-  const applyChanges = async (id, field) => {
-    if (editingField.id === id) {     
-      // Edit name, price or date     
-      let bodyData = {};
-      if (field === 'price') {
-          const priceValue = getCleanPrice(editPrice);
-          bodyData = { price: priceValue };
-      } 
-      else if (field === 'date') {
-          bodyData = { payment_date: editDate };
-      }
-      else if (field === 'name') {
-          bodyData = { name: editName};
-      }
+  const applyChanges = async (id, field, value = null) => {
+    // Find the expense to determine which endpoint to use
+    const expense = rows.find(row => row.id === id);
+    if (!expense) {
+      alert('Error: expense not found!');
+      return;
+    }
+
+    const isRecurringExpense = expense.__isRecurringExpense;
+    
+    // Edit name, price, date or frequency     
+    let bodyData = {};
+    if (field === 'price') {
+        const priceValue = getCleanPrice(value !== null ? value : editPrice);
+        bodyData = { price: priceValue };
+    } 
+    else if (field === 'date') {
+        // For recurring expenses, use start_date; for regular expenses, use payment_date
+        const dateField = isRecurringExpense ? 'start_date' : 'payment_date';
+        bodyData = { [dateField]: value !== null ? value : editDate };
+    }
+    else if (field === 'name') {
+        bodyData = { name: value !== null ? value : editName};
+    }
+    else if (field === 'frequency') {
+        const newFrequency = value !== null ? value : editFrequency;
+        console.log('Updating frequency to:', newFrequency, 'for expense:', id);
+        
+        // Check if we need to move between tables
+        const needsToBeRecurring = newFrequency !== 'once';
+        const isCurrentlyRecurring = isRecurringExpense;
+        
+        if (needsToBeRecurring && !isCurrentlyRecurring) {
+          // Moving from MyExpense to RecurringExpense
+          console.log('Moving expense from MyExpense to RecurringExpense');
+          
+          const recurringData = {
+            name: expense.name,
+            description: expense.description || '',
+            price: expense.price,
+            quantity: expense.quantity || 0,
+            category: expense.category,
+            frequency: newFrequency,
+            start_date: expense.payment_date,
+            next_occurrence: expense.payment_date,
+            is_active: true
+          };
+          
+          // Create in RecurringExpense
+          const createResponse = await fetch('/api/recurringexpenses/', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            credentials: 'include',
+            body: JSON.stringify(recurringData)
+          });
+          
+          if (!createResponse.ok) {
+            alert('Error moving expense to recurring!');
+            return;
+          }
+          
+          // Delete from MyExpense
+          await fetch(`/api/myexpenses/${id}/`, {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: getAuthHeaders(),
+          });
+          
+          // Refresh data
+          await fetchExpenses();
+          setEditingField({id: null, field: null});
+          setEditPrice('');
+          setEditDate('');
+          setEditFrequency('once');
+          return;
+          
+        } else if (!needsToBeRecurring && isCurrentlyRecurring) {
+          // Moving from RecurringExpense to MyExpense
+          console.log('Moving expense from RecurringExpense to MyExpense');
+          
+          const myExpenseData = {
+            name: expense.name,
+            description: expense.description || '',
+            price: expense.price,
+            quantity: expense.quantity || 0,
+            category: expense.category,
+            payment_date: expense.payment_date || expense.start_date,
+            frequency: 'once'
+          };
+          
+          // Create in MyExpense
+          const createResponse = await fetch('/api/myexpenses/', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            credentials: 'include',
+            body: JSON.stringify(myExpenseData)
+          });
+          
+          if (!createResponse.ok) {
+            alert('Error moving expense to one-time!');
+            return;
+          }
+          
+          // Delete from RecurringExpense
+          await fetch(`/api/recurringexpenses/${id}/`, {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: getAuthHeaders(),
+          });
+          
+          // Refresh data
+          await fetchExpenses();
+          setEditingField({id: null, field: null});
+          setEditPrice('');
+          setEditDate('');
+          setEditFrequency('once');
+          return;
+          
+        } else {
+          // Just update frequency in the same table
+          bodyData = { frequency: newFrequency };
+        }
+    }
       
+      // Determine the correct endpoint based on whether it's a recurring expense
+      const endpoint = isRecurringExpense 
+        ? `/api/recurringexpenses/${id}/` 
+        : `/api/myexpenses/${id}/`;
+
       // Send to server (PATCH)
-      const response = await fetch(`/api/myexpenses/${id}/`, {
+      const response = await fetch(endpoint, {
           method: 'PATCH',
           headers: getAuthHeaders(),
           credentials: 'include',
@@ -898,27 +1103,27 @@ function App() {
       const result = await response.json().catch(() => ({}));
       console.log('Server response:', response.status, result);
 
-      // Update the local table
-      setRows(rows.map(row =>
-          row.id === id ? {  ...row, ...bodyData} : row
-      ));
+      // Update the local table with server response (to ensure we have the actual saved data)
+      if (response.ok && result) {
+          // For recurring expenses, also set payment_date from start_date for display
+          const updatedData = isRecurringExpense && result.start_date 
+            ? { ...result, payment_date: result.start_date, __isRecurringExpense: true }
+            : result;
+            
+          setRows(rows.map(row =>
+              row.id === id ? { ...row, ...updatedData } : row
+          ));
+      } else {
+          // Fallback to bodyData if no result
+          setRows(rows.map(row =>
+              row.id === id ? { ...row, ...bodyData } : row
+          ));
+      }
 
       setEditingField({id: null, field: null});
       setEditPrice('');
       setEditDate('');
-    } else {
-        // Edit price and payment date
-        const expense = rows.find(row => row.id === id);
-
-        if (!expense) {
-            alert('Row with this id not found!');
-            return;
-        }
-
-        setEditPrice(expense.price);
-        setEditDate(expense.payment_date);
-        setEditingField({id: id, field: null});
-    }
+      setEditFrequency('once');
   };
 
 
@@ -993,7 +1198,53 @@ function App() {
         const lastDayOfYear = new Date(today.getFullYear(), 11, 31)
         const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
         const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    
+        
+        // Check if expense is recurring (support both new frequency field and old is_recurring field)
+        const frequency = row.frequency;
+        const isRecurring = (frequency && frequency !== 'once') || row.is_recurring;
+        
+        // For recurring expenses, check if they should appear in current period
+        if (isRecurring) {
+            // For "all" interval, show all recurring expenses (no filtering by month)
+            if (selectedInterval === 'all') {
+                return true;
+            }
+            
+            // For old is_recurring without frequency, show in all months (monthly by default)
+            if (row.is_recurring && !frequency) {
+                return true;
+            }
+            
+            const paymentDate = new Date(row.payment_date);
+            const paymentMonth = paymentDate.getMonth(); // 0-11
+            
+            // Determine the current viewing period
+            let currentPeriodDate;
+            if (startDate) {
+                currentPeriodDate = new Date(startDate);
+            } else {
+                currentPeriodDate = today;
+            }
+            const currentMonth = currentPeriodDate.getMonth(); // 0-11
+            
+            if (frequency === 'monthly') {
+                // Show every month
+                return true;
+            } else if (frequency === 'quarterly') {
+                // Show only in months that are in the same quarter cycle
+                // If payment was in January (0), show in Jan(0), Apr(3), Jul(6), Oct(9)
+                const monthDiff = (currentMonth - paymentMonth + 12) % 12;
+                return monthDiff % 3 === 0;
+            } else if (frequency === 'yearly') {
+                // Show only in the same month as original payment
+                return currentMonth === paymentMonth;
+            }
+            
+            // If frequency is not recognized, don't show
+            return false;
+        }
+        
+        // For one-time expenses, filter by date
         switch (selectedInterval) {
             case "today":
                 return (
@@ -1367,11 +1618,14 @@ function App() {
       editPrice: editPrice,
       editDate: editDate,
       editName: editName,
+      editFrequency: editFrequency,
       descriptionMap: descriptionMap,     
       currentPage, 
       categoriesMap,
       isExpenseRecurring,
       setIsExpenseRecurring,
+      expenseFrequency,
+      setExpenseFrequency,
       setCurrentPage,
       totalPrice: totalPrice,
       monthlyTotalPrice: monthlyTotalPrice,
@@ -1389,6 +1643,7 @@ function App() {
       setPrice: setPrice,
       setEditPrice: setEditPrice,
       setEditName: setEditName,
+      setEditFrequency: setEditFrequency,
       setSelectedInterval: setSelectedInterval,
 
       setPaymentDate: setPaymentDate,

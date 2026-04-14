@@ -32,6 +32,13 @@ class Expense(models.Model):
 
 
 class MyExpense(models.Model):
+    FREQUENCY_CHOICES = [
+        ('once', 'One-time'),
+        ('monthly', 'Monthly'),
+        ('quarterly', 'Quarterly'),
+        ('yearly', 'Yearly'),
+    ]
+    
     name = models.CharField(max_length=256)
     description = models.TextField(null=True, blank=True)
     price = models.DecimalField(max_digits=6, decimal_places=2, default=0)
@@ -39,8 +46,14 @@ class MyExpense(models.Model):
     payment_date = models.DateField(default=date.today)
     bill = models.ImageField(upload_to='expenses_images', blank=True)
     category = models.ForeignKey(to=Category, on_delete=models.CASCADE)
+    frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES, default='once')
     is_recurring = models.BooleanField(default=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        # Automatically set is_recurring based on frequency
+        self.is_recurring = self.frequency != 'once'
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name} | Category: {self.category.name}"
@@ -52,9 +65,8 @@ class MyExpense(models.Model):
 
 class RecurringExpense(models.Model):
     FREQUENCY_CHOICES = [
-        ('daily', 'Daily'),
-        ('weekly', 'Weekly'),
         ('monthly', 'Monthly'),
+        ('quarterly', 'Quarterly'),
         ('yearly', 'Yearly'),
     ]
 

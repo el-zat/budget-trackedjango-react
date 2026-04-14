@@ -19,7 +19,38 @@ const Expenses = () => {
 
     //Sorting
     const [selectedSort, setSelectedSort] = useState([])
+    
+    // Collapse state for recurring expenses
+    const [isRecurringCollapsed, setIsRecurringCollapsed] = useState(false)
 
+    // Format date as DD-MM-YYYY
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    };
+
+    // Get display date for expense (first day of selected period for recurring expenses)
+    const getDisplayDate = (expense) => {
+        const isRecurring = (expense.frequency && expense.frequency !== 'once') || expense.is_recurring;
+        
+        if (isRecurring && filterProviderValues.startDate) {
+            // For recurring expenses, show same day of month as payment_date but in current period
+            const startDate = new Date(filterProviderValues.startDate);
+            const paymentDate = new Date(expense.payment_date);
+            const dayOfMonth = paymentDate.getDate();
+            
+            // Create date with current period's month/year and original day
+            const displayDate = new Date(startDate.getFullYear(), startDate.getMonth(), dayOfMonth);
+            return formatDate(displayDate.toISOString());
+        } else {
+            // For one-time expenses, show actual date
+            return formatDate(expense.payment_date);
+        }
+    };
 
     console.log("Filtered and sorted rows:", filterProviderValues.filteredRows)
 
@@ -68,22 +99,30 @@ const Expenses = () => {
 
     //Pagination
     // Separate recurring and regular expenses BEFORE pagination
-    const allRecurringRows = filterProviderValues.filteredRows.filter(row => row.is_recurring);
-    const allRegularRows = filterProviderValues.filteredRows.filter(row => !row.is_recurring);
+    const allRecurringRows = filterProviderValues.filteredRows
+        .filter(row => {
+            // Check new frequency field OR old is_recurring field for backward compatibility
+            const isRecurring = (row.frequency && row.frequency !== 'once') || row.is_recurring;
+            console.log(`Row ${row.id}: ${row.name} - frequency: ${row.frequency}, is_recurring: ${row.is_recurring}, isRecurring: ${isRecurring}`);
+            return isRecurring;
+        })
+        .sort((a, b) => {
+            // Sort recurring expenses by price descending (highest first)
+            const priceA = parseFloat(String(a.price).replace(',', '.')) || 0;
+            const priceB = parseFloat(String(b.price).replace(',', '.')) || 0;
+            return priceB - priceA;
+        });
     
-    const rowsPerPage = 5;  
-    const totalRows = allRegularRows.length; // Count only regular rows for pagination
-    const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
+    const allRegularRows = filterProviderValues.filteredRows.filter(row => {
+        // Regular expenses are those that are NOT recurring
+        return !(row.frequency && row.frequency !== 'once') && !row.is_recurring;
+    });
 
-    // Paginate only regular rows
-    const paginatedRegularRows = allRegularRows.slice(
-        (expensesProviderValues.currentPage - 1) * rowsPerPage,
-        expensesProviderValues.currentPage * rowsPerPage
-    );
+    console.log(`Recurring rows: ${allRecurringRows.length}, Regular rows: ${allRegularRows.length}`);
 
-    // Show recurring rows only on first page
-    const recurringRows = expensesProviderValues.currentPage === 1 ? allRecurringRows : [];
-    const regularRows = paginatedRegularRows;
+    // Show all rows (no pagination)
+    const recurringRows = allRecurringRows;
+    const regularRows = allRegularRows;
 
 
     //Reset sort on selecting another interval filter
@@ -208,6 +247,7 @@ const Expenses = () => {
                         <th>CATEGORY</th>                      
                         <th>EXPENSE</th>                                           
                         <th>DATE</th>
+                        <th>FREQUENCY</th>
                         <th>PRICE €</th>
                         <th>ACTIONS</th>
                     </tr>
@@ -227,14 +267,17 @@ const Expenses = () => {
                                         {recurringRows.length > 0 && (
                                             <>
                                                 <tr className="section-header">
-                                                    <td colSpan={5}>
-                                                        <div className="section-title">
+                                                    <td colSpan={6}>
+                                                        <div className="section-title" onClick={() => setIsRecurringCollapsed(!isRecurringCollapsed)} style={{cursor: 'pointer'}}>
                                                             <i className="material-icons">repeat</i>
                                                             Recurring Expenses
+                                                            <i className="material-icons toggle-icon" style={{marginLeft: 'auto'}}>
+                                                                {isRecurringCollapsed ? 'expand_more' : 'expand_less'}
+                                                            </i>
                                                         </div>
                                                     </td>
                                                 </tr>
-                                                {recurringRows.map((row, idx) => (
+                                                {!isRecurringCollapsed && recurringRows.map((row, idx) => (
                                 <tr key={row.id || idx}>
                                     <td>
                                         {
@@ -245,7 +288,7 @@ const Expenses = () => {
                                     </td>
 
                                     <td>
-                                        {/* Inputs "name", "date" and "price" are editable     */}
+                                        {/* Inputs "name", "date", "frequency" and "price" are editable     */}
                                         {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'name' ? (                                                                                            
                                             <input id="edit-name"
                                                 type="text"
@@ -299,7 +342,54 @@ const Expenses = () => {
                                             }}
                                             data-tooltip="Edit date"
                                         > 
-                                            {row.payment_date} 
+                                            {getDisplayDate(row)} 
+                                        </div>
+                                        )}
+                                    </td>
+                                    <td>
+                                    {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'frequency' ? (                                                              
+                                        <select
+                                            className="frequency-select"
+                                            ref={inputRef}
+                                            value={expensesProviderValues.editFrequency || (() => {
+                                                // For old recurring expenses (is_recurring=true), default to monthly
+                                                return row.is_recurring && (!row.frequency || row.frequency === 'once') ? 'monthly' : (row.frequency || 'once');
+                                            })()}
+                                            onChange={(e) => {
+                                                const newFrequency = e.target.value;
+                                                console.log('Selected frequency in recurring:', newFrequency);
+                                                expensesProviderValues.setEditFrequency(newFrequency);
+                                                // Call applyChanges with value directly
+                                                expensesProviderValues.applyChanges(row.id, 'frequency', newFrequency);
+                                            }}
+                                            onKeyDown={e => {
+                                                if (e.key === 'Enter' || e.key === 'Escape') {
+                                                    expensesProviderValues.setEditingField({ id: null, field: null });
+                                                }
+                                            }}
+                                        >
+                                            <option value="once">One-time</option>
+                                            <option value="monthly">Monthly</option>
+                                            <option value="quarterly">Quarterly</option>
+                                            <option value="yearly">Yearly</option>
+                                        </select>
+                                        ) : (
+                                        <div className="tooltip-icon-container" 
+                                            onClick={() => {
+                                                expensesProviderValues.setEditingField({id: row.id, field: 'frequency'});
+                                                // For old recurring expenses, default to monthly if no frequency set
+                                                const defaultFreq = row.is_recurring && (!row.frequency || row.frequency === 'once') ? 'monthly' : (row.frequency || 'once');
+                                                expensesProviderValues.setEditFrequency(defaultFreq);
+                                            }}
+                                            data-tooltip="Edit frequency"
+                                        > 
+                                            {(() => {
+                                                // For old recurring expenses, treat as monthly if no frequency set
+                                                const displayFreq = row.is_recurring && (!row.frequency || row.frequency === 'once') ? 'monthly' : row.frequency;
+                                                return displayFreq === 'monthly' ? 'Monthly' : 
+                                                       displayFreq === 'quarterly' ? 'Quarterly' : 
+                                                       displayFreq === 'yearly' ? 'Yearly' : 'One-time';
+                                            })()}
                                         </div>
                                         )}
                                     </td>
@@ -419,7 +509,7 @@ const Expenses = () => {
                                         {regularRows.length > 0 && (
                                             <>
                                                 <tr className="section-header">
-                                                    <td colSpan={5}>
+                                                    <td colSpan={6}>
                                                         <div className="section-title">
                                                             <i className="material-icons">receipt</i>
                                                             Regular Expenses
@@ -437,7 +527,7 @@ const Expenses = () => {
                                     </td>
 
                                     <td>
-                                        {/* Inputs "name", "date" and "price" are editable     */}
+                                        {/* Inputs "name", "date", "frequency" and "price" are editable     */}
                                         {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'name' ? (                                                                                            
                                             <input id="edit-name"
                                                 type="text"
@@ -491,7 +581,54 @@ const Expenses = () => {
                                             }}
                                             data-tooltip="Edit date"
                                         > 
-                                            {row.payment_date} 
+                                            {getDisplayDate(row)} 
+                                        </div>
+                                        )}
+                                    </td>
+                                    <td>
+                                    {expensesProviderValues.editingField.id === row.id && expensesProviderValues.editingField.field === 'frequency' ? (                                                              
+                                        <select
+                                            className="frequency-select"
+                                            ref={inputRef}
+                                            value={expensesProviderValues.editFrequency || (() => {
+                                                // For old recurring expenses (is_recurring=true), default to monthly
+                                                return row.is_recurring && (!row.frequency || row.frequency === 'once') ? 'monthly' : (row.frequency || 'once');
+                                            })()}
+                                            onChange={(e) => {
+                                                const newFrequency = e.target.value;
+                                                console.log('Selected frequency in regular:', newFrequency);
+                                                expensesProviderValues.setEditFrequency(newFrequency);
+                                                // Call applyChanges with value directly
+                                                expensesProviderValues.applyChanges(row.id, 'frequency', newFrequency);
+                                            }}
+                                            onKeyDown={e => {
+                                                if (e.key === 'Enter' || e.key === 'Escape') {
+                                                    expensesProviderValues.setEditingField({ id: null, field: null });
+                                                }
+                                            }}
+                                        >
+                                            <option value="once">One-time</option>
+                                            <option value="monthly">Monthly</option>
+                                            <option value="quarterly">Quarterly</option>
+                                            <option value="yearly">Yearly</option>
+                                        </select>
+                                        ) : (
+                                        <div className="tooltip-icon-container" 
+                                            onClick={() => {
+                                                expensesProviderValues.setEditingField({id: row.id, field: 'frequency'});
+                                                // For old recurring expenses, default to monthly if no frequency set
+                                                const defaultFreq = row.is_recurring && (!row.frequency || row.frequency === 'once') ? 'monthly' : (row.frequency || 'once');
+                                                expensesProviderValues.setEditFrequency(defaultFreq);
+                                            }}
+                                            data-tooltip="Edit frequency"
+                                        > 
+                                            {(() => {
+                                                // For old recurring expenses, treat as monthly if no frequency set
+                                                const displayFreq = row.is_recurring && (!row.frequency || row.frequency === 'once') ? 'monthly' : row.frequency;
+                                                return displayFreq === 'monthly' ? 'Monthly' : 
+                                                       displayFreq === 'quarterly' ? 'Quarterly' : 
+                                                       displayFreq === 'yearly' ? 'Yearly' : 'One-time';
+                                            })()}
                                         </div>
                                         )}
                                     </td>
@@ -651,6 +788,11 @@ const Expenses = () => {
                                         placeholder="Enter expense name"
                                         value={expensesProviderValues.miscExpense}
                                         onChange={e => expensesProviderValues.setMiscExpense(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                expensesProviderValues.handleSave(e);
+                                            }
+                                        }}
                                     />
                                 ) : (
                                     <select
@@ -675,6 +817,11 @@ const Expenses = () => {
                                     type="date"
                                     value={expensesProviderValues.paymentDate}
                                     onChange={e => expensesProviderValues.setPaymentDate(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            expensesProviderValues.handleSave(e);
+                                        }
+                                    }}
                                 />
                             </td>
                             <td>
@@ -686,18 +833,28 @@ const Expenses = () => {
                                     prefix="€ "
                                     value={expensesProviderValues.price}
                                     onValueChange={(value) => expensesProviderValues.setPrice(value || '')}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            expensesProviderValues.handleSave(e);
+                                        }
+                                    }}
                                 />
                             </td>
                             <td>
                                 <div className="expense-actions">
-                                    <label className="recurring-checkbox">
-                                        <input
-                                            type="checkbox"
-                                            checked={expensesProviderValues.isExpenseRecurring || false}
-                                            onChange={(e) => expensesProviderValues.setIsExpenseRecurring(e.target.checked)}
-                                        />
-                                        <span>Recurring</span>
-                                    </label>
+                                    <select
+                                        value={expensesProviderValues.expenseFrequency || 'once'}
+                                        onChange={(e) => {
+                                            expensesProviderValues.setExpenseFrequency(e.target.value);
+                                            expensesProviderValues.setIsExpenseRecurring(e.target.value !== 'once');
+                                        }}
+                                        className="frequency-select"
+                                    >
+                                        <option value="once">One-time</option>
+                                        <option value="monthly">Monthly</option>
+                                        <option value="quarterly">Quarterly</option>
+                                        <option value="yearly">Yearly</option>
+                                    </select>
                                     <button className="add-btn" onClick={expensesProviderValues.handleSave}>
                                         <i className="material-icons">add</i>
                                         Add
@@ -711,25 +868,7 @@ const Expenses = () => {
                 </table>
             </div>
             
-            {authProviderValues.isLoggedIn &&    
-            <div className="pagination">
-                <button className="pagination-btn"
-                    onClick={() => expensesProviderValues.setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={expensesProviderValues.currentPage === 1}
-                >
-                    <i className="material-icons">chevron_left</i>
-                    Prev 
-                </button>
-                <span className="page-info">Page <strong>{expensesProviderValues.currentPage}</strong> of <strong>{totalPages > 1 ? totalPages : 1}</strong></span>
-                <button className="pagination-btn"
-                    onClick={() => expensesProviderValues.setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={expensesProviderValues.currentPage === totalPages || totalPages === 1}
-                >
-                    Next
-                    <i className="material-icons">chevron_right</i>
-                </button>               
-            </div>
-            }           
+            {/* Pagination removed - showing all expenses */}
                                         
         </div>
         </SortContext.Provider>

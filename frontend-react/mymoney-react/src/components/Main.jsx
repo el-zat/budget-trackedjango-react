@@ -33,20 +33,31 @@ function Main() {
 
     // Calculate income for selected interval from real data
     const calculateIntervalIncome = () => {
-        if (!authProviderValues.isLoggedIn || !incomeProviderValues.incomes || incomeProviderValues.incomes.length === 0) {
+        if (!authProviderValues.isLoggedIn || !incomeProviderValues.allIncomes || incomeProviderValues.allIncomes.length === 0) {
             return 0;
         }
 
         const startDate = new Date(filterProviderValues.startDate);
+        startDate.setHours(0, 0, 0, 0);
         const endDate = new Date(filterProviderValues.endDate);
+        endDate.setHours(23, 59, 59, 999);
 
-        // Sum only incomes that fall within the selected date range
-        // Recurring incomes are shown in the list but not counted unless their date is in range
-        return incomeProviderValues.incomes.reduce((total, income) => {
+        // Sum incomes: recurring incomes are always included, one-time incomes only if in date range
+        const total = incomeProviderValues.allIncomes.reduce((sum, income) => {
+            // Always include recurring incomes
+            if (income.is_recurring || (income.frequency && income.frequency === 'regular')) {
+                return sum + Number(income.amount);
+            }
+            
+            // For one-time incomes, check if they fall within the date range
             const incomeDate = new Date(income.received_date);
+            incomeDate.setHours(0, 0, 0, 0);
             const includeIncome = incomeDate >= startDate && incomeDate <= endDate;
-            return includeIncome ? total + Number(income.amount) : total;
+            
+            return includeIncome ? sum + Number(income.amount) : sum;
         }, 0);
+
+        return total;
     };
 
     // Get period label based on selected interval
