@@ -22,6 +22,9 @@ def copy_myeexpense(modeladmin, request, queryset):
     )
 
 class MyExpenseAdmin(admin.ModelAdmin):
+    list_display = ['name', 'price', 'frequency', 'payment_date', 'category', 'is_recurring', 'user']
+    list_filter = ['frequency', 'is_recurring', 'category']
+    search_fields = ['name', 'description']
     actions = [copy_myeexpense]
 
 

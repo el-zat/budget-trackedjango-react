@@ -4,8 +4,7 @@ import { Filter } from "./Filter";
 import  Description  from "./description/Description";
 import { Expenses } from "./Expenses";
 import  Income  from "./Income";
-import { CategoriesPieChart } from "./CategoriesPieChart";
-import { ExpensesPieChart } from "./ExpensesPieChart";
+import { CombinedPieCharts } from "./CombinedPieCharts";
 import {AuthContext} from '../context/AuthContext'
 import {DescriptionContext} from '../context/DescriptionContext'
 import {ModalContext} from '../context/ModalContext'
@@ -79,8 +78,16 @@ function Main() {
     };
 
     // Calculate stats for selected interval
-    const intervalExpenses = expensesProviderValues.monthlyTotalPrice ? expensesProviderValues.monthlyTotalPrice() : 0;
-    const intervalIncome = calculateIntervalIncome();
+    const intervalExpenses = useMemo(() => {
+        const result = expensesProviderValues.monthlyTotalPrice ? expensesProviderValues.monthlyTotalPrice() : 0;
+        console.log('Main.jsx: Recalculating intervalExpenses:', result, 'for interval:', filterProviderValues.selectedInterval);
+        return result;
+    }, [expensesProviderValues.monthlyTotalPrice, filterProviderValues.selectedInterval, filterProviderValues.startDate, filterProviderValues.endDate]);
+    
+    const intervalIncome = useMemo(() => {
+        return calculateIntervalIncome();
+    }, [authProviderValues.isLoggedIn, incomeProviderValues.allIncomes, filterProviderValues.startDate, filterProviderValues.endDate]);
+    
     const currentBalance = intervalIncome - intervalExpenses;
     const periodLabel = getPeriodLabel();
 
@@ -168,8 +175,7 @@ function Main() {
                 
                 {authProviderValues.isLoggedIn && 
                     <div className="pie-charts-container">
-                        <CategoriesPieChart />
-                        <ExpensesPieChart />
+                        <CombinedPieCharts />
                     </div>
                 }
 

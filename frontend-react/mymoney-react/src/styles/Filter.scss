@@ -50,7 +50,7 @@
   border-radius: 12px;
   display: flex;
   flex-direction: column;
-  max-height: 300px;
+  height: 350px;
   
   h3 {
     font-size: 16px;
@@ -73,7 +73,7 @@
   border-radius: 12px;
   display: flex;
   flex-direction: column;
-  max-height: 300px;
+  height: 350px;
   
   h3 {
     font-size: 16px;
@@ -94,10 +94,10 @@
 
 .price-and-total-column {
   @include flex(space-between, stretch, column);
-  gap: 12px;
+  gap: 20px;
   flex: 1 1 0;
   min-width: 200px;
-  max-height: 300px;
+  height: 350px;
 }
 
 .price-filter {
@@ -105,7 +105,6 @@
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid $borderColor;
   border-radius: 12px;
-  flex: 1;
   display: flex;
   flex-direction: column;
   
@@ -168,7 +167,7 @@
 }
 
 .filtered-total {
-  padding: 6px 10px;
+  padding: 12px 16px;
   background: linear-gradient(135deg, rgba(88, 101, 242, 0.15), rgba(156, 79, 255, 0.15));
   border: 1px solid rgba(88, 101, 242, 0.3);
   border-radius: 12px;
@@ -182,7 +181,7 @@
     width: 100%;
     
     i {
-      font-size: 22px;
+      font-size: 24px;
       color: rgba(88, 101, 242, 0.8);
     }
     

@@ -327,7 +327,18 @@ const Expenses = () => {
                                             type="date"
                                             ref={inputRef}
                                             value={expensesProviderValues.editDate || ""}
-                                            onChange={e => expensesProviderValues.setEditDate(e.target.value)}
+                                            onChange={e => {
+                                                const newDate = e.target.value;
+                                                expensesProviderValues.setEditDate(newDate);
+                                                console.log('Date changed (recurring) to:', newDate, 'Original:', row.payment_date);
+                                                // Auto-save after a short delay when date changes
+                                                if (newDate && newDate !== row.payment_date) {
+                                                    setTimeout(() => {
+                                                        console.log('Auto-saving recurring date change');
+                                                        expensesProviderValues.applyChanges(row.id, 'date');
+                                                    }, 300);
+                                                }
+                                            }}
                                             onKeyDown={e => {
                                                 if (e.key === 'Enter') {
                                                     expensesProviderValues.applyChanges(row.id, 'date')
@@ -566,7 +577,18 @@ const Expenses = () => {
                                             type="date"
                                             ref={inputRef}
                                             value={expensesProviderValues.editDate || ""}
-                                            onChange={e => expensesProviderValues.setEditDate(e.target.value)}
+                                            onChange={e => {
+                                                const newDate = e.target.value;
+                                                expensesProviderValues.setEditDate(newDate);
+                                                console.log('Date changed (regular) to:', newDate, 'Original:', row.payment_date);
+                                                // Auto-save after a short delay when date changes
+                                                if (newDate && newDate !== row.payment_date) {
+                                                    setTimeout(() => {
+                                                        console.log('Auto-saving regular date change');
+                                                        expensesProviderValues.applyChanges(row.id, 'date');
+                                                    }, 300);
+                                                }
+                                            }}
                                             onKeyDown={e => {
                                                 if (e.key === 'Enter') {
                                                     expensesProviderValues.applyChanges(row.id, 'date')
@@ -773,9 +795,11 @@ const Expenses = () => {
                                 >
                                     <option value="all">Select Category</option>
                                     {Array.isArray(expensesProviderValues.categories) ? (
-                                        expensesProviderValues.categories.map(cat => (
-                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                        ))
+                                        expensesProviderValues.categories
+                                            .sort((a, b) => a.name.localeCompare(b.name))
+                                            .map(cat => (
+                                                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                            ))
                                     ) : (
                                         <option>Loading...</option>
                                     )}
@@ -805,6 +829,7 @@ const Expenses = () => {
                                                 expensesProviderValues.selectedCategory === 'all' ||
                                                 String(exp.category) === String(expensesProviderValues.selectedCategory)
                                             )
+                                            .sort((a, b) => a.name.localeCompare(b.name))
                                             .map(exp => (
                                                 <option key={exp.id} value={exp.name}>{exp.name}</option>
                                             ))

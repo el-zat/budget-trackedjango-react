@@ -84,6 +84,12 @@
       color: rgba(255, 255, 255, 0.5);
       text-transform: uppercase;
       letter-spacing: 1px;
+      
+      // EXPENSE column - wider
+      &:nth-child(2) {
+        min-width: 250px;
+        width: 30%;
+      }
     }
   }
 
@@ -150,8 +156,14 @@
       color: rgba(255, 255, 255, 0.9);
       border-bottom: 1px solid $borderColor;
       
-      // Price column - green color
-      &:nth-child(4) {
+      // EXPENSE column - wider
+      &:nth-child(2) {
+        min-width: 250px;
+        width: 30%;
+      }
+      
+      // Price column - green color  
+      &:nth-child(5) {
         color: #51cf66;
         font-weight: 600;
         font-size: 15px;
@@ -218,16 +230,16 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 4px 6px;
+    padding: 3px 4px;
     background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
     border: 1px solid rgba(255, 215, 0, 0.3);
-    border-radius: 8px;
+    border-radius: 6px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
-    margin-left: 12px;
+    margin-left: 8px;
     
     i {
-      font-size: 14px !important;
+      font-size: 9px !important;
       color: #ffd700;
       margin: 0;
     }
@@ -257,6 +269,10 @@
   
   td {
     padding: 12px 20px !important;
+    
+    &:first-child {
+      min-width: 200px;
+    }
     
     input, select {
       @extend %input_select;
