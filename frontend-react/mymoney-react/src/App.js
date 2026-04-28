@@ -9,6 +9,7 @@ import {AuthContext} from './context/AuthContext'
 import {DescriptionContext} from './context/DescriptionContext'
 import { ModalContext } from './context/ModalContext';
 import RecurringExpenseModal from './components/RecurringExpenseModal';
+import GlobalTooltip from './components/GlobalTooltip';
 
 
 function App() {
@@ -147,7 +148,7 @@ function App() {
   const fetchExpenses = async () => {
     try {
       console.log('fetchExpenses: Starting...');
-      // Fetch regular expenses
+      // Fetch one-time expenses
       const myExpensesResponse = await fetch('/api/myexpenses/', {
         headers: getAuthHeaders(),
         credentials: 'include'
@@ -1057,7 +1058,7 @@ function App() {
           bodyData = { price: priceValue };
       } 
       else if (field === 'date') {
-          // For recurring expenses, use start_date; for regular expenses, use payment_date
+          // For recurring expenses, use start_date; for one-time expenses, use payment_date
           const dateField = isRecurringExpense ? 'start_date' : 'payment_date';
           const dateValue = value !== null ? value : editDate;
           bodyData = { [dateField]: dateValue };
@@ -1860,6 +1861,7 @@ function App() {
                 <DescriptionContext.Provider value={descriptionProviderValues}>
                   <Main />
                   <RecurringExpenseModal />
+                  <GlobalTooltip />
                 </DescriptionContext.Provider>
               </IncomeContext.Provider>
             </ExpensesContext.Provider>

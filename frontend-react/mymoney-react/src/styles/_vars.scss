@@ -88,10 +88,26 @@ $dangerRed: #ff6b6b;
 }
 
 
+// Breakpoints for responsive design
 
-//min-width for devices
-$_mobile: 'min-width: 320px';
-$_tablet: 'min-width: 767px';
-$_desktop: 'min-width: 1024px';
-$_projector: 'min-width: 1201px';
+// mobile
+$_mobile:         'min-width: 320px';
+$_mobile-max:     'max-width: 767px';
+
+// small mobile
+$_extra-small-mobile: 'max-width: 380px';
+$_small-mobile:       'max-width: 480px';
+
+// tablet
+$_tablet:             'min-width: 768px';  // tablet and above
+$_tablet-range:       '(min-width: 768px) and (max-width: 1279px)';
+$_tablet-mid:         '(min-width: 481px) and (max-width: 767px)';
+$_medium-tablet:      'max-width: 1024px';
+
+// desktop
+$_desktop:            'min-width: 1280px';  // desktop and above
+$_small-desktop:      '(min-width: 1280px) and (max-width: 1599px)';
+$_large-desktop:      'min-width: 1600px';
+
+
 

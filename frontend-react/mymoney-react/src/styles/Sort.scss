@@ -68,3 +68,29 @@
         }
     }
 }
+
+// Mobile (up to 767px)
+@media ($_mobile-max) {
+    .sort-container {
+        min-width: unset;
+        padding: 24px 20px;
+        
+        h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+        
+        > div {
+            margin-bottom: 10px;
+            
+            label {
+                padding: 12px 14px;
+                font-size: 14px;
+                
+                i {
+                    font-size: 18px;
+                }
+            }
+        }
+    }
+}

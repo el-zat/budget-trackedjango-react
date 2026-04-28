@@ -92,7 +92,7 @@ function Main() {
     const periodLabel = getPeriodLabel();
 
     return  <main>
-                <div className="header-section">
+                <div className="header-section">                    
                     <div className="header-left">
                         <h1>
                             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -125,39 +125,41 @@ function Main() {
                 </div>
 
                 {authProviderValues.isLoggedIn && (
-                    <div className="stats-grid">
-                        <div className="stat-card income">
-                            <div className="stat-icon">
-                                <img src={incomeIcon} alt="Income" />
-                            </div>
-                            <div className="stat-content">
-                                <div className="stat-label">Total Income</div>
-                                <div className="stat-value">€ {intervalIncome.toFixed(2)}</div>
-                                <div className="stat-period">{periodLabel}</div>
-                            </div>
-                        </div>
-                        
-                        <div className="stat-card total-expenses">
-                            <div className="stat-icon">
-                                <img src={expensesIcon} alt="Expenses" />
-                            </div>
-                            <div className="stat-content">
-                                <div className="stat-label">Total Expenses</div>
-                                <div className="stat-value">€ {intervalExpenses.toFixed(2)}</div>
-                                <div className="stat-period">{periodLabel}</div>
-                            </div>
-                        </div>
-                        
-                        <div className="stat-card balance">
-                            <div className="stat-icon">
-                                <img src={balanceIcon} alt="Balance" />
-                            </div>
-                            <div className="stat-content">
-                                <div className="stat-label">Current Balance</div>
-                                <div className={`stat-value ${currentBalance >= 0 ? 'positive' : 'negative'}`}>
-                                    € {currentBalance.toFixed(2)}
+                    <div className="stats-container">
+                        <div className="stats-card">
+                            <div className="stat-item income">
+                                <div className="stat-icon">
+                                    <img src={incomeIcon} alt="Income" />
                                 </div>
-                                <div className="stat-period">{periodLabel}</div>
+                                <div className="stat-content">
+                                    <div className="stat-label">Total<br />Income</div>
+                                    <div className="stat-value">€ {intervalIncome.toFixed(2)}</div>
+                                    <div className="stat-period">{periodLabel}</div>
+                                </div>
+                            </div>
+                            
+                            <div className="stat-item total-expenses">
+                                <div className="stat-icon">
+                                    <img src={expensesIcon} alt="Expenses" />
+                                </div>
+                                <div className="stat-content">
+                                    <div className="stat-label">Total<br />Expenses</div>
+                                    <div className="stat-value">€ {intervalExpenses.toFixed(2)}</div>
+                                    <div className="stat-period">{periodLabel}</div>
+                                </div>
+                            </div>
+                            
+                            <div className="stat-item balance">
+                                <div className="stat-icon">
+                                    <img src={balanceIcon} alt="Balance" />
+                                </div>
+                                <div className="stat-content">
+                                    <div className="stat-label">Current<br />Balance</div>
+                                    <div className={`stat-value ${currentBalance >= 0 ? 'positive' : 'negative'}`}>
+                                        € {currentBalance.toFixed(2)}
+                                    </div>
+                                    <div className="stat-period">{periodLabel}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
