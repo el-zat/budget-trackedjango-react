@@ -4,9 +4,12 @@
 .sort-container {
     width: 100%;
     padding: 32px;
+    max-width: 100%;
+    box-sizing: border-box;
     background: rgba(156, 79, 255, 0.12);
     border-radius: 12px;
     min-width: 450px;
+    overflow-x: hidden;
     
     h2 {
         margin-bottom: 24px;
@@ -72,7 +75,9 @@
 // Mobile (up to 767px)
 @media ($_mobile-max) {
     .sort-container {
-        min-width: unset;
+        min-width: 0;
+        width: 100%;
+        max-width: 100%;
         padding: 24px 20px;
         
         h2 {

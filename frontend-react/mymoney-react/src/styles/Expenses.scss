@@ -5,8 +5,8 @@
   margin: 0;
   width: 100%;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
-
 
 .expenses-header {
   @include flex(space-between, center, row);
@@ -20,18 +20,16 @@
   top: 0;
   z-index: 30;
   backdrop-filter: blur(10px);
-
+  border-radius: 12px 12px 0 0;
 
   @media ($_mobile-max) {
     padding: 12px;
   }
 
-
   @media ($_small-mobile) {
     padding: 8px;
   }
 }
-
 
 .expenses-title {
   margin: 0;
@@ -42,7 +40,6 @@
   text-align: center;
 }
 
-
 .header-actions {
   display: flex;
   gap: 12px;
@@ -50,13 +47,11 @@
   flex: 1;
   justify-content: flex-end;
 
-
   @media ($_mobile-max) {
     flex-wrap: wrap;
     gap: 8px;
   }
 }
-
 
 .filter-btn,
 .sort-btn {
@@ -70,11 +65,9 @@
   background: rgba(88, 101, 242, 0.15);
   border: 1px solid rgba(88, 101, 242, 0.3);
 
-
   i {
     font-size: 20px;
   }
-
 
   &:hover {
     background: rgba(88, 101, 242, 0.25);
@@ -82,8 +75,6 @@
   }
 }
 
-
-// Table with Header Container
 .expenses-table-container {
   @extend %card;
   width: 100%;
@@ -94,8 +85,6 @@
   border: none;
 }
 
-
-// Individual table scroll wrapper
 .table-scroll-wrapper {
   width: 100%;
   max-height: 250px;
@@ -104,92 +93,80 @@
   margin-bottom: 10px;
   position: relative;
 
-
   [data-tooltip] {
     &::before,
     &::after {
-      display: none !important;
+      display: none;
     }
   }
 
-
-  scrollbar-width: thin !important;
+  scrollbar-width: thin;
   scrollbar-color: rgba(88, 101, 242, 0.5) rgba(255, 255, 255, 0.05);
-  -ms-overflow-style: auto !important;
-
+  -ms-overflow-style: auto;
 
   &::-webkit-scrollbar {
-    display: block !important;
+    display: block;
     width: 8px;
     height: 8px;
   }
 
-
   &::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
+    border-radius: 12px;
   }
-
 
   &::-webkit-scrollbar-thumb {
     background: rgba(88, 101, 242, 0.5);
-    border-radius: 4px;
+    border-radius: 12px;
     min-height: 30px;
-
 
     &:hover {
       background: rgba(88, 101, 242, 0.7);
+      border-radius: 12px;
     }
   }
-
 
   &:last-child {
     margin-bottom: 0;
   }
 
-
   &.onetime {
     max-height: 310px;
   }
 
-
   @media ($_tablet-range) {
     max-height: 240px;
-
 
     &.onetime {
       max-height: 240px;
     }
   }
 
-
   @media ($_mobile-max) {
-    max-height: 155px;
-
+    max-height: 258px;
+    overflow-y: auto;
+    overflow-x: hidden;
 
     &.onetime {
-      max-height: 155px;
+      max-height: 258px;
     }
   }
 
-
   @media ($_small-mobile) {
-    max-height: 175px;
-
+    max-height: 246px;
 
     &.onetime {
-      max-height: 175px;
+      max-height: 246px;
     }
   }
 }
 
-
-// Table Styles
 .expenses-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   display: table;
+  table-layout: fixed;
 
   thead {
     display: table-header-group;
@@ -202,7 +179,6 @@
       line-height: 1;
 
       &.section-header {
-        // убрали position: static — оно блокировало sticky у th внутри
         background: #2a2f5a;
         border-top: 2px solid rgba(88, 101, 242, 0.3);
         border-bottom: none;
@@ -215,7 +191,7 @@
 
             .toggle-icon {
               color: #b197fc;
-              transform: scale(1.1);
+              transform: translateY(-50%) scale(1.1);
             }
           }
         }
@@ -228,6 +204,7 @@
           padding: 14px 20px;
           margin: 0;
           vertical-align: middle;
+          text-align: center;
           background: #2a2f5a;
           font-weight: 600;
           text-transform: none;
@@ -247,8 +224,9 @@
     }
 
     .section-title {
-      display: flex;
+      display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
       font-size: 14px;
       font-weight: 600;
@@ -257,6 +235,10 @@
       letter-spacing: 1px;
       user-select: none;
       cursor: pointer;
+      white-space: nowrap;
+      text-align: center;
+      width: 100%;
+      padding-right: 0;
 
       @media ($_mobile-max) {
         font-size: 12px;
@@ -267,11 +249,13 @@
       @media ($_small-mobile) {
         font-size: 11px;
         gap: 4px;
+        letter-spacing: 0.2px;
       }
 
       i {
         font-size: 18px;
         color: rgba(88, 101, 242, 0.9);
+        flex: 0 0 auto;
 
         @media ($_mobile-max) {
           font-size: 16px;
@@ -283,9 +267,12 @@
       }
 
       .toggle-icon {
+        position: static;
+        transform: none;
         font-size: 24px;
         color: rgba(88, 101, 242, 0.9);
         transition: all 0.3s ease;
+        flex: 0 0 auto;
 
         @media ($_mobile-max) {
           font-size: 20px;
@@ -297,8 +284,6 @@
       }
     }
 
-    // Обычный ряд CATEGORY / EXPENSE / DATE...
-    // top = высота section-header (~48px), чтобы прилипал ПОД ним
     tr:not(.section-header) th {
       position: sticky;
       position: -webkit-sticky;
@@ -329,9 +314,26 @@
       letter-spacing: 1px;
       background: #1a1d3f;
 
+      &:nth-child(1),
+      &:nth-child(2) {
+        width: 12%;
+      }
+
+      &:nth-child(3) {
+        width: 12%;
+      }
+
+      &:nth-child(4) {
+        width: 10%;
+      }
+
+      &:nth-child(5) {
+        width: 9%;
+      }
+
       &:nth-child(6) {
-        padding-left: 70px;
-        padding-right: 2px;
+        padding-left: 0;
+        padding-right: 8px;
       }
     }
   }
@@ -363,8 +365,7 @@
         overflow: visible;
         text-overflow: clip;
         white-space: nowrap;
-        padding-left: 70px;
-        padding-right: 2px;
+        padding-left: 0;
       }
 
       &:nth-child(1),
@@ -473,7 +474,7 @@
     margin-left: 8px;
 
     i {
-      font-size: 9px !important;
+      font-size: 9px;
       color: #ffd700;
       margin: 0;
     }
@@ -492,11 +493,8 @@
   }
 }
 
-
-// Mobile Add Expense Button (inline, below tables)
 .mobile-fixed-add-btn {
   display: none;
-
 
   @media ($_mobile-max), ($_tablet-range) {
     display: flex;
@@ -516,12 +514,10 @@
     transition: all 0.3s ease;
     box-sizing: border-box;
 
-
     i {
       font-size: 22px;
       color: rgba(88, 101, 242, 0.9);
     }
-
 
     &:hover {
       background: linear-gradient(135deg, rgba(88, 101, 242, 0.35), rgba(116, 79, 168, 0.35));
@@ -530,11 +526,8 @@
   }
 }
 
-
-// Mobile Add Form Overlay (backdrop)
 .mobile-add-form-overlay {
   display: none;
-
 
   @media ($_mobile-max), ($_tablet-range) {
     display: block;
@@ -545,11 +538,8 @@
   }
 }
 
-
-// Mobile Add Form (bottom sheet)
 .mobile-add-form {
   display: none;
-
 
   @media ($_mobile-max), ($_tablet-range) {
     display: flex;
@@ -566,20 +556,17 @@
     animation: slideUp 0.3s ease forwards;
   }
 
-
   .mobile-add-form-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 16px;
 
-
     span {
       font-size: 16px;
       font-weight: 600;
       color: rgba(255, 255, 255, 0.95);
     }
-
 
     button {
       background: none;
@@ -588,11 +575,9 @@
       cursor: pointer;
       padding: 4px;
 
-
       &:hover {
         color: rgba(255, 255, 255, 0.9);
       }
-
 
       i {
         font-size: 22px;
@@ -600,19 +585,16 @@
     }
   }
 
-
   .mobile-add-form-fields {
     display: flex;
     flex-direction: column;
     gap: 12px;
   }
 
-
   .mobile-field {
     display: flex;
     flex-direction: column;
     gap: 4px;
-
 
     label {
       font-size: 11px;
@@ -622,18 +604,16 @@
       letter-spacing: 0.5px;
     }
 
-
     select,
     input {
       width: 100%;
       padding: 10px 12px;
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(88, 101, 242, 0.3);
-      border-radius: 8px;
+      border-radius: 5px;
       color: rgba(255, 255, 255, 0.9);
       font-size: 14px;
       transition: border-color 0.2s ease;
-
 
       &:focus {
         outline: none;
@@ -641,7 +621,6 @@
       }
     }
   }
-
 
   .mobile-add-save-btn {
     display: flex;
@@ -660,11 +639,9 @@
     cursor: pointer;
     transition: opacity 0.2s ease;
 
-
     i {
       font-size: 20px;
     }
-
 
     &:hover {
       opacity: 0.9;
@@ -672,18 +649,16 @@
   }
 }
 
-
 @keyframes slideUp {
   from {
     transform: translateY(100%);
   }
+
   to {
     transform: translateY(0);
   }
 }
 
-
-// Add new expense row at bottom of table
 .add-expense-row {
   background: #1a1d3f;
   border-top: 2px solid rgba(88, 101, 242, 0.2);
@@ -691,22 +666,18 @@
   bottom: 0;
   z-index: 50;
 
-
   @media ($_mobile-max), ($_tablet-range) {
-    display: none !important;
+    display: none;
   }
-
 
   &:hover {
     background: #1e2245;
   }
 
-
   td {
     padding: 6px 6px;
     height: 48px;
     vertical-align: middle;
-
 
     &:nth-child(1),
     &:nth-child(2) {
@@ -714,32 +685,27 @@
       width: 12%;
     }
 
-
     &:nth-child(3) {
       max-width: 105px;
       width: 12%;
     }
-
 
     &:nth-child(4) {
       max-width: 85px;
       width: 10%;
     }
 
-
     &:nth-child(5) {
       max-width: 80px;
       width: 9%;
     }
 
-
     &:nth-child(6) {
       max-width: 150px;
       width: auto;
-      padding-left: 70px;
-      padding-right: 2px;
+      padding-left: 0;
+      padding-right: 8px;
     }
-
 
     input,
     select {
@@ -752,7 +718,6 @@
       padding: 0 6px;
       font-size: 13px;
 
-
       &:focus {
         outline: none;
         border-color: $btnColor;
@@ -760,23 +725,19 @@
       }
     }
 
-
-    input[type="text"] {
+    input[type='text'] {
       text-transform: capitalize;
     }
 
-
-    input[type="date"] {
+    input[type='date'] {
       &::-webkit-calendar-picker-indicator {
         filter: invert(1);
         cursor: pointer;
       }
     }
 
-
     select {
       cursor: pointer;
-
 
       option {
         background: #1a1d3f;
@@ -786,12 +747,11 @@
     }
   }
 
-
   .add-btn {
     @extend %btn;
     padding: 4px 6px;
     height: 28px;
-    font-size: 11px;
+    font-size: 14px;
     font-weight: 500;
     background: rgba(88, 101, 242, 0.35);
     border: 1px solid rgba(88, 101, 242, 0.5);
@@ -801,25 +761,21 @@
     width: 100%;
     justify-content: center;
 
-
     &:hover {
       background: rgba(88, 101, 242, 0.45);
       border-color: rgba(88, 101, 242, 0.6);
     }
-
 
     i {
       font-size: 13px;
     }
   }
 
-
   .frequency-select {
     height: 28px;
     padding: 0 6px;
     background: rgba(88, 101, 242, 0.1);
     border: 1px solid rgba(88, 101, 242, 0.3);
-    border-radius: 5px;
     color: rgba(255, 255, 255, 0.9);
     font-size: 13px;
     font-weight: 500;
@@ -827,19 +783,16 @@
     transition: all 0.3s ease;
     width: 100%;
 
-
     &:hover {
       background: rgba(88, 101, 242, 0.15);
       border-color: rgba(88, 101, 242, 0.4);
     }
-
 
     &:focus {
       outline: none;
       border-color: #5865f2;
       background: rgba(88, 101, 242, 0.2);
     }
-
 
     option {
       background: #1a1d3f;
@@ -848,7 +801,6 @@
     }
   }
 }
-
 
 select,
 input,
@@ -860,16 +812,14 @@ input,
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid $borderColor;
 
-
   &:-webkit-autofill,
   &:-webkit-autofill:hover,
   &:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 1000px rgba(42, 29, 79, 0.9) inset !important;
-    -webkit-text-fill-color: $white !important;
-    caret-color: $white !important;
-    transition: background-color 5000s ease-in-out 0s !important;
+    -webkit-box-shadow: 0 0 0 1000px rgba(42, 29, 79, 0.9) inset;
+    -webkit-text-fill-color: $white;
+    caret-color: $white;
+    transition: background-color 5000s ease-in-out 0s;
   }
-
 
   &:focus {
     outline: none;
@@ -878,15 +828,12 @@ input,
   }
 }
 
-
 #edit-name {
   text-transform: capitalize;
 }
 
-
 select {
   cursor: pointer;
-
 
   option {
     background: #1a1d3f;
@@ -895,13 +842,13 @@ select {
   }
 }
 
-
 .action-buttons {
   display: flex;
   gap: 4px;
   align-items: center;
+  width: 100%;
+  justify-content: flex-start;
 }
-
 
 .edit-btn,
 .delete-btn,
@@ -917,18 +864,15 @@ select {
   align-items: center;
   gap: 4px;
 
-
   i {
     font-size: 14px;
   }
 }
 
-
 .edit-btn {
   background: rgba(77, 171, 247, 0.15);
   color: #74c0fc;
   border: 1px solid rgba(77, 171, 247, 0.3);
-
 
   &:hover {
     background: rgba(77, 171, 247, 0.25);
@@ -936,18 +880,15 @@ select {
   }
 }
 
-
 .recurring-btn {
   background: rgba(255, 165, 0, 0.15);
   color: #ffa500;
   border: 1px solid rgba(255, 165, 0, 0.3);
 
-
   &:hover:not(:disabled) {
     background: rgba(255, 165, 0, 0.25);
     border-color: rgba(255, 165, 0, 0.4);
   }
-
 
   &.active,
   &:disabled {
@@ -959,12 +900,10 @@ select {
   }
 }
 
-
 .copy-btn {
   background: rgba(139, 92, 246, 0.15);
   color: #a78bfa;
   border: 1px solid rgba(139, 92, 246, 0.3);
-
 
   &:hover {
     background: rgba(139, 92, 246, 0.25);
@@ -972,12 +911,10 @@ select {
   }
 }
 
-
 .delete-btn {
   background: rgba(255, 107, 107, 0.15);
   color: #fca5a5;
   border: 1px solid rgba(255, 107, 107, 0.3);
-
 
   &:hover {
     background: rgba(255, 107, 107, 0.25);
@@ -985,24 +922,20 @@ select {
   }
 }
 
-
 .attach-btn {
   background: rgba(156, 79, 255, 0.15);
   color: #c084fc;
   border: 1px solid rgba(156, 79, 255, 0.3);
-
 
   &:hover {
     background: rgba(156, 79, 255, 0.25);
     border-color: rgba(156, 79, 255, 0.4);
   }
 
-
   &.has-receipt {
     background: rgba(81, 207, 108, 0.15);
     color: #69db7c;
     border: 1px solid rgba(81, 207, 108, 0.3);
-
 
     &:hover {
       background: rgba(81, 207, 108, 0.25);
@@ -1010,7 +943,6 @@ select {
     }
   }
 }
-
 
 .remove-receipt-btn {
   @extend %btn;
@@ -1025,11 +957,9 @@ select {
   color: #fca5a5;
   border: 1px solid rgba(255, 107, 107, 0.3);
 
-
   i {
     font-size: 16px;
   }
-
 
   &:hover {
     background: rgba(255, 107, 107, 0.25);
@@ -1037,13 +967,11 @@ select {
   }
 }
 
-
 .receipt-actions {
   display: flex;
   align-items: center;
   gap: 4px;
 }
-
 
 .add-show-description-btn,
 .delete-expense-btn {
@@ -1056,18 +984,15 @@ select {
   align-items: center;
   gap: 6px;
 
-
   i {
     font-size: 18px;
   }
 }
 
-
 .add-show-description-btn {
   background: rgba(88, 101, 242, 0.2);
   color: #a5b4fc;
   border: 1px solid rgba(88, 101, 242, 0.3);
-
 
   &:hover {
     background: rgba(88, 101, 242, 0.3);
@@ -1075,19 +1000,16 @@ select {
   }
 }
 
-
 .delete-expense-btn {
   background: rgba(255, 107, 107, 0.2);
   color: #fca5a5;
   border: 1px solid rgba(255, 107, 107, 0.3);
-
 
   &:hover {
     background: rgba(255, 107, 107, 0.3);
     border-color: rgba(255, 107, 107, 0.4);
   }
 }
-
 
 .pagination {
   @include flex(space-between, center, row);
@@ -1097,18 +1019,15 @@ select {
   border-radius: 12px;
   border: 1px solid $borderColor;
 
-
   @media ($_mobile-max) {
     padding: 12px;
     margin-top: 16px;
   }
 
-
   @media ($_small-mobile) {
     padding: 8px;
     margin-top: 12px;
   }
-
 
   .pagination-btn {
     @extend %btn;
@@ -1123,16 +1042,13 @@ select {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid $borderColor;
 
-
     i {
       font-size: 20px;
     }
 
-
     &:disabled {
       opacity: 0.3;
       cursor: not-allowed;
-
 
       &:hover {
         background: rgba(255, 255, 255, 0.05);
@@ -1140,11 +1056,9 @@ select {
     }
   }
 
-
   .page-info {
     color: rgba(255, 255, 255, 0.7);
     font-size: 14px;
-
 
     strong {
       color: rgba(255, 255, 255, 0.9);
@@ -1153,12 +1067,10 @@ select {
   }
 }
 
-
 .expenses-total {
   @include flex(flex-end, center, row);
   margin-top: 20px;
 }
-
 
 .total {
   @extend %card;
@@ -1172,11 +1084,9 @@ select {
   gap: 8px;
   align-items: center;
 
-
   &:hover {
     background: linear-gradient(135deg, rgba(88, 101, 242, 0.3), rgba(156, 79, 255, 0.3));
   }
-
 
   .total-label {
     font-size: 13px;
@@ -1186,23 +1096,19 @@ select {
     letter-spacing: 0.5px;
   }
 
-
   .total-amount {
     font-size: 28px;
     font-weight: 700;
 
-
     &.positive {
       color: $successGreen;
     }
-
 
     &.negative {
       color: $dangerRed;
     }
   }
 }
-
 
 .show-interval {
   font-size: 18px;
@@ -1213,13 +1119,11 @@ select {
   gap: 10px;
   flex: 1;
 
-
   .calendar-icon {
     font-size: 24px;
     color: rgba(255, 255, 255, 0.7);
     margin-bottom: 8px;
   }
-
 
   .interval-select-field {
     margin-left: 30px;
@@ -1228,13 +1132,11 @@ select {
     flex-direction: column;
     gap: 8px;
 
-
     @media ($_mobile-max) {
       min-width: 0;
       margin-left: 0;
       flex: 1;
     }
-
 
     label {
       font-size: 13px;
@@ -1244,7 +1146,6 @@ select {
       letter-spacing: 0.5px;
     }
 
-
     select {
       @extend %input_select;
       background: rgba(255, 255, 255, 0.05);
@@ -1252,13 +1153,11 @@ select {
       transition: all 0.2s ease;
       cursor: pointer;
 
-
       &:focus {
         outline: none;
         border-color: $btnColor;
         background: rgba(255, 255, 255, 0.08);
       }
-
 
       option {
         background: #1a1d3f;
@@ -1268,12 +1167,10 @@ select {
     }
   }
 
-
   span {
     color: rgba(255, 255, 255, 0.95);
     margin-bottom: 8px;
     min-width: 150px;
-
 
     @media ($_mobile-max) {
       min-width: 0;
@@ -1281,12 +1178,10 @@ select {
   }
 }
 
-
 .show-custom {
   @include flex(flex-start, center, row);
   gap: 8px;
   font-size: 16px;
-
 
   p {
     color: rgba(255, 255, 255, 0.6);
@@ -1295,7 +1190,6 @@ select {
   }
 }
 
-
 .show-custom-interval {
   @include flex(flex-start, center, row);
   gap: 16px;
@@ -1303,11 +1197,9 @@ select {
   margin-bottom: 8px;
 }
 
-
 [data-tooltip] {
   position: relative;
   cursor: pointer;
-
 
   &::before {
     content: attr(data-tooltip);
@@ -1331,7 +1223,6 @@ select {
     letter-spacing: 0.3px;
   }
 
-
   &::after {
     content: '';
     position: absolute;
@@ -1347,7 +1238,6 @@ select {
     z-index: 1000;
   }
 
-
   &:hover::before,
   &:hover::after {
     opacity: 1;
@@ -1355,7 +1245,6 @@ select {
     transform: translateX(-50%) translateY(0);
   }
 }
-
 
 .edit-btn[data-tooltip],
 .delete-btn[data-tooltip],
@@ -1368,74 +1257,59 @@ select {
   }
 }
 
-
 .edit-btn[data-tooltip]::before {
   background: linear-gradient(135deg, rgba(77, 171, 247, 0.95) 0%, rgba(51, 154, 240, 0.95) 100%);
 }
-
 
 .edit-btn[data-tooltip]::after {
   border-top-color: rgba(77, 171, 247, 0.95);
 }
 
-
 .recurring-btn[data-tooltip]::before {
   background: linear-gradient(135deg, rgba(255, 165, 0, 0.95) 0%, rgba(255, 140, 0, 0.95) 100%);
 }
-
 
 .recurring-btn[data-tooltip]::after {
   border-top-color: rgba(255, 165, 0, 0.95);
 }
 
-
 .copy-btn[data-tooltip]::before {
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.95) 0%, rgba(124, 58, 237, 0.95) 100%);
 }
-
 
 .copy-btn[data-tooltip]::after {
   border-top-color: rgba(139, 92, 246, 0.95);
 }
 
-
 .delete-btn[data-tooltip]::before {
   background: linear-gradient(135deg, rgba(255, 107, 107, 0.95) 0%, rgba(240, 62, 62, 0.95) 100%);
 }
-
 
 .delete-btn[data-tooltip]::after {
   border-top-color: rgba(255, 107, 107, 0.95);
 }
 
-
 .attach-btn[data-tooltip]::before {
   background: linear-gradient(135deg, rgba(156, 79, 255, 0.95) 0%, rgba(124, 58, 237, 0.95) 100%);
 }
-
 
 .attach-btn[data-tooltip]::after {
   border-top-color: rgba(156, 79, 255, 0.95);
 }
 
-
 .attach-btn.has-receipt[data-tooltip]::before {
   background: linear-gradient(135deg, rgba(81, 207, 108, 0.95) 0%, rgba(51, 183, 79, 0.95) 100%);
 }
-
 
 .attach-btn.has-receipt[data-tooltip]::after {
   border-top-color: rgba(81, 207, 108, 0.95);
 }
 
-
-// Small Desktop
 @media ($_small-desktop) {
   .expenses-table {
     thead th {
       padding: 12px 16px;
       font-size: 10px;
-
 
       &:nth-child(1),
       &:nth-child(2) {
@@ -1443,18 +1317,15 @@ select {
         width: 18%;
       }
 
-
       &:nth-child(6) {
-        padding-left: 90px;
-        padding-right: 2px;
+        padding-left: 0;
+        padding-right: 8px;
       }
     }
-
 
     tbody td {
       padding: 12px 16px;
       font-size: 13px;
-
 
       &:nth-child(6) {
         max-width: 160px;
@@ -1462,10 +1333,9 @@ select {
         overflow: visible;
         text-overflow: clip;
         white-space: nowrap;
-        padding-left: 90px;
-        padding-right: 2px;
+        padding-left: 0;
+        padding-right: 8px;
       }
-
 
       &:nth-child(1),
       &:nth-child(2) {
@@ -1475,7 +1345,6 @@ select {
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-
 
       &:nth-child(3) {
         max-width: 110px;
@@ -1485,7 +1354,6 @@ select {
         white-space: nowrap;
       }
 
-
       &:nth-child(4) {
         max-width: 95px;
         width: 12%;
@@ -1493,7 +1361,6 @@ select {
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-
 
       &:nth-child(5) {
         max-width: 85px;
@@ -1505,10 +1372,8 @@ select {
     }
   }
 
-
   .add-expense-row td {
-    padding: 12px 16px !important;
-
+    padding: 12px 16px;
 
     &:nth-child(1),
     &:nth-child(2) {
@@ -1516,36 +1381,30 @@ select {
       width: 18%;
     }
 
-
     &:nth-child(3) {
       max-width: 110px;
       width: 13%;
     }
-
 
     &:nth-child(4) {
       max-width: 95px;
       width: 12%;
     }
 
-
     &:nth-child(5) {
       max-width: 85px;
       width: 10%;
     }
 
-
     &:nth-child(6) {
       max-width: 160px;
       width: auto;
-      padding-left: 90px;
-      padding-right: 2px;
+      padding-left: 0;
+      padding-right: 8px;
     }
   }
 }
 
-
-// Tablets
 @media ($_tablet-range) {
   .expenses-table {
     th,
@@ -1554,26 +1413,21 @@ select {
       font-size: 13px;
     }
 
-
     thead th {
       &:nth-child(1) {
-        min-width: 70px;
-        width: 12%;
+        display: none;
       }
-
 
       &:nth-child(2) {
         min-width: 95px;
-        width: 17%;
+        width: 22%;
       }
-
 
       &:nth-child(6) {
-        padding-left: 50px;
-        padding-right: 2px;
+        padding-left: 0;
+        padding-right: 8px;
       }
     }
-
 
     tbody td {
       &:nth-child(6) {
@@ -1582,28 +1436,21 @@ select {
         overflow: visible;
         text-overflow: clip;
         white-space: nowrap;
-        padding-left: 50px;
-        padding-right: 2px;
+        padding-left: 0;
+        padding-right: 8px;
       }
-
 
       &:nth-child(1) {
-        min-width: 70px;
-        width: 12%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        display: none;
       }
-
 
       &:nth-child(2) {
         min-width: 95px;
-        width: 17%;
+        width: 22%;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-
 
       &:nth-child(3) {
         max-width: 110px;
@@ -1613,7 +1460,6 @@ select {
         white-space: nowrap;
       }
 
-
       &:nth-child(4) {
         max-width: 95px;
         width: 12%;
@@ -1621,7 +1467,6 @@ select {
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-
 
       &:nth-child(5) {
         max-width: 85px;
@@ -1633,244 +1478,258 @@ select {
     }
   }
 
-
   .add-expense-row {
     td {
-      padding: 8px 6px !important;
-
+      padding: 8px 6px;
 
       &:nth-child(1) {
         min-width: 70px;
         width: 12%;
       }
 
-
       &:nth-child(2) {
         min-width: 95px;
         width: 17%;
       }
-
 
       &:nth-child(3) {
         max-width: 110px;
         width: 13%;
       }
 
-
       &:nth-child(4) {
         max-width: 95px;
         width: 12%;
       }
-
 
       &:nth-child(5) {
         max-width: 85px;
         width: 10%;
       }
 
-
       &:nth-child(6) {
         max-width: 160px;
         width: auto;
-        padding-left: 50px;
-        padding-right: 2px;
+        padding-left: 0;
+        padding-right: 8px;
       }
     }
   }
 }
 
-
-// Mobile
 @media ($_mobile-max) {
-  .expenses-table {
-    font-size: 12px;
+  .expenses-header {
+    padding: 12px 12px;
+    gap: 8px;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
 
+  .expenses-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: center;
+    white-space: nowrap;
+    font-size: 16px;
+  }
 
-    th,
-    td {
-      padding: 8px 10px;
+  .header-actions {
+    flex: 0 0 auto;
+    justify-content: flex-end;
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+
+  .filter-btn,
+  .sort-btn {
+    padding: 4px 8px;
+    height: 28px;
+    font-size: 11px;
+    gap: 3px;
+
+    i {
+      font-size: 14px;
     }
 
+    span {
+      display: none;
+    }
+  }
+
+  .show-interval {
+    display: none;
+  }
+
+  .expenses-table {
+    width: 100%;
+    display: block;
 
     thead {
-      display: table-header-group !important;
-
-
-      tr {
-        display: table-row !important;
-      }
-
+      display: block;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: #2a2f5a;
 
       tr.section-header {
-        display: table-row !important;
-
+        display: block;
 
         th {
-          display: table-cell !important;
-          width: auto !important;
-          position: sticky;
-          top: 0;
-          z-index: 30;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
           background: #2a2f5a;
+          padding: 8px 12px;
+          text-align: center;
         }
       }
 
+      .section-title {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        min-width: 0;
+        margin: 0 auto;
+        white-space: nowrap;
+      }
 
-      th {
-        font-size: 10px;
-
-
-        &:nth-child(1),
-        &:nth-child(2) {
-          min-width: 90px;
-          width: 16%;
-        }
-
-
-        &:nth-child(6) {
-          padding-left: 70px;
-          padding-right: 2px;
-        }
+      tr:not(.section-header) {
+        display: none;
       }
     }
-
 
     tbody {
-      display: table-row-group !important;
-
+      display: block;
+      overflow: visible;
 
       tr {
-        display: table-row !important;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+          'name price'
+          'date actions';
+        align-items: center;
+        row-gap: 6px;
+        column-gap: 8px;
+        padding: 10px 12px;
+        min-height: 78px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        width: 100%;
+        box-sizing: border-box;
       }
-
 
       td {
-        &:nth-child(6) {
-          max-width: 150px;
-          width: auto;
-          overflow: visible;
-          text-overflow: clip;
-          white-space: nowrap;
-          padding-left: 70px;
-          padding-right: 2px;
-        }
-
-
-        &:nth-child(1),
-        &:nth-child(2) {
-          min-width: 90px;
-          width: 16%;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-
-        &:nth-child(3) {
-          max-width: 100px;
-          width: 12%;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-
-        &:nth-child(4) {
-          max-width: 85px;
-          width: 11%;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-
-        &:nth-child(5) {
-          max-width: 80px;
-          width: 10%;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-      }
-    }
-  }
-
-
-  .add-expense-row {
-    td {
-      padding: 8px 10px !important;
-
-
-      &:nth-child(1),
-      &:nth-child(2) {
-        min-width: 90px;
-        width: 16%;
+        display: block;
+        padding: 0;
+        border: none;
+        height: auto;
+        min-width: 0;
       }
 
-
-      &:nth-child(3) {
-        max-width: 100px;
-        width: 12%;
+      td:nth-child(1),
+      td:nth-child(4) {
+        display: none;
       }
 
-
-      &:nth-child(4) {
-        max-width: 85px;
-        width: 11%;
-      }
-
-
-      &:nth-child(5) {
-        max-width: 80px;
-        width: 10%;
-      }
-
-
-      &:nth-child(6) {
-        max-width: 150px;
+      td:nth-child(2),
+      td:nth-child(3),
+      td:nth-child(5),
+      td:nth-child(6) {
         width: auto;
-        padding-left: 70px;
-        padding-right: 2px;
+        max-width: none;
       }
 
-
-      input,
-      select {
-        font-size: 12px;
-        padding: 6px 8px;
+      td:nth-child(2) {
+        grid-area: name;
+        display: block;
+        min-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-size: 13px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.95);
       }
-    }
 
+      td:nth-child(3) {
+        grid-area: date;
+        display: block;
+        min-width: 0;
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.5);
+        white-space: nowrap;
+      }
 
-    .add-btn {
-      padding: 6px 12px;
-      font-size: 11px;
+      td:nth-child(5) {
+        grid-area: price;
+        display: block;
+        justify-self: end;
+        align-self: center;
+        white-space: nowrap;
+        font-size: 13px;
+        font-weight: 700;
+        color: #51cf66;
+        text-align: right;
+      }
+
+      td:nth-child(6) {
+        grid-area: actions;
+        display: flex;
+        justify-self: end;
+        align-items: center;
+        min-width: 0;
+        overflow: visible;
+        text-overflow: clip;
+        white-space: nowrap;
+        padding-left: 0;
+      }
     }
   }
 
+  .expense-name-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 
   .action-buttons {
-    gap: 2px !important;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 2px;
+    width: auto;
   }
 
+  .receipt-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 2px;
+  }
 
   .edit-btn,
   .delete-btn,
   .attach-btn,
   .recurring-btn,
-  .copy-btn {
-    padding: 2px 4px !important;
-    height: 22px !important;
-
+  .copy-btn,
+  .remove-receipt-btn {
+    padding: 2px 4px;
+    height: 22px;
+    min-width: 22px;
 
     i {
-      font-size: 12px !important;
+      font-size: 12px;
     }
   }
 }
 
-
-// Small mobile
 @media ($_small-mobile) {
   .expenses-header {
     padding: 12px 16px;
@@ -1880,21 +1739,18 @@ select {
     align-items: center;
   }
 
-
   .expenses-title {
     font-size: 16px;
     flex: 0 0 auto;
-    text-align: left;
+    text-align: center;
     white-space: nowrap;
   }
-
 
   .header-actions {
     flex: 0 0 auto;
     gap: 6px;
     margin-left: auto;
   }
-
 
   .filter-btn,
   .sort-btn {
@@ -1903,194 +1759,62 @@ select {
     font-size: 11px;
     gap: 3px;
 
-
     i {
       font-size: 14px;
     }
-
 
     span {
       display: none;
     }
   }
 
-
   .show-interval {
     display: none;
   }
 
+  .table-scroll-wrapper {
+    max-height: 246px;
 
-  .expenses-table-container {
-    overflow: visible !important;
-    width: 100%;
-    box-sizing: border-box;
+    &.onetime {
+      max-height: 246px;
+    }
   }
-
 
   .expenses-table {
-    min-width: 600px;
-    font-size: 11px;
-
-
-    thead {
-      th {
-        padding: 8px;
-        font-size: 9px;
-        white-space: nowrap;
-
-
-        &:nth-child(1),
-        &:nth-child(2) {
-          min-width: 60px;
-          width: 11%;
-        }
-
-
-        &:nth-child(6) {
-          padding-left: 50px;
-          padding-right: 2px;
-        }
-      }
-    }
-
-
     tbody {
-      td {
-        padding: 8px;
+      tr {
+        padding: 8px 8px;
+        min-height: 74px;
+        row-gap: 4px;
+        column-gap: 6px;
+      }
 
+      td:nth-child(2) {
+        font-size: 12px;
+      }
 
-        &:nth-child(6) {
-          max-width: 140px;
-          width: auto;
-          overflow: visible;
-          text-overflow: clip;
-          white-space: nowrap;
-          padding-left: 50px;
-          padding-right: 2px;
-        }
+      td:nth-child(3) {
+        font-size: 10px;
+      }
 
-
-        &:nth-child(1),
-        &:nth-child(2) {
-          min-width: 60px;
-          width: 11%;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-
-        &:nth-child(3) {
-          max-width: 80px;
-          width: 11%;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-
-        &:nth-child(4) {
-          max-width: 60px;
-          width: 10%;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-
-        &:nth-child(5) {
-          max-width: 60px;
-          width: 9%;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
+      td:nth-child(5) {
+        font-size: 12px;
       }
     }
   }
-
-
-  .add-expense-row {
-    td {
-      padding: 8px !important;
-
-
-      &:nth-child(1),
-      &:nth-child(2) {
-        min-width: 60px;
-        width: 11%;
-      }
-
-
-      &:nth-child(3) {
-        max-width: 80px;
-        width: 11%;
-      }
-
-
-      &:nth-child(4) {
-        max-width: 60px;
-        width: 10%;
-      }
-
-
-      &:nth-child(5) {
-        max-width: 60px;
-        width: 9%;
-      }
-
-
-      &:nth-child(6) {
-        max-width: 140px;
-        width: auto;
-        padding-left: 50px;
-        padding-right: 2px;
-      }
-
-
-      input,
-      select {
-        font-size: 11px;
-        padding: 5px 6px;
-        min-height: 32px;
-      }
-    }
-
-
-    .add-btn {
-      padding: 5px 10px;
-      font-size: 10px;
-      height: 32px;
-      min-width: 60px;
-    }
-  }
-
-
-  .action-btns {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-
-
-    button,
-    a {
-      font-size: 12px;
-      padding: 4px 8px;
-    }
-  }
-
 
   .edit-btn,
   .delete-btn,
   .attach-btn,
   .recurring-btn,
-  .copy-btn {
-    padding: 1px 3px !important;
-    height: 20px !important;
-
+  .copy-btn,
+  .remove-receipt-btn {
+    padding: 1px 3px;
+    height: 20px;
+    min-width: 20px;
 
     i {
-      font-size: 11px !important;
+      font-size: 11px;
     }
   }
 }

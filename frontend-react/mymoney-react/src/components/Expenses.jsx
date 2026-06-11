@@ -560,11 +560,12 @@ const Expenses = () => {
                 </table>
                 </div>
                 
-                {/* One-time Expenses Table */}
-                {authProviderValues.isLoggedIn && regularRows.length > 0 && (
+                {/* One-time Expenses Table - always show for add expense form */}
+                {authProviderValues.isLoggedIn && (
                     <div className="table-scroll-wrapper onetime">
                     <table className="expenses-table">
                         <thead>
+                            {regularRows.length > 0 && (
                             <tr className="section-header">
                                 <th colSpan={6}>
                                     <div className="section-title" onClick={() => setIsRegularCollapsed(!isRegularCollapsed)} style={{cursor: 'pointer'}}>
@@ -576,6 +577,7 @@ const Expenses = () => {
                                     </div>
                                 </th>
                             </tr>
+                            )}
                             <tr>                       
                                 <th>CATEGORY</th>                      
                                 <th>EXPENSE</th>                                           
@@ -586,7 +588,7 @@ const Expenses = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {!isRegularCollapsed && regularRows.map((row, idx) => (
+                            {regularRows.length > 0 && !isRegularCollapsed && regularRows.map((row, idx) => (
                                 <tr key={row.id || idx}>
                                     <td>
                                         {
