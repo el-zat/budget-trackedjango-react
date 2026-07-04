@@ -46,18 +46,18 @@ const Sort = () => {
                                     <span>By date: oldest first</span>
                                     </label>
                                 </div>                                
-                                <div className="sort-category">
+                                <div className="sort-expense">
                                     <label>
                                     <input
                                         type="radio"
                                         name="sort"
-                                        value="category"
-                                        checked={sortProviderValues.selectedSort === "category"}
+                                        value="expense"
+                                        checked={sortProviderValues.selectedSort === "expense"}
                                         onChange={e => {
                                             sortProviderValues.onSortChange(e.target.value);
                                         }}
                                     />
-                                    <span>By category</span> <i className="material-icons">sort_by_alpha</i>
+                                    <span>By expense name</span> <i className="material-icons">sort_by_alpha</i>
                                     </label>
                                 </div>                                
                                 <div className="sort-price">

@@ -34,7 +34,7 @@ function Login() {
                       <div className="login-container">
                           <h2 >Sign in</h2>
                           <form onSubmit={authProviderValues.handleLogin} >                               
-                              <div> 
+                              <div className="form-group"> 
                               <label htmlFor="username">Username/e-mail:</label>
                               <input 
                                 type="text"
@@ -75,7 +75,7 @@ function Login() {
                               
                           </form>
                           {authProviderValues.message && (
-                            <div className="login-message"> 
+                            <div className={`login-message ${authProviderValues.loginSuccess ? 'login-message--success' : ''}`}> 
                               {authProviderValues.message}
                             </div>
                           )}

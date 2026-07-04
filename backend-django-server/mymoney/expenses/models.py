@@ -89,7 +89,39 @@ class RecurringExpense(models.Model):
     def __str__(self):
         return f"{self.name} ({self.frequency}) | Category: {self.category.name}"
 
+    def get_price_for_date(self, target_date):
+        """Get the effective price for a given date, considering price changes."""
+        price_change = self.price_changes.filter(
+            effective_date__lte=target_date
+        ).order_by('-effective_date').first()
+        
+        if price_change:
+            return price_change.new_price
+        return self.price
+
     class Meta:
         verbose_name = 'Recurring Expense'
         verbose_name_plural = 'Recurring Expenses'
+
+
+class RecurringExpensePriceChange(models.Model):
+    """Tracks price changes for recurring expenses with effective dates."""
+    recurring_expense = models.ForeignKey(
+        RecurringExpense, 
+        on_delete=models.CASCADE, 
+        related_name='price_changes'
+    )
+    new_price = models.DecimalField(max_digits=6, decimal_places=2)
+    effective_date = models.DateField()
+    note = models.CharField(max_length=256, blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.recurring_expense.name}: €{self.new_price} from {self.effective_date}"
+
+    class Meta:
+        verbose_name = 'Recurring Expense Price Change'
+        verbose_name_plural = 'Recurring Expense Price Changes'
+        ordering = ['-effective_date']
+        unique_together = ['recurring_expense', 'effective_date']
 

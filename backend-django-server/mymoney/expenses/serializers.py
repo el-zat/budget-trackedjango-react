@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category, Expense, MyExpense, RecurringExpense
+from .models import Category, Expense, MyExpense, RecurringExpense, RecurringExpensePriceChange
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -41,9 +41,19 @@ class MyExpenseSerializer(serializers.ModelSerializer):
         return instance
 
 
+class RecurringExpensePriceChangeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecurringExpensePriceChange
+        fields = ['id', 'recurring_expense', 'new_price', 'effective_date', 'note', 'created_at']
+        read_only_fields = ['created_at']
+
+
 class RecurringExpenseSerializer(serializers.ModelSerializer):
+    price_changes = RecurringExpensePriceChangeSerializer(many=True, read_only=True)
+    
     class Meta:
         model = RecurringExpense
         fields = ['id', 'name', 'description', 'price', 'quantity', 'category', 'frequency', 
-                  'start_date', 'end_date', 'next_occurrence', 'is_active', 'created_at', 'updated_at']
+                  'start_date', 'end_date', 'next_occurrence', 'is_active', 'created_at', 'updated_at',
+                  'price_changes']
         read_only_fields = ['created_at', 'updated_at']

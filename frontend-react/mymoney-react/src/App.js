@@ -9,6 +9,7 @@ import {AuthContext} from './context/AuthContext'
 import {DescriptionContext} from './context/DescriptionContext'
 import { ModalContext } from './context/ModalContext';
 import RecurringExpenseModal from './components/RecurringExpenseModal';
+import PriceChangeModal from './components/PriceChangeModal';
 import GlobalTooltip from './components/GlobalTooltip';
 
 
@@ -78,6 +79,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginEmail, setLoginEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [loginSuccess, setLoginSuccess] = useState(false);
   const [loginUsername, setLoginUsername] = useState(localStorage.getItem('loginUsername') || '');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginValue, setLoginValue] = useState('');
@@ -111,6 +113,9 @@ function App() {
   const [isModalCustomDateOpen, setIsModalCustomDateOpen] = useState(false);
   const [isModalRecurringOpen, setIsModalRecurringOpen] = useState(false);
   const [selectedExpenseForRecurring, setSelectedExpenseForRecurring] = useState(null);
+  const [isModalPriceChangeOpen, setIsModalPriceChangeOpen] = useState(false);
+  const [selectedExpenseForPriceChange, setSelectedExpenseForPriceChange] = useState(null);
+  const [priceChangeType, setPriceChangeType] = useState(null); // 'expense' or 'income'
 
   // Get token
   function getAuthHeaders() {
@@ -419,7 +424,7 @@ function App() {
   const totalPrice = () => {      
       if (isLoggedIn && Array.isArray(filteredRows)) {
           return filteredRows.reduce((prevTotal, row) => {
-              const price = Number(row.price) || 0;
+              const price = Number(getEffectivePriceForRow(row)) || 0;
               return prevTotal + price;
           }, 0)
       } 
@@ -429,12 +434,27 @@ function App() {
   const allRowsTotalPrice = () => {      
       if (isLoggedIn && Array.isArray(rows)) {
           return rows.reduce((prevTotal, row) => {
-              const price = Number(row.price) || 0;
+              const price = Number(getEffectivePriceForRow(row)) || 0;
               return prevTotal + price;
           }, 0)
       } 
       else { return 0}
   }
+
+  // Get the effective price for a row, considering price changes
+  const getEffectivePriceForRow = (row) => {
+      if (!row.price_changes || row.price_changes.length === 0) {
+          return row.price;
+      }
+      
+      const referenceDate = startDate ? new Date(startDate) : new Date();
+      
+      const applicableChange = row.price_changes
+          .filter(change => new Date(change.effective_date) <= referenceDate)
+          .sort((a, b) => new Date(b.effective_date) - new Date(a.effective_date))[0];
+      
+      return applicableChange ? applicableChange.new_price : row.price;
+  };
 
   const monthlyTotalPrice = () => {      
       if (isLoggedIn && Array.isArray(rows)) {
@@ -447,7 +467,7 @@ function App() {
           console.log('monthlyTotalPrice: start=', start, 'end=', end);
           
           const total = rows.reduce((prevTotal, row) => {
-              const price = Number(row.price) || 0;
+              const price = Number(getEffectivePriceForRow(row)) || 0;
               
               // Check if this is a recurring expense
               const isRecurring = (row.frequency && row.frequency !== 'once') || row.is_recurring;
@@ -648,6 +668,7 @@ function App() {
       e.preventDefault();
 
       setMessage('');
+      setLoginSuccess(false);
 
       const loginPayload = {
         login: loginValue,
@@ -670,6 +691,7 @@ function App() {
           const data = await response.json(); //Get username from response
           console.log("Login response data:", data);
           localStorage.setItem('token', data.token);  //Save token in local storage
+          setLoginSuccess(true);
           setMessage('Login successful!');
           setIsSignupMessageShown(false);
           setLoginEmail(data.email);            
@@ -1245,6 +1267,109 @@ function App() {
     }
   };
 
+  // Create a price change for a recurring expense (effective from a specific date)
+  const createExpensePriceChange = async (recurringExpenseId, newPrice, effectiveDate, note = '') => {
+    try {
+      const priceValue = getCleanPrice(newPrice);
+      const response = await fetch('/api/recurringexpensepricechanges/', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        credentials: 'include',
+        body: JSON.stringify({
+          recurring_expense: recurringExpenseId,
+          new_price: priceValue,
+          effective_date: effectiveDate,
+          note: note
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to create price change: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('Price change created:', result);
+
+      // Refresh expenses to get updated price_changes
+      await fetchExpenses();
+      setEditingField({ id: null, field: null });
+      setEditPrice('');
+    } catch (error) {
+      console.error('Error creating price change:', error);
+      throw error;
+    }
+  };
+
+  // Create an amount change for a recurring income (effective from a specific date)
+  const createIncomeAmountChange = async (incomeId, newAmount, effectiveDate, note = '') => {
+    try {
+      const amountValue = getCleanPrice(newAmount);
+      const response = await fetch('/api/incomeamountchanges/', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        credentials: 'include',
+        body: JSON.stringify({
+          income: incomeId,
+          new_amount: amountValue,
+          effective_date: effectiveDate,
+          note: note
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to create amount change: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('Amount change created:', result);
+
+      // Refresh incomes to get updated amount_changes
+      await fetchIncomes();
+    } catch (error) {
+      console.error('Error creating income amount change:', error);
+      throw error;
+    }
+  };
+
+  // Apply income changes directly with a value (for modal use)
+  const applyIncomeAmountDirect = async (id, field, value) => {
+    try {
+      const income = incomes.find(inc => inc.id === id);
+      if (!income) {
+        alert('Error: income not found!');
+        return;
+      }
+
+      let bodyData = {};
+      if (field === 'amount') {
+        const amountValue = getCleanPrice(value);
+        bodyData = { amount: amountValue };
+      } else if (field === 'name') {
+        bodyData = { name: value };
+      }
+
+      const response = await fetch(`/api/incomes/${id}/`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        credentials: 'include',
+        body: JSON.stringify(bodyData)
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setIncomes(incomes.map(inc => inc.id === id ? { ...inc, ...result } : inc));
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to update income: ${errorText}`);
+      }
+    } catch (error) {
+      console.error('Error in applyIncomeAmountDirect:', error);
+      throw error;
+    }
+  };
+
 
   //Description 
 
@@ -1756,6 +1881,9 @@ function App() {
       getToday: getToday,
       getFirstDayOfYear: getFirstDayOfYear,
       applyChanges: applyChanges,
+      createExpensePriceChange: createExpensePriceChange,
+      createIncomeAmountChange: createIncomeAmountChange,
+      applyIncomeAmountDirect: applyIncomeAmountDirect,
       deleteExpense: deleteExpense,
       copyExpense: copyExpense,
       createRecurringExpense: createRecurringExpense,
@@ -1789,6 +1917,8 @@ function App() {
       loginUsername,
       loginPassword, 
       loginValue,
+      message,
+      loginSuccess,
       registrationUsername,
       getAuthHeaders,
       getCookie,
@@ -1815,12 +1945,18 @@ function App() {
       isModalCustomDateOpen,
       isModalRecurringOpen,
       selectedExpenseForRecurring,
+      isModalPriceChangeOpen,
+      selectedExpenseForPriceChange,
+      priceChangeType,
       setIsModalSortOpen,
       setIsModalLoginOpen,
       setIsModalRegistrationOpen,
       setIsModalCustomDateOpen,
       setIsModalRecurringOpen,
       setSelectedExpenseForRecurring,
+      setIsModalPriceChangeOpen,
+      setSelectedExpenseForPriceChange,
+      setPriceChangeType,
     };
 
   const incomeProviderValues = {
@@ -1861,6 +1997,7 @@ function App() {
                 <DescriptionContext.Provider value={descriptionProviderValues}>
                   <Main />
                   <RecurringExpenseModal />
+                  <PriceChangeModal />
                   <GlobalTooltip />
                 </DescriptionContext.Provider>
               </IncomeContext.Provider>

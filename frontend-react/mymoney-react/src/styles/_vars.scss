@@ -76,12 +76,14 @@ $dangerRed: #ff6b6b;
 
     &:hover {
         background-color: $btnHoverColor;
-        box-shadow: 0 4px 12px rgba(88, 101, 242, 0.4);
+        box-shadow: 0 6px 16px rgba(88, 101, 242, 0.5);
+        transform: translateY(-1px);
     }
     &:focus {
         outline: none;
     }
     &:active {
+        transform: translateY(0);
         box-shadow: 0 2px 8px rgba(88, 101, 242, 0.3);
     }
 }

@@ -7,6 +7,7 @@ import { AuthContext } from "../context/AuthContext";
 import { ModalContext } from "../context/ModalContext";
 import { SortContext } from "../context/SortContext";
 import { Sort } from "./Sort"
+import ReceiptScanner from "./ReceiptScanner";
 
 
 const Expenses = () => {
@@ -68,6 +69,25 @@ const Expenses = () => {
             // For one-time expenses, show actual date
             return formatDate(expense.payment_date);
         }
+    };
+
+    // Get effective price for a recurring expense based on the current period
+    const getEffectivePrice = (expense) => {
+        if (!expense.price_changes || expense.price_changes.length === 0) {
+            return expense.price;
+        }
+        
+        // Determine the reference date (current period start or today)
+        const referenceDate = filterProviderValues.startDate 
+            ? new Date(filterProviderValues.startDate) 
+            : new Date();
+        
+        // Find the most recent price change that is effective on or before the reference date
+        const applicableChange = expense.price_changes
+            .filter(change => new Date(change.effective_date) <= referenceDate)
+            .sort((a, b) => new Date(b.effective_date) - new Date(a.effective_date))[0];
+        
+        return applicableChange ? applicableChange.new_price : expense.price;
     };
 
     console.log("Filtered and sorted rows:", filterProviderValues.filteredRows)
@@ -237,6 +257,7 @@ const Expenses = () => {
                     <h2 className="expenses-title">Expenses</h2>
 
                     <div className="header-actions">
+                        {authProviderValues.isLoggedIn && <ReceiptScanner />}
                         {!modalProviderValues.isModalSortOpen  && authProviderValues.isLoggedIn &&                              
                             <button className="sort-btn" 
                                 onClick={() => modalProviderValues.setIsModalSortOpen(true)}>
@@ -355,7 +376,7 @@ const Expenses = () => {
                                                                 if (newDate && newDate !== row.payment_date) {
                                                                     setTimeout(() => {
                                                                         console.log('Auto-saving recurring date change');
-                                                                        expensesProviderValues.applyChanges(row.id, 'date');
+                                                                        expensesProviderValues.applyChanges(row.id, 'date', newDate);
                                                                     }, 300);
                                                                 }
                                                             }}
@@ -369,7 +390,7 @@ const Expenses = () => {
                                                         <div className="tooltip-icon-container" 
                                                             onClick={() => {
                                                                 expensesProviderValues.setEditingField({id: row.id, field: 'date'});
-                                                                expensesProviderValues.setEditDate(row.date);
+                                                                expensesProviderValues.setEditDate(row.payment_date);
                                                             }}
                                                             data-tooltip="Edit date"
                                                         > 
@@ -445,13 +466,14 @@ const Expenses = () => {
                                                         ) : (
                                                             <div className="tooltip-icon-container" 
                                                                 onClick={() => {
-                                                                    expensesProviderValues.setEditingField({id: row.id, field: 'price'});
-                                                                    const priceValue = String(row.price).replace(',', '.');
-                                                                    expensesProviderValues.setEditPrice(priceValue);
+                                                                    // For recurring expenses, open the price change modal
+                                                                    modalProviderValues.setSelectedExpenseForPriceChange(row);
+                                                                    modalProviderValues.setPriceChangeType('expense');
+                                                                    modalProviderValues.setIsModalPriceChangeOpen(true);
                                                                 }}
                                                                 data-tooltip="Edit price"
                                                             >
-                                                                € {row.price} 
+                                                                € {getEffectivePrice(row)} 
                                                             </div>
                                                         )}
                                                     </td>
@@ -562,7 +584,7 @@ const Expenses = () => {
                 
                 {/* One-time Expenses Table - always show for add expense form */}
                 {authProviderValues.isLoggedIn && (
-                    <div className="table-scroll-wrapper onetime">
+                    <div className={`table-scroll-wrapper onetime${regularRows.length === 0 ? ' no-regular' : ''}`}>
                     <table className="expenses-table">
                         <thead>
                             {regularRows.length > 0 && (
@@ -646,7 +668,7 @@ const Expenses = () => {
                                                 if (newDate && newDate !== row.payment_date) {
                                                     setTimeout(() => {
                                                         console.log('Auto-saving one-time date change');
-                                                        expensesProviderValues.applyChanges(row.id, 'date');
+                                                        expensesProviderValues.applyChanges(row.id, 'date', newDate);
                                                     }, 300);
                                                 }
                                             }}
@@ -660,7 +682,7 @@ const Expenses = () => {
                                         <div className="tooltip-icon-container" 
                                             onClick={() => {
                                                 expensesProviderValues.setEditingField({id: row.id, field: 'date'});
-                                                expensesProviderValues.setEditDate(row.date);
+                                                expensesProviderValues.setEditDate(row.payment_date);
                                             }}
                                             data-tooltip="Edit date"
                                         > 

@@ -63,8 +63,8 @@ function Description( {id} ) {
               <button 
                 className="close-description" 
                 onClick={descriptionProviderValues.closeDescription}
-                style = {{width: '30px'}}
-                >x
+                >
+                <i className="material-icons">close</i>
                 </button>            
               <textarea
                   value={description}

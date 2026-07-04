@@ -1,6 +1,9 @@
 from rest_framework import serializers
 from .models import User, EmailVerification
 from django.contrib.auth import get_user_model, authenticate
+from datetime import timedelta
+from django.utils.timezone import now
+import uuid
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -55,6 +58,14 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             last_name=validated_data['last_name'],
             password=validated_data['password1'],
         )
+        # Create email verification and send email
+        expiration = now() + timedelta(hours=48)
+        record = EmailVerification.objects.create(
+            code=uuid.uuid4(),
+            user=user,
+            expiration=expiration,
+        )
+        record.send_verification_email()
         return user
     
 

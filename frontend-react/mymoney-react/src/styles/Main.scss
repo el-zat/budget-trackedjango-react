@@ -99,13 +99,24 @@ main {
 .header-section {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 30px;
   gap: 20px;
-  flex-wrap: wrap;
   width: 100%;
   box-sizing: border-box;
   min-width: 0;
+
+  h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .brand-logo {
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
+  }
 
   @media ($_small-desktop) {
     margin-bottom: 24px;
@@ -115,6 +126,11 @@ main {
   @media ($_tablet-range) {
     margin-bottom: 20px;
     gap: 16px;
+    .brand-logo {
+    width: 45px;
+    height: 45px;
+    flex: 0 0 45px;
+  }
   }
 
   @media ($_mobile-max) {
@@ -127,25 +143,15 @@ main {
     .header-left {
       align-items: center;
     }
+
+    .brand-logo {
+      width: 35px;
+      height: 35px;
+      flex-basis: 35px;
+    }
   }
 }
 
-.header-left {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  flex-shrink: 1;
-  min-width: 0;
-
-  @media ($_tablet-range) {
-    gap: 10px;
-  }
-
-  @media ($_mobile-max) {
-    gap: 8px;
-    max-width: 100%;
-  }
-}
 
 .user-actions {
   display: flex;
@@ -270,12 +276,14 @@ h1 {
 .stat-item {
   flex: 1;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 16px;
   padding: 18px 20px;
   position: relative;
   min-width: 0;
   flex-shrink: 1;
+  align-items: center;
+  text-align: center;
 
   &:not(:last-child) {
     border-right: 1px solid $borderColor;
@@ -417,7 +425,6 @@ h1 {
     gap: 8px;
     flex-direction: column;
     align-items: center;
-    text-align: center;
 
     &:not(:last-child) {
       border-right: 1px solid $borderColor;
@@ -612,11 +619,16 @@ main,
   overflow: hidden;
 }
 
+.expenses-table td:has(.action-buttons),
+.expenses-table td:has(.receipt-actions) {
+  overflow: visible;
+}
+
 .action-buttons,
 .receipt-actions {
   min-width: 0;
   flex-wrap: nowrap;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .expense-name-cell {

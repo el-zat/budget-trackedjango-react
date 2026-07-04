@@ -1,7 +1,7 @@
 from pyexpat.errors import messages
 from django.contrib import admin
 # from django.contrib.auth.admin import UserAdmin
-from expenses.models import Category, Expense, MyExpense, RecurringExpense
+from expenses.models import Category, Expense, MyExpense, RecurringExpense, RecurringExpensePriceChange
 # from django.contrib.auth.models import User
 import copy
 
@@ -34,8 +34,15 @@ class RecurringExpenseAdmin(admin.ModelAdmin):
     search_fields = ['name', 'description']
 
 
+class RecurringExpensePriceChangeAdmin(admin.ModelAdmin):
+    list_display = ['recurring_expense', 'new_price', 'effective_date', 'note', 'created_at']
+    list_filter = ['effective_date']
+    search_fields = ['recurring_expense__name', 'note']
+
+
 admin.site.register(MyExpense, MyExpenseAdmin)
 admin.site.register(RecurringExpense, RecurringExpenseAdmin)
+admin.site.register(RecurringExpensePriceChange, RecurringExpensePriceChangeAdmin)
 admin.site.register(Expense)
 admin.site.register(Category)
 

@@ -2,10 +2,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse
 from rest_framework.routers import DefaultRouter
-from expenses.views import CategoryViewSet, ExpenseViewSet, MyExpenseViewSet, RecurringExpenseViewSet
-from incomes.views import IncomeCategoryViewSet, IncomeViewSet
+from expenses.views import CategoryViewSet, ExpenseViewSet, MyExpenseViewSet, RecurringExpenseViewSet, RecurringExpensePriceChangeViewSet, ReceiptScanView
+from incomes.views import IncomeCategoryViewSet, IncomeViewSet, IncomeAmountChangeViewSet
 from users.views import (UserViewSet, EmailVerificationViewSet, UserLoginAPIView,
-                         UserProfileViewSet, UserRegistrationView, UserLogoutAPIView)
+                         UserProfileViewSet, UserRegistrationView, UserLogoutAPIView,
+                         EmailVerificationConfirmView, ResendVerificationEmailView)
 from django.urls import re_path
 # from expenses.views import FrontendAppView  # Commented out for development
 
@@ -15,8 +16,10 @@ router.register(r'categories', CategoryViewSet)
 router.register(r'expenses', ExpenseViewSet)
 router.register(r'myexpenses', MyExpenseViewSet, basename='myexpense')
 router.register(r'recurringexpenses', RecurringExpenseViewSet, basename='recurringexpense')
+router.register(r'recurringexpensepricechanges', RecurringExpensePriceChangeViewSet, basename='recurringexpensepricechange')
 router.register(r'incomecategories', IncomeCategoryViewSet)
 router.register(r'incomes', IncomeViewSet, basename='income')
+router.register(r'incomeamountchanges', IncomeAmountChangeViewSet, basename='incomeamountchange')
 router.register(r'users', UserViewSet)
 router.register(r'emailverifications', EmailVerificationViewSet)
 router.register(r'userprofile', UserProfileViewSet, basename='userprofile')
@@ -27,9 +30,12 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
 
+    path('api/receipt-scan/', ReceiptScanView.as_view(), name='receipt-scan'),
     path('api/login/', UserLoginAPIView.as_view(), name='user-login'),
     path('api/registration/', UserRegistrationView.as_view(), name='user-registration'),
     path('api/logout/', UserLogoutAPIView.as_view(), name='user-logout'),
+    path('api/resend-verification/', ResendVerificationEmailView.as_view(), name='resend-verification'),
+    path('verify/<str:email>/<uuid:code>/', EmailVerificationConfirmView.as_view(), name='email-verification'),
 
 ]
 

@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv(Path(__file__).resolve().parent.parent.parent / '.env')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -45,6 +50,7 @@ INSTALLED_APPS = [
 
     "expenses",
     "incomes",
+    "stores",
 ]
 
 MIDDLEWARE = [
@@ -113,11 +119,11 @@ WSGI_APPLICATION = "mymoney.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "expenses_db",
-        "USER": "zatykina",
-        "PASSWORD": "zatykina",
-        "HOST": "116.203.101.149",
-        "PORT": "5432",
+        "NAME": os.environ.get('DB_NAME', 'expenses_db'),
+        "USER": os.environ.get('DB_USER', 'zatykina'),
+        "PASSWORD": os.environ.get('DB_PASSWORD', ''),
+        "HOST": os.environ.get('DB_HOST', '116.203.101.149'),
+        "PORT": os.environ.get('DB_PORT', '5432'),
     }
 }
 
@@ -181,6 +187,26 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
+
+
+# Email configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+
+DOMAIN_NAME = os.environ.get('DOMAIN_NAME', 'http://localhost:8000')
+
+# Google Gemini API key for AI-based receipt parsing (free tier)
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
+
+# Tesseract OCR executable path
+TESSERACT_CMD = os.environ.get(
+    'TESSERACT_CMD',
+    os.path.expanduser(r'~\AppData\Local\Programs\Tesseract-OCR\tesseract.exe')
+)
 
 
 LOGGING = {
