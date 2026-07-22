@@ -1,0 +1,146 @@
+@import './vars';
+@import './mixins';
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content.recurring-modal {
+    @extend %card;
+    width: 90%;
+    max-width: 500px;
+    padding: 0;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+
+    &:hover {
+        background: $cardBg;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid $borderColor;
+
+    h2 {
+        margin: 0;
+        font-size: 18px;
+        color: $white;
+        font-weight: 600;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255, 255, 255, 0.5);
+        transition: color 0.2s ease;
+
+        &:hover {
+            color: $white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        i {
+            font-size: 22px;
+        }
+    }
+}
+
+.modal-body {
+    padding: 24px;
+
+    .form-group {
+        margin-bottom: 20px;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+
+        .frequency-select,
+        .date-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid $borderColor;
+            border-radius: 8px;
+            font-size: 14px;
+            color: $white;
+            background: $inputColor;
+            transition: all 0.2s ease;
+
+            &:focus {
+                outline: none;
+                border-color: $btnColor;
+                background: rgba(255, 255, 255, 0.08);
+            }
+
+            option {
+                background: $bgColor;
+                color: $white;
+            }
+        }
+
+        .frequency-select {
+            cursor: pointer;
+        }
+    }
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid $borderColor;
+
+    .cancel-btn {
+        @extend %mainFont;
+        padding: 8px 20px;
+        border: 1px solid $borderColor;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.7);
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: $white;
+            transform: translateY(-1px);
+        }
+    }
+
+    .save-btn {
+        @extend %btn;
+        font-size: 14px;
+        height: auto;
+        padding: 8px 20px;
+    }
+}

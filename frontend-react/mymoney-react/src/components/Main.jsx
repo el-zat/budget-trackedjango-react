@@ -68,7 +68,7 @@ function Main() {
             case 'year':
                 return filterProviderValues.customLabel || filterProviderValues.currentYear;
             case 'today':
-                return filterProviderValues.todayFormatted;
+                return filterProviderValues.customLabel || filterProviderValues.todayFormatted;;
             case 'all':
                 return 'All Time';
             case 'custom':
@@ -117,12 +117,14 @@ function Main() {
                         <IntervalSelector
                             selectedInterval={filterProviderValues.selectedInterval}
                             setSelectedInterval={filterProviderValues.setSelectedInterval}
+                            currentDay={filterProviderValues.currentDay}
                             currentMonth={filterProviderValues.currentMonth}
                             currentYear={filterProviderValues.currentYear}
                             customLabel={filterProviderValues.customLabel}
                             setCustomLabel={filterProviderValues.setCustomLabel}
                             setDateFrom={filterProviderValues.setDateFrom}
                             setDateTo={filterProviderValues.setDateTo}
+                            periodLabel={periodLabel}
                         />
                     )}
                     <div className="user-actions">
@@ -163,7 +165,7 @@ function Main() {
                 )}
 
                 <FilterContext.Provider value={filterProviderValues}>
-                    <Filter />
+                    <Filter periodLabel={periodLabel} />
                     <ModalContext.Provider value={modalProviderValues}>
                         <div className="content-container">
                             <Income />

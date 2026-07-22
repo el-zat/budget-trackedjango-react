@@ -1,0 +1,349 @@
+@import './vars';
+
+.price-change-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.price-change-modal {
+    background: linear-gradient(135deg, #1e2148 0%, #2a2f5a 100%);
+    border: 1px solid rgba(88, 101, 242, 0.3);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 480px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(88, 101, 242, 0.1);
+    animation: slideUp 0.3s ease;
+
+    @keyframes slideUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+        h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            i {
+                font-size: 22px;
+                color: $btnColor;
+            }
+        }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.5);
+            transition: all 0.2s ease;
+
+            &:hover {
+                color: rgba(255, 255, 255, 0.9);
+                background: rgba(255, 107, 107, 0.15);
+                border-color: rgba(255, 107, 107, 0.3);
+            }
+
+            i {
+                font-size: 20px;
+            }
+        }
+    }
+
+    .modal-body {
+        padding: 24px;
+
+        .current-info {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            margin-bottom: 20px;
+
+            .info-label {
+                font-size: 13px;
+                color: rgba(255, 255, 255, 0.5);
+            }
+
+            .info-value {
+                font-size: 16px;
+                font-weight: 700;
+                color: $successGreen;
+            }
+
+            .info-name {
+                flex-basis: 100%;
+                font-size: 14px;
+                font-weight: 500;
+                color: rgba(255, 255, 255, 0.8);
+                margin-top: 4px;
+            }
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+
+            .mode-btn {
+                flex: 1;
+                display: flex;
+                align-items: flex-start;
+                gap: 10px;
+                padding: 12px 14px;
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 10px;
+                color: rgba(255, 255, 255, 0.7);
+                cursor: pointer;
+                transition: all 0.2s ease;
+                text-align: left;
+
+                i {
+                    font-size: 20px;
+                    margin-top: 2px;
+                    color: rgba(255, 255, 255, 0.4);
+
+                    @media (max-width: 480px) {
+                        display: none;
+                    }
+                }
+
+                div {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                }
+
+                .mode-title {
+                    font-size: 13px;
+                    font-weight: 600;
+                    color: rgba(255, 255, 255, 0.8);
+                }
+
+                .mode-desc {
+                    font-size: 11px;
+                    color: rgba(255, 255, 255, 0.4);
+                }
+
+                &:hover {
+                    background: rgba(88, 101, 242, 0.08);
+                    border-color: rgba(88, 101, 242, 0.3);
+                }
+
+                &.active {
+                    background: rgba(88, 101, 242, 0.15);
+                    border-color: rgba(88, 101, 242, 0.5);
+
+                    i {
+                        color: $btnColor;
+                    }
+
+                    .mode-title {
+                        color: rgba(255, 255, 255, 0.95);
+                    }
+                }
+            }
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+
+            label {
+                display: block;
+                margin-bottom: 6px;
+                font-size: 12px;
+                font-weight: 600;
+                color: rgba(255, 255, 255, 0.5);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .price-input,
+            .date-input,
+            .note-input {
+                width: 100%;
+                padding: 10px 14px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: 8px;
+                font-size: 14px;
+                color: rgba(255, 255, 255, 0.9);
+                transition: all 0.2s ease;
+                box-sizing: border-box;
+
+                &:focus {
+                    outline: none;
+                    border-color: $btnColor;
+                    background: rgba(255, 255, 255, 0.08);
+                    box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.1);
+                }
+
+                &::placeholder {
+                    color: rgba(255, 255, 255, 0.3);
+                }
+            }
+
+            .price-input {
+                font-size: 16px;
+                font-weight: 600;
+            }
+
+            .date-input {
+                cursor: pointer;
+
+                &::-webkit-calendar-picker-indicator {
+                    filter: invert(1);
+                    cursor: pointer;
+                }
+            }
+        }
+
+        .existing-changes {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+            h4 {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                margin: 0 0 12px;
+                font-size: 13px;
+                font-weight: 600;
+                color: rgba(255, 255, 255, 0.6);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+
+                i {
+                    font-size: 16px;
+                    color: rgba(88, 101, 242, 0.7);
+                }
+            }
+
+            ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            li {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 12px;
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(255, 255, 255, 0.06);
+                border-radius: 8px;
+                font-size: 13px;
+
+                .change-price {
+                    font-weight: 600;
+                    color: $successGreen;
+                }
+
+                .change-date {
+                    color: rgba(255, 255, 255, 0.5);
+                    font-size: 12px;
+                }
+
+                .change-note {
+                    flex-basis: 100%;
+                    font-size: 11px;
+                    color: rgba(255, 255, 255, 0.4);
+                    font-style: italic;
+                }
+            }
+        }
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 16px 24px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+
+            &:hover:not(:disabled) {
+                transform: translateY(-1px);
+            }
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+        }
+
+        .cancel-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.12);
+                border-color: rgba(255, 255, 255, 0.3);
+                color: rgba(255, 255, 255, 0.95);
+                transform: translateY(-1px);
+            }
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, $btnColor, $accentPurple);
+            color: white;
+            box-shadow: 0 4px 12px rgba(88, 101, 242, 0.3);
+
+            &:hover:not(:disabled) {
+                box-shadow: 0 6px 16px rgba(88, 101, 242, 0.4);
+            }
+        }
+    }
+}

@@ -1,0 +1,629 @@
+@import 'vars';
+
+.receipt-scanner {
+    display: inline-block;
+
+    // Trigger button
+    &__trigger {
+        @extend %btn;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: linear-gradient(135deg, $accentPurple, $btnColor);
+        font-size: 14px;
+        padding: 8px 16px;
+        height: 38px;
+        line-height: 1;
+        white-space: nowrap;
+        vertical-align: middle;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        box-sizing: border-box;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+
+        span {
+            display: inline;
+            line-height: 1;
+        }
+
+        svg {
+            flex-shrink: 0;
+        }
+
+        &:hover {
+            background: linear-gradient(135deg, darken($accentPurple, 5%), darken($btnColor, 5%));
+        }
+    }
+
+    // Modal overlay
+    &__overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 20px;
+    }
+
+    // Modal window
+    &__modal {
+        background: $bgColor;
+        border: 1px solid $borderColor;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 520px;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    // Header
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 24px;
+        border-bottom: 1px solid $borderColor;
+
+        h3 {
+            @extend %mainFont;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+    }
+
+    &__close {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.6);
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 6px;
+        transition: all 0.2s;
+
+        &:hover {
+            color: $white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+    }
+
+    // Body
+    &__body {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    // File upload
+    &__file-input {
+        display: none;
+    }
+
+    &__upload-label {
+        display: block;
+        cursor: pointer;
+        border: 2px dashed rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        transition: all 0.3s;
+        overflow: hidden;
+
+        &:hover {
+            border-color: $accentPurple;
+            background: rgba(156, 79, 255, 0.05);
+        }
+    }
+
+    &__upload-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        color: rgba(255, 255, 255, 0.5);
+        gap: 8px;
+
+        p {
+            @extend %mainFont;
+            font-size: 15px;
+            margin: 8px 0 0;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        span {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+    }
+
+    &__preview {
+        width: 100%;
+        max-height: 250px;
+        object-fit: contain;
+        display: block;
+    }
+
+    // Camera button (visible on mobile/tablet only)
+    &__camera-btn {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 12px 16px;
+        margin-top: 10px;
+        border: 1px solid $accentPurple;
+        border-radius: 10px;
+        background: rgba(156, 79, 255, 0.1);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        svg {
+            flex-shrink: 0;
+        }
+
+        &:hover {
+            background: rgba(156, 79, 255, 0.2);
+            border-color: lighten($accentPurple, 10%);
+        }
+
+        &:active {
+            transform: scale(0.98);
+        }
+
+        @media (max-width: 1024px) {
+            display: inline-flex;
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            display: inline-flex;
+        }
+    }
+
+    // Scan button
+    &__scan-btn {
+        @extend %btn;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        height: 44px;
+        font-size: 15px;
+
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+    }
+
+    // Error message
+    &__error {
+        background: rgba(255, 107, 107, 0.1);
+        border: 1px solid rgba(255, 107, 107, 0.3);
+        border-radius: 8px;
+        padding: 12px 16px;
+        color: $dangerRed;
+        font-size: 14px;
+    }
+
+    // Supermarket confirmation prompt
+    &__store-confirm {
+        background: rgba(76, 175, 80, 0.1);
+        border: 1px solid rgba(76, 175, 80, 0.4);
+        border-radius: 8px;
+        padding: 16px;
+        text-align: center;
+
+        p {
+            margin: 0 0 12px;
+            font-size: 14px;
+            color: #e0e0e0;
+            line-height: 1.5;
+
+            strong {
+                color: #fff;
+            }
+        }
+    }
+
+    &__store-confirm-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    &__confirm-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        background: #4caf50;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s;
+
+        &:hover {
+            background: #43a047;
+        }
+    }
+
+    &__reject-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+        background: transparent;
+        color: #e0e0e0;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+    }
+
+    // Category picker
+    &__category-picker {
+        background: rgba(33, 150, 243, 0.08);
+        border: 1px solid rgba(33, 150, 243, 0.3);
+        border-radius: 8px;
+        padding: 16px;
+
+        p {
+            margin: 0 0 12px;
+            font-size: 14px;
+            color: #e0e0e0;
+            font-weight: 500;
+        }
+    }
+
+    &__category-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    &__category-option {
+        padding: 6px 14px;
+        border: 1px solid rgba(156, 39, 176, 0.4);
+        border-radius: 16px;
+        background: rgba(156, 39, 176, 0.1);
+        color: #ce93d8;
+        font-size: 13px;
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s, color 0.2s;
+
+        &:hover {
+            background: rgba(156, 39, 176, 0.3);
+            border-color: rgba(156, 39, 176, 0.7);
+            color: #fff;
+        }
+
+        &.active {
+            background: rgba(156, 39, 176, 0.4);
+            border-color: #ce93d8;
+            color: #fff;
+        }
+    }
+
+    &__manual-name {
+        margin-bottom: 12px;
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 4px;
+        }
+    }
+
+    &__name-input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.05);
+        color: #fff;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s;
+
+        &:focus {
+            border-color: rgba(156, 39, 176, 0.6);
+        }
+
+        &::placeholder {
+            color: #666;
+        }
+    }
+
+    &__date-input {
+        padding: 4px 8px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.05);
+        color: #fff;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s;
+        cursor: pointer;
+
+        &:focus {
+            border-color: rgba(156, 39, 176, 0.6);
+        }
+
+        &::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+    }
+
+    &__expense-name-field {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 12px;
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+    }
+
+    &__change-btn {
+        margin-left: 8px;
+        padding: 2px 10px;
+        border: 1px solid rgba(156, 39, 176, 0.4);
+        border-radius: 12px;
+        background: transparent;
+        color: #ce93d8;
+        font-size: 11px;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s;
+
+        &:hover {
+            background: rgba(156, 39, 176, 0.2);
+            color: #fff;
+        }
+    }
+
+    // Results section
+    &__results {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    &__result-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        h4 {
+            @extend %mainFont;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+    }
+
+    &__confidence {
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-weight: 500;
+
+        &--high {
+            background: rgba(81, 207, 102, 0.15);
+            color: $successGreen;
+        }
+
+        &--medium {
+            background: rgba(255, 193, 7, 0.15);
+            color: #ffc107;
+        }
+
+        &--low {
+            background: rgba(255, 107, 107, 0.15);
+            color: $dangerRed;
+        }
+    }
+
+    &__result-info {
+        background: $cardBg;
+        border: 1px solid $borderColor;
+        border-radius: 10px;
+        padding: 14px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    &__result-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .label {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+        }
+
+        .value {
+            @extend %mainFont;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .category-badge {
+            background: rgba(156, 79, 255, 0.15);
+            color: $accentPurple;
+            padding: 3px 10px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+    }
+
+    // Line items
+    &__items {
+        h5 {
+            @extend %mainFont;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0 0 10px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+    }
+
+    &__items-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    &__item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px;
+        background: $cardBg;
+        border: 1px solid $borderColor;
+        border-radius: 8px;
+        gap: 8px;
+    }
+
+    &__item-info {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 0;
+
+        .item-name {
+            @extend %mainFont;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .item-price {
+            font-size: 12px;
+            color: $accentBlue;
+            font-weight: 500;
+        }
+    }
+
+    &__item-apply {
+        background: rgba(81, 207, 102, 0.15);
+        border: 1px solid rgba(81, 207, 102, 0.3);
+        color: $successGreen;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        flex-shrink: 0;
+
+        &:hover {
+            background: rgba(81, 207, 102, 0.3);
+        }
+    }
+
+    // Action buttons
+    &__actions {
+        display: flex;
+        gap: 10px;
+        padding-top: 8px;
+        border-top: 1px solid $borderColor;
+    }
+
+    &__apply-btn {
+        @extend %btn;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        flex: 1;
+        height: 40px;
+        font-size: 14px;
+        background: $successGreen;
+        box-shadow: 0 2px 8px rgba(81, 207, 102, 0.3);
+
+        &:hover {
+            background: darken($successGreen, 8%);
+            box-shadow: 0 6px 16px rgba(81, 207, 102, 0.4);
+        }
+    }
+
+    &__cancel-btn {
+        @extend %mainFont;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid $borderColor;
+        border-radius: 10px;
+        padding: 8px 20px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        height: 40px;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+    }
+}
+
+// Spinner animation
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+// Mobile responsive
+@media ($_mobile-max) {
+    .receipt-scanner {
+        &__modal {
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 12px;
+        }
+
+        &__body {
+            padding: 16px;
+        }
+
+        &__upload-placeholder {
+            padding: 30px 16px;
+        }
+    }
+}

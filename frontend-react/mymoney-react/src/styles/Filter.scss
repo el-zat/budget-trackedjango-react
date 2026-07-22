@@ -17,9 +17,10 @@
   @include flex(flex-start, stretch, row);
   gap: 16px;
   width: 100%;
+  flex-wrap: wrap;
 }
 
-.select-interval { 
+.select-interval {
   @include flex(flex-start, flex-start, column);
   flex: 1;
   min-width: 280px;
@@ -51,13 +52,13 @@
   display: flex;
   flex-direction: column;
   height: 350px;
-  
+
   h3 {
     font-size: 16px;
     font-weight: 600;
     margin-bottom: 16px;
   }
-  
+
   > div {
     overflow-y: auto;
     flex: 1;
@@ -74,13 +75,13 @@
   display: flex;
   flex-direction: column;
   height: 350px;
-  
+
   h3 {
     font-size: 16px;
     font-weight: 600;
     margin-bottom: 16px;
   }
-  
+
   > div {
     overflow-y: auto;
     flex: 1;
@@ -88,6 +89,11 @@
 }
 
 .select-expense-checkbox {
+  @include flex(flex-start, flex-start, column);
+  gap: 8px;
+}
+
+.select-category-checkbox {
   @include flex(flex-start, flex-start, column);
   gap: 8px;
 }
@@ -107,7 +113,7 @@
   border-radius: 12px;
   display: flex;
   flex-direction: column;
-  
+
   h3 {
     font-size: 16px;
     font-weight: 600;
@@ -123,24 +129,24 @@
 .price-input-group {
   @include flex(flex-start, stretch, column);
   gap: 8px;
-  
+
   label {
     font-size: 13px;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.7);
   }
-  
-  input[type="number"] {
+
+  input {
     @extend %input_select;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid $borderColor;
-    
+
     &:focus {
       outline: none;
       border-color: $btnColor;
       background: rgba(255, 255, 255, 0.08);
     }
-    
+
     &::placeholder {
       color: rgba(255, 255, 255, 0.3);
     }
@@ -160,7 +166,7 @@
   font-size: 11px;
   font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 500;
-  
+
   i {
     font-size: 14px;
   }
@@ -174,21 +180,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
   .filtered-total-content {
     @include flex(flex-start, center, row);
     gap: 8px;
     width: 100%;
-    
+
     i {
       font-size: 24px;
       color: rgba(88, 101, 242, 0.8);
     }
-    
+
     .filtered-total-info {
       @include flex(flex-start, center, row);
       gap: 6px;
-      
+
       .filtered-total-label {
         font-size: 11px;
         font-weight: 500;
@@ -196,7 +202,7 @@
         text-transform: uppercase;
         letter-spacing: 0.3px;
       }
-      
+
       .filtered-total-value {
         font-size: 18px;
         font-weight: 700;
@@ -207,40 +213,35 @@
   }
 }
 
-.select-category-checkbox {
-  @include flex(flex-start, flex-start, column);
-  gap: 8px;
-}
-
 .custom-interval {
   @include flex(flex-start, stretch, column);
   gap: 12px;
   width: 100%;
   margin-top: 16px;
 
-  input, select {
+  input,
+  select {
     @extend %input_select;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid $borderColor;
-    
+
     &:focus {
       outline: none;
       border-color: $btnColor;
       background: rgba(255, 255, 255, 0.08);
     }
   }
-  
-  // Make calendar icon white
+
   input[type="date"] {
     &::-webkit-calendar-picker-indicator {
       filter: invert(1);
       cursor: pointer;
     }
   }
-  
+
   select {
     cursor: pointer;
-    
+
     option {
       background: #1a1d3f;
       color: rgba(255, 255, 255, 0.9);
@@ -255,11 +256,11 @@ label {
   cursor: pointer;
   font-size: 14px;
   transition: color 0.2s ease;
-  
+
   &:hover {
     color: $btnColor;
   }
-  
+
   input[type="checkbox"],
   input[type="radio"] {
     cursor: pointer;
@@ -287,22 +288,21 @@ h3 {
 .search-container {
   @include flex(flex-start, center, row);
   gap: 8px;
-  flex: 1;
-  
+  flex: 1 1 280px;
+
   input {
     flex: 1;
     max-width: 300px;
     @extend %input_select;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid $borderColor;
-    
+
     &:focus {
       outline: none;
       border-color: $btnColor;
       background: rgba(255, 255, 255, 0.08);
     }
 
-    // Styling for the clear button in the search field
     &::-webkit-search-cancel-button {
       -webkit-appearance: none;
       appearance: none;
@@ -314,7 +314,7 @@ h3 {
       cursor: pointer;
       opacity: 0.8;
       transition: opacity 0.2s ease;
-      
+
       &:hover {
         opacity: 1;
       }
@@ -329,16 +329,37 @@ h3 {
     display: flex;
     align-items: center;
     justify-content: center;
-    
+
     i {
       font-size: 20px;
     }
   }
 }
 
+.create-report-btn {
+  @extend %btn;
+  height: 40px;
+  padding: 8px 20px;
+  @include flex(center, center, row);
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(88, 101, 242, 0.95), rgba(156, 79, 255, 0.95));
+  border: 1px solid rgba(156, 79, 255, 0.55);
+  box-shadow: 0 8px 22px rgba(88, 101, 242, 0.25);
+
+  i {
+    font-size: 18px;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.06);
+  }
+}
+
 .filter-buttons {
   @include flex(flex-start, center, row);
   gap: 12px;
+  flex-wrap: wrap;
 
   .reset-filters-btn,
   .close-filter-btn {
@@ -347,7 +368,7 @@ h3 {
     height: 40px;
     @include flex(center, center, row);
     gap: 6px;
-    
+
     i {
       font-size: 18px;
     }
@@ -356,10 +377,68 @@ h3 {
   .reset-filters-btn {
     background: rgba(156, 79, 255, 0.15);
     border: 1px solid $accentPurple;
-    
+
     &:hover {
       background: rgba(156, 79, 255, 0.25);
       transform: translateY(-2px);
+    }
+  }
+}
+
+@media (max-width: 1100px) {
+  .categories-filter,
+  .expenses-filter,
+  .price-and-total-column {
+    min-width: calc(50% - 8px);
+  }
+}
+
+@media (max-width: 768px) {
+  .filter-container {
+    padding: 16px;
+  }
+
+  .categories-filter,
+  .expenses-filter,
+  .price-and-total-column,
+  .select-interval {
+    min-width: 100%;
+    height: auto;
+  }
+
+  .categories-filter,
+  .expenses-filter {
+    > div {
+      max-height: 220px;
+    }
+  }
+
+  .filter-actions {
+    align-items: stretch;
+  }
+
+  .search-container,
+  .create-report-btn,
+  .filter-buttons {
+    width: 100%;
+  }
+
+  .search-container {
+    input {
+      max-width: 100%;
+    }
+  }
+
+  .create-report-btn {
+    justify-content: center;
+  }
+
+  .filter-buttons {
+    justify-content: stretch;
+
+    .reset-filters-btn,
+    .close-filter-btn {
+      flex: 1 1 100%;
     }
   }
 }

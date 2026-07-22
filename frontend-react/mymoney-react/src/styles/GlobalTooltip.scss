@@ -1,0 +1,70 @@
+.global-tooltip {
+  position: fixed;
+  transform: translateX(-50%) translateY(-100%) translateY(-10px);
+  padding: 8px 12px;
+  background: linear-gradient(135deg, rgba(88, 101, 242, 0.95) 0%, rgba(116, 79, 168, 0.95) 100%);
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 10000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3),
+              0 0 20px rgba(88, 101, 242, 0.2);
+  letter-spacing: 0.3px;
+  max-width: calc(100vw - 16px);
+  animation: tooltipFadeIn 0.2s ease forwards;
+
+  .global-tooltip-arrow {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(88, 101, 242, 0.95);
+    border-bottom: none;
+  }
+
+  // Color variants
+  &.tooltip-edit {
+    background: linear-gradient(135deg, rgba(77, 171, 247, 0.95) 0%, rgba(51, 154, 240, 0.95) 100%);
+    .global-tooltip-arrow { border-top-color: rgba(77, 171, 247, 0.95); }
+  }
+
+  &.tooltip-delete {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.95) 0%, rgba(240, 62, 62, 0.95) 100%);
+    .global-tooltip-arrow { border-top-color: rgba(255, 107, 107, 0.95); }
+  }
+
+  &.tooltip-recurring {
+    background: linear-gradient(135deg, rgba(255, 165, 0, 0.95) 0%, rgba(255, 140, 0, 0.95) 100%);
+    .global-tooltip-arrow { border-top-color: rgba(255, 165, 0, 0.95); }
+  }
+
+  &.tooltip-copy {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.95) 0%, rgba(124, 58, 237, 0.95) 100%);
+    .global-tooltip-arrow { border-top-color: rgba(139, 92, 246, 0.95); }
+  }
+
+  &.tooltip-attach {
+    background: linear-gradient(135deg, rgba(156, 79, 255, 0.95) 0%, rgba(124, 58, 237, 0.95) 100%);
+    .global-tooltip-arrow { border-top-color: rgba(156, 79, 255, 0.95); }
+  }
+
+  &.tooltip-attach-has {
+    background: linear-gradient(135deg, rgba(81, 207, 102, 0.95) 0%, rgba(64, 192, 87, 0.95) 100%);
+    .global-tooltip-arrow { border-top-color: rgba(81, 207, 102, 0.95); }
+  }
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-100%) translateY(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-100%) translateY(-10px);
+  }
+}
