@@ -67,7 +67,23 @@ function Registration() {
       } else {
         const data = await response.json();
         setIsSuccess(false);
-        setMessage('Error: ' + (data.detail || JSON.stringify(data)));
+        // Build user-friendly error message
+        let errorMsg = '';
+        if (data.error) {
+          errorMsg = data.error;
+        } else if (data.details) {
+          const details = data.details;
+          const msgs = [];
+          for (const [field, errors] of Object.entries(details)) {
+            if (Array.isArray(errors)) {
+              errors.forEach(e => msgs.push(typeof e === 'string' ? e : JSON.stringify(e)));
+            }
+          }
+          errorMsg = msgs.join(' ') || 'Registration failed.';
+        } else {
+          errorMsg = 'Registration failed. Please try again.';
+        }
+        setMessage(errorMsg);
       }
     } catch (error) {
       setIsSuccess(false);

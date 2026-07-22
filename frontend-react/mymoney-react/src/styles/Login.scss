@@ -2,14 +2,12 @@
 @import './mixins';
 
 .login-container {
-    padding: 24px;
-    background: rgba(77, 171, 247, 0.15);
-    border-radius: 12px;
-    border: none;
     width: 100%;
-    max-width: 360px;
+    max-width: 380px;
+    padding: 28px 24px;
     box-sizing: border-box;
-    
+    margin: 0 auto;
+
     h2 {
         margin-bottom: 24px;
         text-align: center;
@@ -18,34 +16,34 @@
     }
 
     form {
-        @include flex(space-between, stretch, column);  
-        gap: 20px;
+        @include flex(space-between, stretch, column);
+        gap: 18px;
     }
 }
 
 .loggedout,
-.loggedin {  
-    @include flex(center, center, row);  
+.loggedin {
+    @include flex(center, center, row);
     gap: 12px;
 
     .login-btn,
     .logout-btn {
         @extend %btn;
         padding: 8px 20px;
-        height: 40px;   
+        height: 40px;
         font-size: 14px;
         font-weight: 600;
         display: flex;
         align-items: center;
         gap: 6px;
-        
+
         .material-icons {
             font-size: 18px;
         }
     }
 }
 
-.greeting {    
+.greeting {
     @include flex(center, center, row);
     gap: 8px;
     padding: 8px 16px;
@@ -57,7 +55,7 @@
         font-size: 24px;
         color: $accentPurple;
     }
-    
+
     span {
         font-weight: 600;
         font-size: 14px;
@@ -74,9 +72,10 @@ label {
 
 input {
     @extend %input_select;
+    width: 100%;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid $borderColor;
-    
+
     &:focus {
         outline: none;
         border-color: $btnColor;
@@ -93,22 +92,23 @@ input {
 
 .show-password-btn {
     position: absolute;
-    top: 50%;
+    top: calc(50% + 12px);
     right: 12px;
+    transform: translateY(-50%);
     border: none;
     padding: 4px;
     background: transparent;
     cursor: pointer;
     color: rgba(255, 255, 255, 0.5);
     transition: color 0.2s ease;
-    
+
     &:hover {
         color: rgba(255, 255, 255, 0.9);
     }
 }
 
 .login-message {
-    margin-top: 16px;
+    margin-top: 12px;
     padding: 12px;
     background: rgba(255, 107, 107, 0.1);
     color: #fca5a5;
@@ -127,12 +127,58 @@ input {
 .submit-login {
     @extend %btn;
     width: 100%;
-    margin-top: 8px;
-    margin-bottom: 16px;
+    margin-top: 4px;
+    margin-bottom: 12px;
 }
 
-// Tablets (768px - 1279px)
+.forgot-password-link {
+    text-align: center;
+    margin-top: 6px;
+    margin-bottom: 8px;
+    font-size: 13px;
+
+    a {
+        color: #5865f2;
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+.resend-verification-block {
+    margin-top: 8px;
+    text-align: center;
+
+    .resend-verification-btn {
+        @extend %btn;
+        background: transparent;
+        border: 1px solid $btnColor;
+        padding: 8px 16px;
+        font-size: 13px;
+        cursor: pointer;
+        width: 100%;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+    }
+
+    .resend-msg {
+        margin-top: 8px;
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.7);
+    }
+}
+
+// Tablets
 @media ($_tablet-range) {
+    .login-container {
+        max-width: 360px;
+        padding: 24px 20px;
+    }
+
     .loggedin {
         flex-direction: column;
         align-items: flex-end;
@@ -142,24 +188,29 @@ input {
 
 // Mobile styles
 @media ($_mobile-max) {
+    .login-container {
+        max-width: 100%;
+        padding: 24px 18px;
+    }
+
     .loggedout,
     .loggedin {
         gap: 6px;
         flex-wrap: wrap;
-        
+
         .login-btn,
         .logout-btn {
             padding: 6px 12px;
             height: 36px;
             font-size: 13px;
             white-space: nowrap;
-            
+
             .material-icons {
                 font-size: 16px;
             }
         }
     }
-    
+
     .greeting {
         padding: 6px 12px;
         font-size: 13px;
@@ -167,23 +218,27 @@ input {
 }
 
 @media ($_small-mobile) {
+    .login-container {
+        padding: 20px 16px;
+    }
+
     .loggedout,
     .loggedin {
         gap: 4px;
-        
+
         .login-btn,
         .logout-btn {
             padding: 4px 8px;
             height: 32px;
             font-size: 12px;
             gap: 4px;
-            
+
             .material-icons {
                 font-size: 14px;
             }
         }
     }
-    
+
     .greeting {
         padding: 4px 8px;
         font-size: 12px;

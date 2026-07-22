@@ -65,7 +65,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             user=user,
             expiration=expiration,
         )
-        record.send_verification_email()
+        try:
+            record.send_verification_email()
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f'Failed to send verification email to {user.email}: {e}')
+            # User is still created, they can request resend later
         return user
     
 

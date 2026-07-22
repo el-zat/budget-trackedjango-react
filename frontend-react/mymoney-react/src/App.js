@@ -84,6 +84,7 @@ function App() {
   const [loginPassword, setLoginPassword] = useState('');
   const [loginValue, setLoginValue] = useState('');
   const [isSignupMessageShown, setIsSignupMessageShown] = useState(true);
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
   const [registrationUsername, setRegistrationUsername] = useState('');
 
   //Filtering
@@ -110,6 +111,7 @@ function App() {
   const [isModalSortOpen, setIsModalSortOpen] = useState(false);
   const [isModalLoginOpen, setIsModalLoginOpen] = useState(false);
   const [isModalRegistrationOpen, setIsModalRegistrationOpen] = useState(false);
+  const [isModalForgotPasswordOpen, setIsModalForgotPasswordOpen] = useState(false);
   const [isModalCustomDateOpen, setIsModalCustomDateOpen] = useState(false);
   const [isModalRecurringOpen, setIsModalRecurringOpen] = useState(false);
   const [selectedExpenseForRecurring, setSelectedExpenseForRecurring] = useState(null);
@@ -669,6 +671,7 @@ function App() {
 
       setMessage('');
       setLoginSuccess(false);
+      setUnverifiedEmail('');
 
       const loginPayload = {
         login: loginValue,
@@ -715,7 +718,10 @@ function App() {
           const data = await response.json();
           console.log("No response");
           console.log("Full response data:", data); 
-          if (data.error) {
+          if (data.email_not_verified) {
+            setMessage(data.error);
+            setUnverifiedEmail(data.email || '');
+          } else if (data.error) {
             setMessage(data.error);
             console.log("Error:", data.error);
           } else if (
@@ -1920,6 +1926,7 @@ function App() {
       message,
       loginSuccess,
       registrationUsername,
+      unverifiedEmail,
       getAuthHeaders,
       getCookie,
       setIsSignupMessageShown,
@@ -1929,7 +1936,8 @@ function App() {
       setLoginPassword,
       setLoginValue,
       setLoginEmail,
-      setIsLoggedIn,      
+      setIsLoggedIn,
+      setUnverifiedEmail,
   }
 
   const descriptionProviderValues = {
@@ -1941,6 +1949,7 @@ function App() {
   const modalProviderValues = {
       isModalLoginOpen,     
       isModalRegistrationOpen,     
+      isModalForgotPasswordOpen,
       isModalSortOpen,
       isModalCustomDateOpen,
       isModalRecurringOpen,
@@ -1951,6 +1960,7 @@ function App() {
       setIsModalSortOpen,
       setIsModalLoginOpen,
       setIsModalRegistrationOpen,
+      setIsModalForgotPasswordOpen,
       setIsModalCustomDateOpen,
       setIsModalRecurringOpen,
       setSelectedExpenseForRecurring,

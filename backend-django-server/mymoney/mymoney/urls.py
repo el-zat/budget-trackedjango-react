@@ -6,7 +6,8 @@ from expenses.views import CategoryViewSet, ExpenseViewSet, MyExpenseViewSet, Re
 from incomes.views import IncomeCategoryViewSet, IncomeViewSet, IncomeAmountChangeViewSet
 from users.views import (UserViewSet, EmailVerificationViewSet, UserLoginAPIView,
                          UserProfileViewSet, UserRegistrationView, UserLogoutAPIView,
-                         EmailVerificationConfirmView, ResendVerificationEmailView)
+                         EmailVerificationConfirmView, ResendVerificationEmailView,
+                         PasswordResetRequestView, PasswordResetConfirmView, PasswordResetValidateTokenView)
 from django.urls import re_path
 # from expenses.views import FrontendAppView  # Commented out for development
 
@@ -35,7 +36,10 @@ urlpatterns = [
     path('api/registration/', UserRegistrationView.as_view(), name='user-registration'),
     path('api/logout/', UserLogoutAPIView.as_view(), name='user-logout'),
     path('api/resend-verification/', ResendVerificationEmailView.as_view(), name='resend-verification'),
-    path('verify/<str:email>/<uuid:code>/', EmailVerificationConfirmView.as_view(), name='email-verification'),
+    path('api/password-reset/', PasswordResetRequestView.as_view(), name='password-reset-request'),
+    path('api/password-reset/confirm/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
+    path('api/password-reset/validate/', PasswordResetValidateTokenView.as_view(), name='password-reset-validate'),
+    path('verify/<str:email>/<uuid:code>/',EmailVerificationConfirmView.as_view(),name='email-verification'),
 
 ]
 

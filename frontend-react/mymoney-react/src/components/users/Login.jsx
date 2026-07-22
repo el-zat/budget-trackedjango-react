@@ -10,6 +10,7 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 function Login() {
 
   const [showPassword, setShowPassword] = useState(false);
+  const [resendMessage, setResendMessage] = useState('');
   const authProviderValues = useContext(AuthContext)
   const modalProviderValues = useContext(ModalContext);
   const filterProviderValues = useContext(FilterContext);
@@ -30,7 +31,6 @@ function Login() {
   return  <React.Fragment>
               <Modal isOpen={modalProviderValues.isModalLoginOpen} onClose={() => 
                       modalProviderValues.setIsModalLoginOpen(false)}>
-                  <div className="container d-flex justify-content-center" >
                       <div className="login-container">
                           <h2 >Sign in</h2>
                           <form onSubmit={authProviderValues.handleLogin} >                               
@@ -79,6 +79,44 @@ function Login() {
                               {authProviderValues.message}
                             </div>
                           )}
+                          {authProviderValues.unverifiedEmail && (
+                            <div className="resend-verification-block">
+                              <button 
+                                type="button" 
+                                className="resend-verification-btn"
+                                onClick={async () => {
+                                  setResendMessage('');
+                                  try {
+                                    const resp = await fetch('/api/resend-verification/', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({ email: authProviderValues.unverifiedEmail }),
+                                    });
+                                    const data = await resp.json();
+                                    if (resp.ok) {
+                                      setResendMessage('Verification email sent! Check your inbox.');
+                                    } else {
+                                      setResendMessage(data.error || 'Failed to resend.');
+                                    }
+                                  } catch (err) {
+                                    setResendMessage('Server error.');
+                                  }
+                                }}
+                              >
+                                Resend verification email
+                              </button>
+                              {resendMessage && <p className="resend-msg">{resendMessage}</p>}
+                            </div>
+                          )}
+                          <p className="forgot-password-link">
+                              <a href="#" onClick={e => {
+                                  e.preventDefault();
+                                  modalProviderValues.setIsModalLoginOpen(false);
+                                  modalProviderValues.setIsModalForgotPasswordOpen(true);
+                              }}>
+                                Forgot password?
+                              </a>
+                          </p>
                           {/* {authProviderValues.isSignupMessageShown && */}
                             <p className="mt-3 text-center" >
                               No account?  
@@ -94,7 +132,6 @@ function Login() {
                           {/* } */}
                           
                       </div>
-                  </div>
               </Modal>
               
               {!authProviderValues.isLoggedIn && !authProviderValues.isLoginFormShow &&

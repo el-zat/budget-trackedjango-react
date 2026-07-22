@@ -10,6 +10,7 @@ import {DescriptionContext} from '../context/DescriptionContext'
 import {ModalContext} from '../context/ModalContext'
 import { Registration } from './users/Registration'
 import { Login } from './users/Login'
+import { ForgotPassword } from './users/ForgotPassword'
 import { CustomDateModal } from './CustomDateModal'
 import { FilterContext } from "../context/FilterContext";
 import { ExpensesContext } from "../context/ExpensesContext";
@@ -185,6 +186,7 @@ function Main() {
                     <FilterContext.Provider value={filterProviderValues}>
                         <AuthContext.Provider value={authProviderValues}>
                             <Registration />
+                            <ForgotPassword />
                         </AuthContext.Provider>                        
                     </FilterContext.Provider>
                 </ModalContext.Provider>
