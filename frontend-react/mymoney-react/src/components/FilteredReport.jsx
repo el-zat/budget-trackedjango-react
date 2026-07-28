@@ -1,100 +1,8 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import "../styles/FilteredReport.scss";
+import { buildFilteredReportHtmlContent } from "./FilteredReportHtml";
+import { buildPrintableHtml } from "./PrintableReportHtml";
 
-const escapeHtml = (str = "") =>
-  String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-
-const buildPrintableHtml = ({ htmlContent, title = "Expenses Report" }) => `<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>${title}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        background: #fff;
-      }
-
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-        color: #111827;
-        padding: 12mm;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        table-layout: fixed;
-        font-size: 12px;
-      }
-
-      th,
-      td {
-        border: 1px solid #e5e7eb;
-        padding: 8px 10px;
-        vertical-align: top;
-        word-break: break-word;
-      }
-
-      thead {
-        display: table-header-group;
-      }
-
-      tfoot {
-        display: table-footer-group;
-      }
-
-      thead th {
-        background: #f1f5f9;
-        font-weight: 700;
-        text-transform: uppercase;
-        font-size: 11px;
-      }
-
-      tfoot td {
-        font-weight: 700;
-        background: #f8fafc;
-      }
-
-      .report-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 12px;
-        margin-bottom: 12px;
-      }
-
-      .report-meta {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-
-      .meta {
-        background: #f8fafc;
-        padding: 8px 10px;
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
-        font-size: 12px;
-      }
-
-      @page {
-        size: A4;
-        margin: 12mm;
-      }
-    </style>
-  </head>
-  <body>
-    ${htmlContent}
-  </body>
-</html>`;
 
 const FilteredReport = ({
   periodLabel = "All Time",
@@ -165,78 +73,64 @@ const FilteredReport = ({
   };
 
   const getRowDate = (row) =>
-    row.spent_at || row.expense_date || row.date || row.created_at || row.updated_at || "";
+    row.spent_at ||
+    row.expense_date ||
+    row.date ||
+    row.created_at ||
+    row.updated_at ||
+    "";
 
   const printableRows = useMemo(() => {
     return [...filteredRows].sort((a, b) => {
-      const dateA = new Date(getRowDate(a)).getTime() || 0;
-      const dateB = new Date(getRowDate(b)).getTime() || 0;
-      return dateB - dateA;
+      const priceA = Number(a.price || 0);
+      const priceB = Number(b.price || 0);
+      return priceB - priceA;
     });
   }, [filteredRows]);
+
+  const categoryBreakdown = useMemo(() => {
+    const grouped = printableRows.reduce((acc, row) => {
+      const categoryName = getRowCategoryName(row) || "Uncategorized";
+      const price = Number(row.price || 0);
+
+      if (!acc[categoryName]) {
+        acc[categoryName] = {
+          name: categoryName,
+          count: 0,
+          sum: 0,
+        };
+      }
+
+      acc[categoryName].count += 1;
+      acc[categoryName].sum += price;
+
+      return acc;
+    }, {});
+
+    return Object.values(grouped)
+      .map((item) => ({
+        ...item,
+        percent: total > 0 ? (item.sum * 100) / total : 0,
+      }))
+      .sort((a, b) => b.sum - a.sum);
+  }, [printableRows, total, categories]);
 
   const generatedAt = new Date().toLocaleString("en-GB");
 
   const handlePrint = (event) => {
     event?.preventDefault();
 
-    const rowsHtml = printableRows
-      .map((row, index) => {
-        const date = formatDate(getRowDate(row));
-        const expense = getRowExpenseName(row);
-        const category = getRowCategoryName(row);
-        const price = Number(row.price || 0).toFixed(2);
-
-        return `
-          <tr>
-            <td style="text-align:center">${index + 1}</td>
-            <td>${date}</td>
-            <td>${escapeHtml(expense)}</td>
-            <td>${escapeHtml(category)}</td>
-            <td style="text-align:right">€ ${price}</td>
-          </tr>
-        `;
-      })
-      .join("");
-
-    const htmlContent = `
-      <div class="report-header">
-        <div>
-          <h1 style="margin:0;font-size:20px">Expenses Report</h1>
-          <div style="color:#6b7280;font-size:12px">Filtered report for the selected budget period</div>
-        </div>
-        <div class="report-meta">
-          <div class="meta"><strong>Period</strong><div>${escapeHtml(periodLabel)}</div></div>
-          <div class="meta"><strong>Generated</strong><div>${escapeHtml(generatedAt)}</div></div>
-          <div class="meta"><strong>Rows</strong><div>${printableRows.length}</div></div>
-          <div class="meta"><strong>Total</strong><div>€ ${Number(total).toFixed(2)}</div></div>
-        </div>
-      </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th style="width:44px">#</th>
-            <th style="width:98px">Date</th>
-            <th style="width:200px">Expense</th>
-            <th style="width:180px">Category</th>
-            <th style="width:110px">Price</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${
-            rowsHtml ||
-            `<tr><td colspan="6" style="text-align:center;padding:18px">No filtered expenses found</td></tr>`
-          }
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="5" style="text-align:right;padding:10px"><strong>Total</strong></td>
-            <td style="text-align:right;padding:10px"><strong>€ ${Number(total).toFixed(2)}</strong></td>
-          </tr>
-        </tfoot>
-      </table>
-    `;
+    const htmlContent = buildFilteredReportHtmlContent({
+      printableRows,
+      periodLabel,
+      generatedAt,
+      total,
+      categoryBreakdown,
+      formatDate,
+      getRowDate,
+      getRowExpenseName,
+      getRowCategoryName,
+    });
 
     const iframe = document.createElement("iframe");
     iframe.style.position = "fixed";
@@ -272,23 +166,12 @@ const FilteredReport = ({
         iframeWindow.print();
 
         setTimeout(() => {
-          document.body.removeChild(iframe);
-        }, 1000);
-      }, 300);
-    };
-
-    setTimeout(() => {
-      try {
-        iframeWindow.focus();
-        iframeWindow.print();
-      } finally {
-        setTimeout(() => {
           if (document.body.contains(iframe)) {
             document.body.removeChild(iframe);
           }
         }, 1000);
-      }
-    }, 500);
+      }, 300);
+    };
   };
 
   return (
@@ -314,7 +197,9 @@ const FilteredReport = ({
           <header className="report-header">
             <div>
               <h1>Expenses Report</h1>
-              <p className="report-subtitle">Filtered report for the selected budget period</p>
+              <p className="report-subtitle">
+                Filtered report for the selected budget period
+              </p>
             </div>
 
             <div className="report-meta">
@@ -360,13 +245,17 @@ const FilteredReport = ({
           </section>
 
           <section className="report-table-section">
-            <table className="report-table" role="table" aria-label="Filtered expenses table">
+            <table
+              className="report-table"
+              role="table"
+              aria-label="Filtered expenses table"
+            >
               <thead>
                 <tr>
-                  <th>#</th>
+                  <th></th>
                   <th>Date</th>
-                  <th>Expense</th>
-                  <th>Category</th>        
+                  <th>Category</th>
+                  <th>Expense</th>                  
                   <th>Price</th>
                 </tr>
               </thead>
@@ -377,27 +266,57 @@ const FilteredReport = ({
                     <tr key={row.id || `${getRowDate(row)}-${index}`}>
                       <td>{index + 1}</td>
                       <td>{formatDate(getRowDate(row))}</td>
-                      <td>{getRowExpenseName(row)}</td>
                       <td>{getRowCategoryName(row)}</td>
-                      <td className="price-cell">€ {Number(row.price || 0).toFixed(2)}</td>
+                      <td>{getRowExpenseName(row)}</td>                     
+                      <td className="price-cell">
+                        € {Number(row.price || 0).toFixed(2)}
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="empty-report">
+                    <td colSpan="5" className="empty-report">
                       No filtered expenses found for this selection.
                     </td>
                   </tr>
                 )}
               </tbody>
 
-              <tfoot>
-                <tr>
-                  <td colSpan="5" className="report-total-label">Total</td>
-                  <td className="report-total-value">€ {Number(total).toFixed(2)}</td>
-                </tr>
-              </tfoot>
+              <tfoot></tfoot>
             </table>
+          </section>
+
+          <section className="report-breakdown-section">
+            <h2>Categories Breakdown</h2>
+
+            {categoryBreakdown.length > 0 ? (
+              <table
+                className="report-table report-breakdown-table"
+                role="table"
+                aria-label="Categories breakdown table"
+              >
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Entries</th>
+                    <th>Total</th>
+                    <th>Share</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {categoryBreakdown.map((item) => (
+                    <tr key={item.name}>
+                      <td>{item.name}</td>
+                      <td>{item.count}</td>
+                      <td>€ {item.sum.toFixed(2)}</td>
+                      <td>{item.percent.toFixed(1)}%</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="empty-report">No category summary available.</div>
+            )}
           </section>
         </div>
       </div>

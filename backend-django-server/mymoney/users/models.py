@@ -1,13 +1,10 @@
-from unittest import result
-
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.mail import send_mail
-from django.db import models
 from django.urls import reverse
 from django.utils.timezone import now
-import os
+from urllib.parse import quote
 
 class User(AbstractUser):
     image = models.ImageField(upload_to='users_images', null=True, blank=True)
@@ -24,10 +21,14 @@ class EmailVerification(models.Model):
         return f'EmailVerification object for {self.user.email}'
 
     def send_verification_email(self):
-        link = reverse('email-verification', kwargs={'email': self.user.email, 'code': self.code})
-        verification_link = f'{settings.DOMAIN_NAME}{link}'
-        print("EMAIL =", self.user.email)
-        print("VERIFICATION LINK =", verification_link)
+        link = reverse(
+            "email-verification",
+            kwargs={
+                "email": self.user.email,
+                "code": self.code,
+            },
+        )
+        verification_link = f"{settings.DOMAIN_NAME.rstrip('/')}{link}"
 
         subject = f'Account confirmation for {self.user.username}'
         message = 'To confirm the account for {} click on the link: {}'.format(
@@ -62,14 +63,10 @@ class PasswordResetToken(models.Model):
         return f'PasswordReset for {self.user.email}'
 
     def send_reset_email(self):
-        # reset_link = f'{settings.DOMAIN_NAME}/reset-password/{self.user.email}/{self.code}/'
-        reset_link = f'http://localhost:3000/reset-password/{self.user.email}/{self.code}/'
-
-        FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
-        reset_link = f'{FRONTEND_URL}/reset-password/{self.user.email}/{self.code}/'
-
+        e_mail = quote(self.user.email, safe="")
+        code = quote(str(self.code), safe="")
+        reset_link = f"{settings.FRONTEND_URL.rstrip('/')}/reset-password/{e_mail}/{code}/"
         subject = f'Password reset for {self.user.username}'
-
         message = (
             f'Hello {self.user.username},\n\n'
             f'You requested a password reset. Click the link below to set a new password:\n\n'

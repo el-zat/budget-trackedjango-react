@@ -2,6 +2,7 @@ from django.db import models
 from datetime import date
 from django.conf import settings
 
+
 class Category(models.Model):
     name = models.CharField(max_length=128, unique=True)
     description = models.TextField(null=True, blank=True)
@@ -17,7 +18,7 @@ class Category(models.Model):
 class Expense(models.Model):
     name = models.CharField(max_length=256)
     description = models.TextField(null=True, blank=True)
-    price = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     quantity = models.PositiveIntegerField(default=0)
     payment_date = models.DateField(default=date.today)
     bill = models.ImageField(upload_to='expenses_images', blank=True)
@@ -38,10 +39,10 @@ class MyExpense(models.Model):
         ('quarterly', 'Quarterly'),
         ('yearly', 'Yearly'),
     ]
-    
+
     name = models.CharField(max_length=256)
     description = models.TextField(null=True, blank=True)
-    price = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     quantity = models.PositiveIntegerField(default=0)
     payment_date = models.DateField(default=date.today)
     bill = models.ImageField(upload_to='expenses_images', blank=True)
@@ -51,7 +52,6 @@ class MyExpense(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        # Automatically set is_recurring based on frequency
         self.is_recurring = self.frequency != 'once'
         super().save(*args, **kwargs)
 
@@ -72,17 +72,17 @@ class RecurringExpense(models.Model):
 
     name = models.CharField(max_length=256)
     description = models.TextField(null=True, blank=True)
-    price = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     quantity = models.PositiveIntegerField(default=0)
     category = models.ForeignKey(to=Category, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    
+
     frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES, default='monthly')
     start_date = models.DateField(default=date.today)
     end_date = models.DateField(null=True, blank=True)
     next_occurrence = models.DateField(default=date.today)
     is_active = models.BooleanField(default=True)
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -90,11 +90,10 @@ class RecurringExpense(models.Model):
         return f"{self.name} ({self.frequency}) | Category: {self.category.name}"
 
     def get_price_for_date(self, target_date):
-        """Get the effective price for a given date, considering price changes."""
         price_change = self.price_changes.filter(
             effective_date__lte=target_date
         ).order_by('-effective_date').first()
-        
+
         if price_change:
             return price_change.new_price
         return self.price
@@ -105,13 +104,12 @@ class RecurringExpense(models.Model):
 
 
 class RecurringExpensePriceChange(models.Model):
-    """Tracks price changes for recurring expenses with effective dates."""
     recurring_expense = models.ForeignKey(
-        RecurringExpense, 
-        on_delete=models.CASCADE, 
+        RecurringExpense,
+        on_delete=models.CASCADE,
         related_name='price_changes'
     )
-    new_price = models.DecimalField(max_digits=6, decimal_places=2)
+    new_price = models.DecimalField(max_digits=10, decimal_places=2)
     effective_date = models.DateField()
     note = models.CharField(max_length=256, blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -123,5 +121,9 @@ class RecurringExpensePriceChange(models.Model):
         verbose_name = 'Recurring Expense Price Change'
         verbose_name_plural = 'Recurring Expense Price Changes'
         ordering = ['-effective_date']
-        unique_together = ['recurring_expense', 'effective_date']
-
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recurring_expense', 'effective_date'],
+                name='unique_recurring_expense_effective_date'
+            )
+        ]

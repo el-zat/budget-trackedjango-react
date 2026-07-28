@@ -16,13 +16,9 @@ import { FilterContext } from "../context/FilterContext";
 import { ExpensesContext } from "../context/ExpensesContext";
 import { IncomeContext } from "../context/IncomeContext";
 import IntervalSelector from './IntervalSelector';
-import incomeIcon from '../assets/icons/income-icon.svg';
-import expensesIcon from '../assets/icons/expenses-icon.svg';
-import balanceIcon from '../assets/icons/balance-icon.svg';
 
 
 function Main() {
-
 
     const authProviderValues = useContext(AuthContext)
     const descriptionProviderValues = useContext(DescriptionContext)

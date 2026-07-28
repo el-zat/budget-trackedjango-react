@@ -3,6 +3,7 @@ Receipt Scanner Service
 Uses Tesseract OCR to extract text from receipt images,
 then Google Gemini (free) to parse the text into structured data and categorize.
 """
+import os
 import json
 import logging
 import requests
@@ -14,9 +15,11 @@ from stores.models import KnownStore
 
 logger = logging.getLogger(__name__)
 
-# Set Tesseract executable path from settings (required on Windows)
-if hasattr(settings, 'TESSERACT_CMD') and settings.TESSERACT_CMD:
-    pytesseract.pytesseract.tesseract_cmd = settings.TESSERACT_CMD
+TESSERACT_CMD = getattr(settings, "TESSERACT_CMD", None) or os.environ.get("TESSERACT_CMD")
+if TESSERACT_CMD:
+    pytesseract.pytesseract.tesseract_cmd = TESSERACT_CMD
+
+logger.info("Using Tesseract binary: %s", pytesseract.pytesseract.tesseract_cmd)
 
 
 def preprocess_image(image_file):
@@ -58,24 +61,26 @@ def extract_text_from_image(image_file):
     Tries multiple OCR configurations for best results.
     """
     img = preprocess_image(image_file)
-    
-    # Try with auto page segmentation and rotation detection first
+
     configs = [
-        ('deu+eng', r'--oem 3 --psm 1'),  # Auto with rotation detection
-        ('deu+eng', r'--oem 3 --psm 6'),  # Assume uniform block of text
-        ('eng', r'--oem 3 --psm 6'),       # English only fallback
+        ('deu+eng', r'--oem 3 --psm 4'),
+        ('deu+eng', r'--oem 3 --psm 6'),
+        ('deu+eng', r'--oem 3 --psm 11'),
+        ('eng', r'--oem 3 --psm 4'),
+        ('eng', r'--oem 3 --psm 6'),
+        ('eng', r'--oem 3 --psm 11'),
     ]
-    
+
     best_text = ''
     for lang, config in configs:
         try:
-            text = pytesseract.image_to_string(img, lang=lang, config=config)
-            if len(text.strip()) > len(best_text):
-                best_text = text.strip()
+            text = pytesseract.image_to_string(img, lang=lang, config=config).strip()
+            logger.info("OCR result for %s %s: %s", lang, config, text[:200])
+            if len(text) > len(best_text):
+                best_text = text
         except Exception as e:
             logger.warning(f"OCR config ({lang}, {config}) failed: {e}")
-            continue
-    
+
     return best_text
 
 
@@ -295,10 +300,11 @@ def scan_receipt(image_file):
     logger.info(f"OCR extracted text (first 200 chars): {ocr_text[:200]}")
     
     if not ocr_text or len(ocr_text.strip()) < 5:
-        raise ValueError(
-            "Could not recognize text in the image. "
-            "Try taking a photo with better lighting and focus."
-        )
+        logger.warning("OCR text is very short, continuing with Gemini vision")
+        # raise ValueError(
+        #     "Could not recognize text in the image. "
+        #     "Try taking a photo with better lighting and focus."
+        # )
     
     # Step 2: Get categories from DB
     categories = get_categories_list()

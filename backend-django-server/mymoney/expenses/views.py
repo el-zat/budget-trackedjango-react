@@ -8,6 +8,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 import logging
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -104,9 +105,13 @@ class ReceiptScanView(APIView):
             )
         except Exception as e:
             import traceback
-            logger.error(f'Receipt scan failed: {e}\n{traceback.format_exc()}')
+            tb = traceback.format_exc()
+            logger.error(f'Receipt scan failed: {e}\n{tb}')
             return Response(
-                {'error': 'Failed to process receipt. Please try again or enter data manually.'},
+                {
+                    'error': str(e) if settings.DEBUG else 'Failed to process receipt. Please try again or enter data manually.',
+                    'traceback': tb if settings.DEBUG else None,
+                },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 

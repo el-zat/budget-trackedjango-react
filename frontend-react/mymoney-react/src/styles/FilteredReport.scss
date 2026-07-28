@@ -145,6 +145,7 @@
   border-collapse: collapse;
   table-layout: fixed;
   font-size: 13px;
+  margin-bottom: 30px;
 
   th,
   td {
@@ -183,24 +184,23 @@
 
 .report-table th:nth-child(1),
 .report-table td:nth-child(1) {
-  width: 44px;
-  text-align: center;
+  width: 50px;
 }
 
 .report-table th:nth-child(2),
 .report-table td:nth-child(2) {
-  width: 100px;
+  width: 120px;
   white-space: nowrap;
 }
 
 .report-table th:nth-child(3),
 .report-table td:nth-child(3) {
-  width: 220px;
+  width: 250px;
 }
 
 .report-table th:nth-child(4),
 .report-table td:nth-child(4) {
-  width: 200px;
+  width: 250px;
 }
 
 .report-table th:nth-child(5),
@@ -215,8 +215,7 @@
   text-align: right;
 }
 
-.price-cell,
-.report-total-value {
+.price-cell{
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
@@ -224,6 +223,29 @@
 .empty-report {
   padding: 18px;
   text-align: center;
+}
+
+.report-breakdown-table {
+  th:nth-child(1),
+  td:nth-child(1) {
+    width: 200px;
+  }
+
+  th:nth-child(2),
+  td:nth-child(2) {
+    width: 80px;;
+  }
+
+  th:nth-child(3),
+  td:nth-child(3) {
+    width: 200px;
+  }
+
+  th:nth-child(4),
+  td:nth-child(4) {
+    width: 250px;
+  }
+
 }
 
 @media (max-width: 900px) {
