@@ -164,8 +164,17 @@ function Main() {
                     <Filter periodLabel={periodLabel} />
                     <ModalContext.Provider value={modalProviderValues}>
                         <div className="content-container">
-                            <Income />
-                            <Expenses />
+                            {authProviderValues.isLoggedIn ? (
+                                <>
+                                    <Income />
+                                    <Expenses />
+                                </>
+                            ) : (
+                                <div className="empty-state" style={{ gridColumn: '1 / -1', minHeight: '320px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                    <i className="material-icons" style={{ fontSize: '64px', marginBottom: '16px', opacity: 0.4 }}>account_balance_wallet</i>
+                                    <p style={{ fontSize: '18px', color: '#6b7280' }}>No data. Please log in</p>
+                                </div>
+                            )}
                         </div>
                     </ModalContext.Provider>                                    
                 </FilterContext.Provider>

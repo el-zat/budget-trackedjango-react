@@ -80,19 +80,6 @@ export default function Income() {
         };
     }, [closeEditing]);
 
-    if (!authContext.isLoggedIn) {
-        return (
-            <div className="income-wrapper">
-                <div className="income-list">
-                    <div className="empty-state">
-                        <i className="material-icons">account_balance_wallet</i>
-                        <p>No data. Please log in</p>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="income-wrapper">
             <div className="income-header" onClick={() => setIsExpanded(!isExpanded)}>
