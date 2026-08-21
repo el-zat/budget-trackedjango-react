@@ -1,3 +1,4 @@
+import os
 from rest_framework import viewsets, status, generics, permissions
 from rest_framework.permissions import AllowAny
 from .serializers import (UserSerializer, EmailVerificationSerializer, UserLoginSerializer, 
@@ -142,22 +143,9 @@ class EmailVerificationConfirmView(APIView):
             
             user.is_verified_email = True
             user.save()
-            
-            return HttpResponse(
-                '''<!DOCTYPE html>
-                <html>
-                <head><title>Email Verified</title></head>
-                <body style="font-family: Arial, sans-serif; text-align: center; padding-top: 50px;">
-                    <h1 style="color: #28a745;">&#10004; Email Verified Successfully!</h1>
-                    <p>Your account has been verified. You can now log in.</p>
-                    <a href="/" style="display: inline-block; margin-top: 20px; padding: 10px 20px; 
-                       background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
-                       Go to Login
-                    </a>
-                </body>
-                </html>''',
-                content_type='text/html'
-            )
+
+            frontend_url = os.environ.get('FRONTEND_URL', '')
+            return redirect(f'{frontend_url}/?verified=true')
         except User.DoesNotExist:
             return HttpResponse(
                 '<h1>Verification Failed</h1><p>User not found.</p>',

@@ -15,6 +15,14 @@ function Login() {
   const modalProviderValues = useContext(ModalContext);
   const filterProviderValues = useContext(FilterContext);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('verified') === 'true') {
+      modalProviderValues.setIsModalLoginOpen(true);
+      window.history.replaceState({}, '', '/');
+    }
+  }, []);
+
 
   const emptyTable = () => {
     filterProviderValues.setFilteredRows([]); 
