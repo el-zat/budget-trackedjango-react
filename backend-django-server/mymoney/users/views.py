@@ -54,7 +54,7 @@ class UserLoginAPIView(APIView):
             if not user.is_verified_email:
                 return Response({
                     'success': False, 
-                    'error': 'Please verify your email before logging in. Check your inbox or request a new verification link.',
+                    'error': 'Please verify your email before logging in. Check your inbox or request a new verification link. Please check your spam folder if you do not see the email.',
                     'email_not_verified': True,
                     'email': user.email,
                 }, status=status.HTTP_403_FORBIDDEN)

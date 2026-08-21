@@ -129,6 +129,7 @@ function Registration() {
                         <h3>Check your email!</h3>
                         <p>We sent a verification link to <strong>{registrationEmail}</strong>.</p>
                         <p>Click the link in the email to activate your account.</p>
+                        <p>Check your spam folder if you don't see the email.</p>
                         <button className="resend-btn" type="button" onClick={handleResendVerification}>
                           Resend verification email
                         </button>
