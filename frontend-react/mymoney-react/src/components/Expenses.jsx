@@ -9,10 +9,7 @@ import { SortContext } from "../context/SortContext";
 import { Sort } from "./Sort"
 import ReceiptScanner from "./ReceiptScanner";
 
-
 const Expenses = () => {
-
-    
     const expensesProviderValues = useContext(ExpensesContext)
     const filterProviderValues = useContext(FilterContext)
     const authProviderValues = useContext(AuthContext)

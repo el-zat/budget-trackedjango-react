@@ -4,6 +4,7 @@ import { IncomeContext } from '../context/IncomeContext';
 import { FilterContext } from '../context/FilterContext';
 import { ModalContext } from '../context/ModalContext';
 import { ExpensesContext } from '../context/ExpensesContext';
+import { AuthContext } from '../context/AuthContext';
 import '../styles/Income.scss';
 
 export default function Income() {
@@ -11,6 +12,7 @@ export default function Income() {
     const filterContext = useContext(FilterContext);
     const modalContext = useContext(ModalContext);
     const expensesContext = useContext(ExpensesContext);
+    const authContext = useContext(AuthContext);
     const [isExpanded, setIsExpanded] = useState(true);
     const [isFormExpanded, setIsFormExpanded] = useState(false);
     const inputRef = useRef(null);
@@ -77,6 +79,19 @@ export default function Income() {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [closeEditing]);
+
+    if (!authContext.isLoggedIn) {
+        return (
+            <div className="income-wrapper">
+                <div className="income-list">
+                    <div className="empty-state">
+                        <i className="material-icons">account_balance_wallet</i>
+                        <p>No data. Please log in</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="income-wrapper">
