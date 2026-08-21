@@ -220,7 +220,18 @@ const Expenses = () => {
       onSortChange,
     }
 
-
+    if (!authProviderValues.isLoggedIn) {
+        return (
+            <div className="expenses-wrapper">
+                <div className="expenses-table-container">
+                    <div className="empty-state">
+                        <i className="material-icons">account_balance_wallet</i>
+                        <p>No data. Please log in</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return  <React.Fragment>
         <SortContext.Provider value={sortProviderValues}>
