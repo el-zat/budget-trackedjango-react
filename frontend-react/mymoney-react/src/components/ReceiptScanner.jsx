@@ -138,6 +138,8 @@ const ReceiptScanner = () => {
 
         try {
             const uploadFile = await compressImageIfNeeded(selectedFile);
+            console.log(`File size before: ${selectedFile.size / 1024}KB, after: ${uploadFile.size / 1024}KB`);
+            
             const formData = new FormData();
             formData.append('image', uploadFile);
 
