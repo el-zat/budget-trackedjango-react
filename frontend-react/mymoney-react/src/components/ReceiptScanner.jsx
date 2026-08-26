@@ -25,6 +25,8 @@ const ReceiptScanner = () => {
     const expensesProviderValues = useContext(ExpensesContext);
     const authProviderValues = useContext(AuthContext);
 
+    console.log('ReceiptScanner component loaded with new code - v2');
+
     const parseResponse = async (response) => {
         const contentType = response.headers.get('content-type') || '';
         const rawText = await response.text();
