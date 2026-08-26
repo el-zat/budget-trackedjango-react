@@ -127,6 +127,8 @@ def parse_receipt_with_gemini(ocr_text, categories, image_base64=None, image_mim
     Use Google Gemini (free tier) to parse receipt data.
     Sends both OCR text and the original image for better recognition.
     """
+    logger.info(f"Starting Gemini parsing, OCR text length: {len(ocr_text)}, categories count: {len(categories)}")
+    
     api_key = settings.GEMINI_API_KEY
     if not api_key:
         raise ValueError("GEMINI_API_KEY is not configured in settings.")
@@ -194,6 +196,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no code blocks, no extra text.""
     last_error = None
     for model_idx, model in enumerate(models):
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        logger.info(f"Trying model {model_idx + 1}/{len(models)}: {model}")
 
         try:
             # Retry with backoff for rate limits
@@ -202,6 +205,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no code blocks, no extra text.""
             max_retries = 4 if model_idx == 0 else 2
             response = None
             for attempt in range(max_retries):
+                logger.info(f"Model {model} attempt {attempt + 1}/{max_retries}")
                 response = requests.post(url, json=payload, timeout=90)
                 if response.status_code in (429, 503):
                     delay = 3 * (attempt + 1)  # 3s, 6s, 9s, 12s
@@ -288,14 +292,20 @@ def scan_receipt(image_file):
     """
     import base64
     
+    logger.info("Starting receipt scan pipeline...")
+    
     # Step 0: Read image bytes for Gemini Vision
     image_file.seek(0)
     image_bytes = image_file.read()
+    logger.info(f"Image size: {len(image_bytes)} bytes")
+    
     image_base64 = base64.b64encode(image_bytes).decode('utf-8')
     # Determine MIME type
     image_mime = getattr(image_file, 'content_type', 'image/jpeg') or 'image/jpeg'
+    logger.info(f"Image MIME type: {image_mime}")
     
     # Step 1: OCR with Tesseract
+    logger.info("Step 1: Running OCR with Tesseract...")
     ocr_text = extract_text_from_image(image_file)
     
     logger.info(f"OCR extracted text (first 200 chars): {ocr_text[:200]}")

@@ -73,6 +73,8 @@ class ReceiptScanView(APIView):
 
     def post(self, request):
         image = request.FILES.get('image')
+        logger.info(f'Receipt scan request received, image: {image}')
+        
         if not image:
             return Response(
                 {'error': 'No image uploaded. Please attach a receipt photo.'},
@@ -80,6 +82,7 @@ class ReceiptScanView(APIView):
             )
 
         # Validate file type
+        logger.info(f'File size: {image.size} bytes, type: {image.content_type}')
         allowed_types = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
         if image.content_type not in allowed_types:
             return Response(
@@ -87,18 +90,22 @@ class ReceiptScanView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Validate file size (max 10MB)
-        if image.size > 10 * 1024 * 1024:
+        # Validate file size (max 50MB)
+        if image.size > 50 * 1024 * 1024:
+            logger.warning(f'File too large: {image.size} bytes')
             return Response(
-                {'error': 'File too large. Maximum size is 10 MB.'},
+                {'error': 'File too large. Maximum size is 50 MB.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         try:
+            logger.info('Starting receipt scan...')
             from .receipt_scanner import scan_receipt
             result = scan_receipt(image)
+            logger.info(f'Receipt scan successful: {result}')
             return Response(result, status=status.HTTP_200_OK)
         except ValueError as e:
+            logger.error(f'Validation error in receipt scan: {e}')
             return Response(
                 {'error': str(e)},
                 status=status.HTTP_422_UNPROCESSABLE_ENTITY
