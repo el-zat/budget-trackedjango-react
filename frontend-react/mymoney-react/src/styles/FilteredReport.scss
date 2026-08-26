@@ -512,12 +512,34 @@
       padding: 6px 8px;
       border: 1px solid #e9eef6;
       width: auto !important;
-        text-align: left;
-      }
+      text-align: left;
+    }
 
-      th:nth-child(2), td:nth-child(2),
-      th:nth-child(3), td:nth-child(3) {
-        text-align: right;
+    th:nth-child(2), td:nth-child(2),
+    th:nth-child(3), td:nth-child(3) {
+      text-align: right;
+    }
+  }
+
+  .report-breakdown-section h2 {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
   body * {
     visibility: hidden;
   }
