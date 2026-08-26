@@ -63,12 +63,8 @@ def extract_text_from_image(image_file):
     img = preprocess_image(image_file)
 
     configs = [
-        ('deu+eng', r'--oem 3 --psm 4'),
         ('deu+eng', r'--oem 3 --psm 6'),
-        ('deu+eng', r'--oem 3 --psm 11'),
-        ('eng', r'--oem 3 --psm 4'),
-        ('eng', r'--oem 3 --psm 6'),
-        ('eng', r'--oem 3 --psm 11'),
+        ('deu+eng', r'--oem 3 --psm 4'),
     ]
 
     best_text = ''
