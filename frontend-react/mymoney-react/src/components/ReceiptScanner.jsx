@@ -135,6 +135,13 @@ const ReceiptScanner = () => {
         setError(null);
 
         const token = localStorage.getItem('token');
+        console.log(`Token from localStorage: ${token ? 'Present (' + token.length + ' chars)' : 'MISSING'}`);
+
+        if (!token) {
+            setError('Not logged in. Please log in first.');
+            setIsScanning(false);
+            return;
+        }
 
         try {
             const uploadFile = await compressImageIfNeeded(selectedFile);
@@ -143,6 +150,7 @@ const ReceiptScanner = () => {
             const formData = new FormData();
             formData.append('image', uploadFile);
 
+            console.log('Sending request with Authorization header...');
             const response = await fetch('/api/receipt-scan/', {
                 method: 'POST',
                 headers: {
