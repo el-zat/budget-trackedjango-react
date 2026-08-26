@@ -152,10 +152,7 @@ DOMAIN_NAME = os.environ.get("DOMAIN_NAME")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-TESSERACT_CMD = os.environ.get(
-    "TESSERACT_CMD",
-    r"C:\Users\elena.zatykina\AppData\Local\Programs\Tesseract-OCR\tesseract.exe"
-)
+TESSERACT_CMD = os.environ.get("TESSERACT_CMD", "")
 
 
 if not DEBUG:

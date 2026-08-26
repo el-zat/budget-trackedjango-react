@@ -5,6 +5,8 @@ import { AuthContext } from "../context/AuthContext";
 import '../styles/ReceiptScanner.scss';
 import { FiCamera, FiUpload, FiCheck, FiX, FiLoader } from "react-icons/fi";
 
+const MAX_RECEIPT_UPLOAD_BYTES = 900 * 1024;
+
 const ReceiptScanner = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
@@ -22,6 +24,92 @@ const ReceiptScanner = () => {
 
     const expensesProviderValues = useContext(ExpensesContext);
     const authProviderValues = useContext(AuthContext);
+
+    const parseResponse = async (response) => {
+        const contentType = response.headers.get('content-type') || '';
+        const rawText = await response.text();
+
+        if (!rawText) {
+            return { data: null, rawText: '' };
+        }
+
+        if (contentType.includes('application/json')) {
+            try {
+                return { data: JSON.parse(rawText), rawText };
+            } catch {
+                return { data: null, rawText };
+            }
+        }
+
+        try {
+            return { data: JSON.parse(rawText), rawText };
+        } catch {
+            return { data: null, rawText };
+        }
+    };
+
+    const getHttpErrorMessage = (status, fallback) => {
+        if (status === 413) {
+            return 'Receipt photo is too large for the server. Please upload a smaller image.';
+        }
+        if (status === 502 || status === 503 || status === 504) {
+            return 'Server is temporarily unavailable. Please try again in a minute.';
+        }
+        if (status >= 500) {
+            return 'Server error while scanning receipt. Please try again later.';
+        }
+        return fallback || `Request failed (${status}).`;
+    };
+
+    const compressImageIfNeeded = async (file) => {
+        if (!file || file.size <= MAX_RECEIPT_UPLOAD_BYTES || !file.type.startsWith('image/')) {
+            return file;
+        }
+
+        const toDataUrl = (blob) => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error('Failed to read image for compression.'));
+            reader.readAsDataURL(blob);
+        });
+
+        const dataUrl = await toDataUrl(file);
+        const img = await new Promise((resolve, reject) => {
+            const image = new Image();
+            image.onload = () => resolve(image);
+            image.onerror = () => reject(new Error('Failed to load image for compression.'));
+            image.src = dataUrl;
+        });
+
+        const maxDimension = 1600;
+        const ratio = Math.min(1, maxDimension / img.width, maxDimension / img.height);
+        const width = Math.max(1, Math.round(img.width * ratio));
+        const height = Math.max(1, Math.round(img.height * ratio));
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return file;
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const qualities = [0.85, 0.75, 0.65, 0.55];
+        for (const quality of qualities) {
+            const blob = await new Promise((resolve) => {
+                canvas.toBlob(resolve, 'image/jpeg', quality);
+            });
+
+            if (!blob) continue;
+
+            if (blob.size <= MAX_RECEIPT_UPLOAD_BYTES || quality === qualities[qualities.length - 1]) {
+                return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
+            }
+        }
+
+        return file;
+    };
 
     const handleFileSelect = (e) => {
         const file = e.target.files[0];
@@ -47,10 +135,12 @@ const ReceiptScanner = () => {
         setError(null);
 
         const token = localStorage.getItem('token');
-        const formData = new FormData();
-        formData.append('image', selectedFile);
 
         try {
+            const uploadFile = await compressImageIfNeeded(selectedFile);
+            const formData = new FormData();
+            formData.append('image', uploadFile);
+
             const response = await fetch('/api/receipt-scan/', {
                 method: 'POST',
                 headers: {
@@ -59,10 +149,16 @@ const ReceiptScanner = () => {
                 body: formData,
             });
 
-            const data = await response.json();
+            const { data, rawText } = await parseResponse(response);
 
             if (!response.ok) {
-                setError(data.error || 'Error scanning receipt');
+                const errorFromApi = data && typeof data === 'object' ? data.error : null;
+                setError(getHttpErrorMessage(response.status, errorFromApi || rawText || 'Error scanning receipt'));
+                return;
+            }
+
+            if (!data || typeof data !== 'object') {
+                setError('Unexpected server response. Please try again.');
                 return;
             }
 
@@ -79,7 +175,7 @@ const ReceiptScanner = () => {
             setExpenseName(data.seller || '');
             setExpenseDate(data.date || new Date().toISOString().split('T')[0]);
         } catch (err) {
-            setError('Network error. Check your connection and try again.');
+            setError(err?.message || 'Network error. Check your connection and try again.');
         } finally {
             setIsScanning(false);
         }
@@ -126,9 +222,11 @@ const ReceiptScanner = () => {
                 body: JSON.stringify(expenseData),
             });
 
+            const { data, rawText } = await parseResponse(response);
+
             if (!response.ok) {
-                const data = await response.json();
-                setError('Failed to save: ' + JSON.stringify(data));
+                const errorFromApi = data && typeof data === 'object' ? JSON.stringify(data) : rawText;
+                setError(getHttpErrorMessage(response.status, `Failed to save: ${errorFromApi || 'unknown error'}`));
                 return;
             }
 
