@@ -298,7 +298,6 @@ const FilteredReport = ({
                 <thead>
                   <tr>
                     <th>Category</th>
-                    <th>Entries</th>
                     <th>Total</th>
                     <th>Share</th>
                   </tr>
@@ -307,7 +306,6 @@ const FilteredReport = ({
                   {categoryBreakdown.map((item) => (
                     <tr key={item.name}>
                       <td>{item.name}</td>
-                      <td>{item.count}</td>
                       <td>€ {item.sum.toFixed(2)}</td>
                       <td>{item.percent.toFixed(1)}%</td>
                     </tr>

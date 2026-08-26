@@ -704,6 +704,80 @@
   }
 }
 
+.inline-description-row {
+  td {
+    padding: 0 !important;
+    background: rgba(88, 101, 242, 0.05);
+    border-left: 3px solid rgba(88, 101, 242, 0.5);
+  }
+}
+
+.inline-description {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px;
+
+  textarea {
+    width: 100%;
+    min-height: 72px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(88, 101, 242, 0.4);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 13px;
+    font-family: inherit;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+
+    &:focus {
+      border-color: rgba(88, 101, 242, 0.9);
+    }
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.35);
+    }
+  }
+}
+
+.inline-description-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.inline-save-btn {
+  padding: 6px 18px;
+  background: #5865f2;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover { background: #4752c4; }
+}
+
+.inline-cancel-btn {
+  padding: 6px 14px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 7px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.35);
+  }
+}
+
 .add-expense-row {
   background: #1a1d3f;
   border-top: 2px solid rgba(88, 101, 242, 0.2);

@@ -41,7 +41,6 @@ export const buildFilteredReportHtmlContent = ({
       return `
         <tr>
           <td>${escapeHtml(item.name)}</td>
-          <td style="text-align:center">${Number(item.count || 0)}</td>
           <td style="text-align:right">€ ${Number(item.sum || 0).toFixed(2)}</td>
           <td style="text-align:right">${Number(item.percent || 0).toFixed(1)}%</td>
         </tr>
@@ -87,7 +86,6 @@ export const buildFilteredReportHtmlContent = ({
         <thead>
           <tr>
             <th>Category</th>
-            <th style="width:90px">Entries</th>
             <th style="width:120px">Total</th>
             <th style="width:90px">Share</th>
           </tr>
@@ -95,7 +93,7 @@ export const buildFilteredReportHtmlContent = ({
         <tbody>
           ${
             breakdownHtml ||
-            `<tr><td colspan="4" style="text-align:center;padding:18px">No category summary available</td></tr>`
+            `<tr><td colspan="3" style="text-align:center;padding:18px">No category summary available</td></tr>`
           }
         </tbody>
       </table>

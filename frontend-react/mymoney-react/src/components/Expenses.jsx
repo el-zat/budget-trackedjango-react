@@ -6,14 +6,77 @@ import { FilterContext } from "../context/FilterContext";
 import { AuthContext } from "../context/AuthContext";
 import { ModalContext } from "../context/ModalContext";
 import { SortContext } from "../context/SortContext";
+import { DescriptionContext } from "../context/DescriptionContext";
 import { Sort } from "./Sort"
 import ReceiptScanner from "./ReceiptScanner";
+
+// Inline description editor — renders as a table row directly below the expense
+const InlineDescription = ({ id }) => {
+    const [description, setDescription] = useState("");
+    const [isLoaded, setIsLoaded] = useState(false);
+    const expensesProviderValues = useContext(ExpensesContext);
+    const authProviderValues = useContext(AuthContext);
+
+    useEffect(() => {
+        if (!id) return;
+        fetch(`/api/myexpenses/${id}/`)
+            .then(res => res.json())
+            .then(data => {
+                setDescription(data.description || "");
+                setIsLoaded(true);
+            })
+            .catch(() => setIsLoaded(true));
+    }, [id]);
+
+    const handleSave = async () => {
+        if (!id) return;
+        await fetch(`/api/myexpenses/${id}/`, {
+            method: 'PATCH',
+            credentials: 'include',
+            headers: authProviderValues.getAuthHeaders(),
+            body: JSON.stringify({ description }),
+        });
+        expensesProviderValues.setHasDescription(id, true);
+        expensesProviderValues.closeDescription();
+    };
+
+    return (
+        <tr className="inline-description-row">
+            <td colSpan={6}>
+                {!isLoaded ? (
+                    <span style={{ color: '#888', fontSize: '13px' }}>Loading...</span>
+                ) : (
+                    <div className="inline-description">
+                        <textarea
+                            value={description}
+                            onChange={e => setDescription(e.target.value)}
+                            placeholder="Add description..."
+                            rows={3}
+                            autoFocus
+                            onKeyDown={e => {
+                                if (e.key === 'Escape') expensesProviderValues.closeDescription();
+                                if (e.key === 'Enter' && e.ctrlKey) handleSave();
+                            }}
+                        />
+                        <div className="inline-description-actions">
+                            <button className="inline-save-btn" onClick={handleSave}>Save</button>
+                            <button className="inline-cancel-btn" onClick={expensesProviderValues.closeDescription}>
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </td>
+        </tr>
+    );
+};
 
 const Expenses = () => {
     const expensesProviderValues = useContext(ExpensesContext)
     const filterProviderValues = useContext(FilterContext)
     const authProviderValues = useContext(AuthContext)
     const modalProviderValues = useContext(ModalContext)
+    const descriptionProviderValues = useContext(DescriptionContext)
 
     //Sorting
     const [selectedSort, setSelectedSort] = useState([])
@@ -316,7 +379,8 @@ const Expenses = () => {
                                         {recurringRows.length > 0 && (
                                             <>
                                                 {!isRecurringCollapsed && recurringRows.map((row, idx) => (
-                                                <tr key={row.id || idx}>
+                                                <React.Fragment key={row.id || idx}>
+                                                <tr>
                                                     <td>
                                                         {
                                                             expensesProviderValues.categories.find(
@@ -549,6 +613,10 @@ const Expenses = () => {
                                                         </div>
                                                     </td>                                
                                                 </tr>
+                                                {descriptionProviderValues.isDescriptionShown && descriptionProviderValues.currentDescriptionId === row.id && (
+                                                    <InlineDescription id={row.id} />
+                                                )}
+                                                </React.Fragment>
                                                 ))}
                                                 
                                             </>
@@ -606,7 +674,8 @@ const Expenses = () => {
                         </thead>
                         <tbody>
                             {regularRows.length > 0 && !isRegularCollapsed && regularRows.map((row, idx) => (
-                                <tr key={row.id || idx}>
+                                <React.Fragment key={row.id || idx}>
+                                <tr>
                                     <td>
                                         {
                                             expensesProviderValues.categories.find(
@@ -840,6 +909,10 @@ const Expenses = () => {
                                         </div>
                                     </td>                                
                                 </tr>
+                                {descriptionProviderValues.isDescriptionShown && descriptionProviderValues.currentDescriptionId === row.id && (
+                                    <InlineDescription id={row.id} />
+                                )}
+                                </React.Fragment>
                             ))}
                             
                             {/* Mobile Add Expense Button - hidden, moved outside table */}

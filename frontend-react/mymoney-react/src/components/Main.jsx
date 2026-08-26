@@ -1,12 +1,10 @@
 import React, {useState, useEffect, useMemo, useContext } from "react"
 import  '../styles/Main.scss'
 import { Filter } from "./Filter";
-import  Description  from "./description/Description";
 import { Expenses } from "./Expenses";
 import  Income  from "./Income";
 import { CombinedPieCharts } from "./CombinedPieCharts";
 import {AuthContext} from '../context/AuthContext'
-import {DescriptionContext} from '../context/DescriptionContext'
 import {ModalContext} from '../context/ModalContext'
 import { Registration } from './users/Registration'
 import { Login } from './users/Login'
@@ -21,7 +19,6 @@ import IntervalSelector from './IntervalSelector';
 function Main() {
 
     const authProviderValues = useContext(AuthContext)
-    const descriptionProviderValues = useContext(DescriptionContext)
     const filterProviderValues = useContext(FilterContext)
     const modalProviderValues = useContext(ModalContext)
     const expensesProviderValues = useContext(ExpensesContext)
@@ -185,9 +182,7 @@ function Main() {
                     </div>
                 }
 
-                {descriptionProviderValues.isDescriptionShown && descriptionProviderValues.currentDescriptionId &&
-                    <Description id={descriptionProviderValues.currentDescriptionId}/>
-                }
+                {/* Description now renders inline in the expenses table row */}
 
                 <ModalContext.Provider value={modalProviderValues}>
                     <FilterContext.Provider value={filterProviderValues}>
