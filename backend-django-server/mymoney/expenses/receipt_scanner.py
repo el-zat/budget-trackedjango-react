@@ -201,7 +201,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no code blocks, no extra text.""
             max_retries = 4 if model_idx == 0 else 2
             response = None
             for attempt in range(max_retries):
-                response = requests.post(url, json=payload, timeout=45)
+                response = requests.post(url, json=payload, timeout=90)
                 if response.status_code in (429, 503):
                     delay = 3 * (attempt + 1)  # 3s, 6s, 9s, 12s
                     logger.warning(f"Model {model} returned {response.status_code}, retry {attempt+1}/{max_retries} in {delay}s...")
