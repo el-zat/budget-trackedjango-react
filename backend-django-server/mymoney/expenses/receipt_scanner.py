@@ -165,15 +165,16 @@ If the text is unreadable or not a receipt, set confidence to "low" and fill wha
 
 IMPORTANT: Return ONLY valid JSON. No markdown, no code blocks, no extra text."""
 
-    # Build request parts — include image if available
+    # Build request parts — don't send image due to timeout issues
+    # Gemini is usually good enough with just OCR text
     parts = [{"text": prompt}]
-    if image_base64 and image_mime:
-        parts.insert(0, {
-            "inline_data": {
-                "mime_type": image_mime,
-                "data": image_base64
-            }
-        })
+    # if image_base64 and image_mime:
+    #     parts.insert(0, {
+    #         "inline_data": {
+    #             "mime_type": image_mime,
+    #             "data": image_base64
+    #         }
+    #     })
 
     # Try multiple models in case of quota limits
     models = ['gemini-3.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash-lite', 'gemini-2.0-flash']
