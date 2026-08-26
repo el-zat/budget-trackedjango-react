@@ -153,6 +153,7 @@
     border: 1px solid #e9eef6;
     vertical-align: top;
     word-break: break-word;
+    text-align: left;
   }
 
   thead {
@@ -163,6 +164,7 @@
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
+      text-align: center;
     }
   }
 
@@ -212,11 +214,9 @@
 .report-table td:nth-child(6) {
   width: 110px;
   white-space: nowrap;
-  text-align: right;
 }
 
 .price-cell{
-  text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
@@ -227,22 +227,13 @@
 
 .report-breakdown-table {
   th:nth-child(1),
-  td:nth-child(1) {
-    width: auto;
-    text-align: left;
-  }
+  td:nth-child(1) { width: auto; }
 
   th:nth-child(2),
-  td:nth-child(2) {
-    width: 140px;
-    text-align: right;
-  }
+  td:nth-child(2) { width: 140px; }
 
   th:nth-child(3),
-  td:nth-child(3) {
-    width: 100px;
-    text-align: right;
-  }
+  td:nth-child(3) { width: 100px; }
 }
 
 // ── Tablet (600–900px) ─────────────────────────────────────────────────────
@@ -309,9 +300,9 @@
   .report-table td:nth-child(5) { width: 80px; min-width: unset; }
 
   .report-breakdown-table {
-    th:nth-child(1), td:nth-child(1) { width: auto; text-align: left; }
-    th:nth-child(2), td:nth-child(2) { width: 100px; text-align: right; }
-    th:nth-child(3), td:nth-child(3) { width: 80px; text-align: right; }
+    th:nth-child(1), td:nth-child(1) { width: auto; }
+    th:nth-child(2), td:nth-child(2) { width: 100px; }
+    th:nth-child(3), td:nth-child(3) { width: 80px; }
   }
 }
 
@@ -515,9 +506,8 @@
       text-align: left;
     }
 
-    th:nth-child(2), td:nth-child(2),
-    th:nth-child(3), td:nth-child(3) {
-      text-align: right;
+    thead th {
+      text-align: center;
     }
   }
 

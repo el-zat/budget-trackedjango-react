@@ -10,7 +10,7 @@ import { DescriptionContext } from "../context/DescriptionContext";
 import { Sort } from "./Sort"
 import ReceiptScanner from "./ReceiptScanner";
 
-// Inline description editor — renders as a table row directly below the expense
+// Inline description editor — renders inside the name cell of the same row
 const InlineDescription = ({ id }) => {
     const [description, setDescription] = useState("");
     const [isLoaded, setIsLoaded] = useState(false);
@@ -40,34 +40,28 @@ const InlineDescription = ({ id }) => {
         expensesProviderValues.closeDescription();
     };
 
+    if (!isLoaded) return <div className="inline-description-loading">Loading...</div>;
+
     return (
-        <tr className="inline-description-row">
-            <td colSpan={6}>
-                {!isLoaded ? (
-                    <span style={{ color: '#888', fontSize: '13px' }}>Loading...</span>
-                ) : (
-                    <div className="inline-description">
-                        <textarea
-                            value={description}
-                            onChange={e => setDescription(e.target.value)}
-                            placeholder="Add description..."
-                            rows={3}
-                            autoFocus
-                            onKeyDown={e => {
-                                if (e.key === 'Escape') expensesProviderValues.closeDescription();
-                                if (e.key === 'Enter' && e.ctrlKey) handleSave();
-                            }}
-                        />
-                        <div className="inline-description-actions">
-                            <button className="inline-save-btn" onClick={handleSave}>Save</button>
-                            <button className="inline-cancel-btn" onClick={expensesProviderValues.closeDescription}>
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </td>
-        </tr>
+        <div className="inline-description">
+            <textarea
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder="Add description..."
+                rows={3}
+                autoFocus
+                onKeyDown={e => {
+                    if (e.key === 'Escape') expensesProviderValues.closeDescription();
+                    if (e.key === 'Enter' && e.ctrlKey) handleSave();
+                }}
+            />
+            <div className="inline-description-actions">
+                <button className="inline-save-btn" onClick={handleSave}>Save</button>
+                <button className="inline-cancel-btn" onClick={expensesProviderValues.closeDescription}>
+                    Cancel
+                </button>
+            </div>
+        </div>
     );
 };
 
@@ -379,8 +373,7 @@ const Expenses = () => {
                                         {recurringRows.length > 0 && (
                                             <>
                                                 {!isRecurringCollapsed && recurringRows.map((row, idx) => (
-                                                <React.Fragment key={row.id || idx}>
-                                                <tr>
+                                                <tr key={row.id || idx}>
                                                     <td>
                                                         {
                                                             expensesProviderValues.categories.find(
@@ -419,6 +412,9 @@ const Expenses = () => {
                                                                 )}
                                                             </div>                                                                                                                  
                                                             )}
+                                                        {descriptionProviderValues.isDescriptionShown && descriptionProviderValues.currentDescriptionId === row.id && (
+                                                            <InlineDescription id={row.id} />
+                                                        )}
                                                     </td>                
                                                     
                                                     <td>
@@ -613,10 +609,6 @@ const Expenses = () => {
                                                         </div>
                                                     </td>                                
                                                 </tr>
-                                                {descriptionProviderValues.isDescriptionShown && descriptionProviderValues.currentDescriptionId === row.id && (
-                                                    <InlineDescription id={row.id} />
-                                                )}
-                                                </React.Fragment>
                                                 ))}
                                                 
                                             </>
@@ -674,8 +666,7 @@ const Expenses = () => {
                         </thead>
                         <tbody>
                             {regularRows.length > 0 && !isRegularCollapsed && regularRows.map((row, idx) => (
-                                <React.Fragment key={row.id || idx}>
-                                <tr>
+                                <tr key={row.id || idx}>
                                     <td>
                                         {
                                             expensesProviderValues.categories.find(
@@ -716,6 +707,9 @@ const Expenses = () => {
                                                 )}
                                             </div>                                                                                                                  
                                             )}
+                                        {descriptionProviderValues.isDescriptionShown && descriptionProviderValues.currentDescriptionId === row.id && (
+                                            <InlineDescription id={row.id} />
+                                        )}
                                     </td>                
                                     
                                     <td>
@@ -909,10 +903,6 @@ const Expenses = () => {
                                         </div>
                                     </td>                                
                                 </tr>
-                                {descriptionProviderValues.isDescriptionShown && descriptionProviderValues.currentDescriptionId === row.id && (
-                                    <InlineDescription id={row.id} />
-                                )}
-                                </React.Fragment>
                             ))}
                             
                             {/* Mobile Add Expense Button - hidden, moved outside table */}

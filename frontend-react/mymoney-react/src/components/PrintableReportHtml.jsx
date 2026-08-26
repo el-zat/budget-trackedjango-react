@@ -33,6 +33,7 @@ export const buildPrintableHtml = ({
         padding: 8px 10px;
         vertical-align: top;
         word-break: break-word;
+        text-align: left;
       }
 
       thead {
@@ -48,6 +49,7 @@ export const buildPrintableHtml = ({
         font-weight: 700;
         text-transform: uppercase;
         font-size: 11px;
+        text-align: center;
       }
 
       tfoot td {

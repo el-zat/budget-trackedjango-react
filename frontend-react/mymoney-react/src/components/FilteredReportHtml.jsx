@@ -26,11 +26,11 @@ export const buildFilteredReportHtmlContent = ({
 
       return `
         <tr>
-          <td style="text-align:center">${index + 1}</td>
+          <td>${index + 1}</td>
           <td>${date}</td>
           <td>${escapeHtml(category)}</td>
           <td>${escapeHtml(expense)}</td>          
-          <td style="text-align:right">€ ${price}</td>
+          <td>€ ${price}</td>
         </tr>
       `;
     })
@@ -41,8 +41,8 @@ export const buildFilteredReportHtmlContent = ({
       return `
         <tr>
           <td>${escapeHtml(item.name)}</td>
-          <td style="text-align:right">€ ${Number(item.sum || 0).toFixed(2)}</td>
-          <td style="text-align:right">${Number(item.percent || 0).toFixed(1)}%</td>
+          <td>€ ${Number(item.sum || 0).toFixed(2)}</td>
+          <td>${Number(item.percent || 0).toFixed(1)}%</td>
         </tr>
       `;
     })
@@ -64,11 +64,11 @@ export const buildFilteredReportHtmlContent = ({
     <table>
       <thead>
         <tr>
-          <th style="width:44px">#</th>
-          <th style="width:98px">Date</th>
-          <th style="width:180px">Category</th>
-          <th style="width:200px">Expense</th>      
-          <th style="width:110px">Price</th>
+          <th style="width:44px;text-align:center">#</th>
+          <th style="width:98px;text-align:center">Date</th>
+          <th style="width:180px;text-align:center">Category</th>
+          <th style="width:200px;text-align:center">Expense</th>      
+          <th style="width:110px;text-align:center">Price</th>
         </tr>
       </thead>
       <tbody>
@@ -85,9 +85,9 @@ export const buildFilteredReportHtmlContent = ({
       <table style="margin-bottom: 16px;">
         <thead>
           <tr>
-            <th>Category</th>
-            <th style="width:120px">Total</th>
-            <th style="width:90px">Share</th>
+            <th style="text-align:center">Category</th>
+            <th style="width:120px;text-align:center">Total</th>
+            <th style="width:90px;text-align:center">Share</th>
           </tr>
         </thead>
         <tbody>
