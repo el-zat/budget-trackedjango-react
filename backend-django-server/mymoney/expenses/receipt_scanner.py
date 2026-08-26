@@ -126,23 +126,25 @@ def _parse_date_from_ocr(ocr_text):
     import re
     from datetime import datetime
 
+    # Patterns: DD.MM.YYYY, YYYY-MM-DD, DD.MM.YY
     date_patterns = [
-        r'\b(\d{2})[./-](\d{2})[./-](\d{4})\b',
-        r'\b(\d{4})[./-](\d{2})[./-](\d{2})\b',
+        (r'\b(\d{2})[./-](\d{2})[./-](\d{4})\b', '%d-%m-%Y'),
+        (r'\b(\d{4})[./-](\d{2})[./-](\d{2})\b', '%Y-%m-%d'),
+        (r'\b(\d{2})[.](\d{2})[.](\d{2})\b', '%d-%m-%y'),  # DD.MM.YY
     ]
 
-    for pattern in date_patterns:
-        match = re.search(pattern, ocr_text)
-        if not match:
-            continue
-        try:
-            if len(match.group(1)) == 4:
-                parsed = datetime.strptime(match.group(0).replace('.', '-').replace('/', '-'), '%Y-%m-%d')
-            else:
-                parsed = datetime.strptime(match.group(0).replace('.', '-').replace('/', '-'), '%d-%m-%Y')
-            return parsed.strftime('%Y-%m-%d')
-        except Exception:
-            continue
+    for pattern, fmt in date_patterns:
+        # Find all matches and take the first valid one
+        for match in re.finditer(pattern, ocr_text):
+            try:
+                raw = match.group(0).replace('.', '-').replace('/', '-')
+                parsed = datetime.strptime(raw, fmt)
+                # Sanity check: year should be reasonable
+                if parsed.year < 2000 or parsed.year > 2100:
+                    continue
+                return parsed.strftime('%Y-%m-%d')
+            except Exception:
+                continue
 
     return None
 
@@ -151,18 +153,36 @@ def _parse_total_from_ocr(ocr_text):
     import re
 
     text_lower = ocr_text.lower()
-    total_patterns = [
-        r'(?:summe|total|gesamt|zu zahlen|betrag|endbetrag)\s*[:\s]*([0-9]+[.,][0-9]{2})',
-        r'([0-9]+[.,][0-9]{2})\s*(?:eur|€)',
-    ]
 
-    for pattern in total_patterns:
-        match = re.search(pattern, text_lower)
-        if match:
+    # Priority 1: keyword-based patterns — usually the actual total
+    keyword_patterns = [
+        r'(?:summe|total|gesamt|zu zahlen|endbetrag|gesamtbetrag|bar|karte|visa|mastercard|ec)\s*[:\s]*([0-9]+[.,][0-9]{2})',
+        r'(?:betrag)\s*[:\s]*([0-9]+[.,][0-9]{2})',
+    ]
+    for pattern in keyword_patterns:
+        # Take the LAST match — totals appear near end of receipt
+        matches = list(re.finditer(pattern, text_lower))
+        if matches:
             try:
-                return float(match.group(1).replace(',', '.'))
+                return float(matches[-1].group(1).replace(',', '.'))
             except Exception:
                 pass
+
+    # Priority 2: amount followed by EUR/€ — take the LARGEST value
+    eur_amounts = re.findall(r'([0-9]+[.,][0-9]{2})\s*(?:eur|€)', text_lower)
+    if eur_amounts:
+        try:
+            return max(float(a.replace(',', '.')) for a in eur_amounts)
+        except Exception:
+            pass
+
+    # Priority 3: all amounts on receipt — take the largest (likely the total)
+    all_amounts = re.findall(r'\b([0-9]{1,4}[.,][0-9]{2})\b', text_lower)
+    if all_amounts:
+        try:
+            return max(float(a.replace(',', '.')) for a in all_amounts)
+        except Exception:
+            pass
 
     return None
 
