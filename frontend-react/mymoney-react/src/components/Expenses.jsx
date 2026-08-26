@@ -878,22 +878,37 @@ const Expenses = () => {
                                             }}
                                         />
                                     ) : (
-                                        <select
-                                            value={expensesProviderValues.selectedExpense}
-                                            onChange={e => expensesProviderValues.setSelectedExpense(e.target.value)}
-                                        >
-                                            <option value="all">Select Expense</option>
-                                            {(Array.isArray(expensesProviderValues.expenses) ? expensesProviderValues.expenses : [])
-                                                .filter(exp =>
-                                                    expensesProviderValues.selectedCategory === 'all' ||
-                                                    String(exp.category) === String(expensesProviderValues.selectedCategory)
-                                                )
-                                                .sort((a, b) => a.name.localeCompare(b.name))
-                                                .map(exp => (
-                                                    <option key={exp.id} value={exp.name}>{exp.name}</option>
-                                                ))
-                                            }
-                                        </select>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                            <select
+                                                value={expensesProviderValues.selectedExpense}
+                                                onChange={e => {
+                                                    expensesProviderValues.setSelectedExpense(e.target.value);
+                                                    expensesProviderValues.setCustomExpenseName(e.target.value === 'all' ? '' : e.target.value);
+                                                }}
+                                            >
+                                                <option value="all">Select Expense</option>
+                                                {(Array.isArray(expensesProviderValues.expenses) ? expensesProviderValues.expenses : [])
+                                                    .filter(exp =>
+                                                        expensesProviderValues.selectedCategory === 'all' ||
+                                                        String(exp.category) === String(expensesProviderValues.selectedCategory)
+                                                    )
+                                                    .sort((a, b) => a.name.localeCompare(b.name))
+                                                    .map(exp => (
+                                                        <option key={exp.id} value={exp.name}>{exp.name}</option>
+                                                    ))
+                                                }
+                                            </select>
+                                            {expensesProviderValues.selectedExpense !== 'all' && (
+                                                <input
+                                                    type="text"
+                                                    placeholder="Edit expense name..."
+                                                    value={expensesProviderValues.customExpenseName}
+                                                    onChange={e => expensesProviderValues.setCustomExpenseName(e.target.value)}
+                                                    onKeyDown={e => { if (e.key === 'Enter') expensesProviderValues.handleSave(e); }}
+                                                    style={{ fontSize: '12px' }}
+                                                />
+                                            )}
+                                        </div>
                                     )}
                                 </td>
                                 <td>
@@ -1005,22 +1020,35 @@ const Expenses = () => {
                                             onChange={e => expensesProviderValues.setMiscExpense(e.target.value)}
                                         />
                                     ) : (
-                                        <select
-                                            value={expensesProviderValues.selectedExpense}
-                                            onChange={e => expensesProviderValues.setSelectedExpense(e.target.value)}
-                                        >
-                                            <option value="all">Select Expense</option>
-                                            {(Array.isArray(expensesProviderValues.expenses) ? expensesProviderValues.expenses : [])
-                                                .filter(exp =>
-                                                    expensesProviderValues.selectedCategory === 'all' ||
-                                                    String(exp.category) === String(expensesProviderValues.selectedCategory)
-                                                )
-                                                .sort((a, b) => a.name.localeCompare(b.name))
-                                                .map(exp => (
-                                                    <option key={exp.id} value={exp.name}>{exp.name}</option>
-                                                ))
-                                            }
-                                        </select>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                            <select
+                                                value={expensesProviderValues.selectedExpense}
+                                                onChange={e => {
+                                                    expensesProviderValues.setSelectedExpense(e.target.value);
+                                                    expensesProviderValues.setCustomExpenseName(e.target.value === 'all' ? '' : e.target.value);
+                                                }}
+                                            >
+                                                <option value="all">Select Expense</option>
+                                                {(Array.isArray(expensesProviderValues.expenses) ? expensesProviderValues.expenses : [])
+                                                    .filter(exp =>
+                                                        expensesProviderValues.selectedCategory === 'all' ||
+                                                        String(exp.category) === String(expensesProviderValues.selectedCategory)
+                                                    )
+                                                    .sort((a, b) => a.name.localeCompare(b.name))
+                                                    .map(exp => (
+                                                        <option key={exp.id} value={exp.name}>{exp.name}</option>
+                                                    ))
+                                                }
+                                            </select>
+                                            {expensesProviderValues.selectedExpense !== 'all' && (
+                                                <input
+                                                    type="text"
+                                                    placeholder="Edit expense name..."
+                                                    value={expensesProviderValues.customExpenseName}
+                                                    onChange={e => expensesProviderValues.setCustomExpenseName(e.target.value)}
+                                                />
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                                 <div className="mobile-field">

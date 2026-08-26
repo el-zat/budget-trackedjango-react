@@ -103,10 +103,14 @@ def detect_grocery_store(ocr_text):
     for store in stores:
         # Check official OCR variants
         for variant in store.get_variants_list():
-            if variant in text_lower:
+            variant_norm = (variant or '').strip().lower()
+            if len(variant_norm) < 3:
+                continue
+            if variant_norm in text_lower:
                 return store.name, store.category, store.group_label
         # Also check store name directly (handles cases like OCR reading it correctly)
-        if store.name.lower() in text_lower or store.name.lower() in text_stripped:
+        store_name_norm = store.name.lower().strip()
+        if len(store_name_norm) >= 3 and (store_name_norm in text_lower or store_name_norm in text_stripped):
             return store.name, store.category, store.group_label
     
     # Last resort: check first 5 lines — store name is usually at the top
@@ -116,6 +120,51 @@ def detect_grocery_store(ocr_text):
             return store.name, store.category, store.group_label
     
     return None, None, None
+
+
+def _parse_date_from_ocr(ocr_text):
+    import re
+    from datetime import datetime
+
+    date_patterns = [
+        r'\b(\d{2})[./-](\d{2})[./-](\d{4})\b',
+        r'\b(\d{4})[./-](\d{2})[./-](\d{2})\b',
+    ]
+
+    for pattern in date_patterns:
+        match = re.search(pattern, ocr_text)
+        if not match:
+            continue
+        try:
+            if len(match.group(1)) == 4:
+                parsed = datetime.strptime(match.group(0).replace('.', '-').replace('/', '-'), '%Y-%m-%d')
+            else:
+                parsed = datetime.strptime(match.group(0).replace('.', '-').replace('/', '-'), '%d-%m-%Y')
+            return parsed.strftime('%Y-%m-%d')
+        except Exception:
+            continue
+
+    return None
+
+
+def _parse_total_from_ocr(ocr_text):
+    import re
+
+    text_lower = ocr_text.lower()
+    total_patterns = [
+        r'(?:summe|total|gesamt|zu zahlen|betrag|endbetrag)\s*[:\s]*([0-9]+[.,][0-9]{2})',
+        r'([0-9]+[.,][0-9]{2})\s*(?:eur|€)',
+    ]
+
+    for pattern in total_patterns:
+        match = re.search(pattern, text_lower)
+        if match:
+            try:
+                return float(match.group(1).replace(',', '.'))
+            except Exception:
+                pass
+
+    return None
 
 
 def parse_receipt_with_gemini(ocr_text, categories, image_base64=None, image_mime=None):
@@ -393,6 +442,16 @@ def scan_receipt(image_file):
         result['seller'] = group_label or store_name
         # Flag for frontend to show confirmation prompt
         result['detected_store'] = store_name
+
+    # Step 5: OCR-based fallback for missing critical fields
+    if not result.get('date'):
+        result['date'] = _parse_date_from_ocr(ocr_text)
+
+    if result.get('total') in (None, '', 0):
+        result['total'] = _parse_total_from_ocr(ocr_text)
+
+    if not result.get('seller') and store_name:
+        result['seller'] = group_label or store_name
     
     # Add raw OCR text for debugging/transparency
     result['ocr_text'] = ocr_text

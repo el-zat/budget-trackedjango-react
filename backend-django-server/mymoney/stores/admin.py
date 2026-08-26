@@ -1,7 +1,9 @@
 from django.contrib import admin
+from expenses.models import Category
 from .models import (
     GroceryStore,
     Drugstore,
+    GasStationStore,
     SportStore,
     ElectronicsStore,
     ClothingStore,
@@ -18,12 +20,20 @@ class BaseStoreAdmin(admin.ModelAdmin):
 
     store_type_value = None
     default_group_label = None
+    default_category_name = None
+
+    def _get_default_category(self):
+        if not self.default_category_name:
+            return None
+        return Category.objects.filter(name=self.default_category_name).first()
 
     def get_changeform_initial_data(self, request):
         initial = super().get_changeform_initial_data(request)
+        default_category = self._get_default_category()
         initial.update({
             'store_type': self.store_type_value,
             'group_label': self.default_group_label,
+            'category': default_category.id if default_category else None,
         })
         return initial
 
@@ -31,6 +41,8 @@ class BaseStoreAdmin(admin.ModelAdmin):
         obj.store_type = self.store_type_value
         if not obj.group_label:
             obj.group_label = self.default_group_label
+        if not obj.category:
+            obj.category = self._get_default_category()
         super().save_model(request, obj, form, change)
 
 
@@ -44,6 +56,13 @@ class GroceryStoreAdmin(BaseStoreAdmin):
 class DrugstoreAdmin(BaseStoreAdmin):
     store_type_value = 'drugstore'
     default_group_label = 'Drugstore total'
+
+
+@admin.register(GasStationStore)
+class GasStationStoreAdmin(BaseStoreAdmin):
+    store_type_value = 'gas_station'
+    default_group_label = 'Fuel'
+    default_category_name = 'Transport'
 
 
 @admin.register(SportStore)

@@ -8,6 +8,7 @@ class KnownStore(models.Model):
     class StoreType(models.TextChoices):
         GROCERY = 'grocery', 'Grocery Store'
         DRUGSTORE = 'drugstore', 'Drugstore'
+        GAS_STATION = 'gas_station', 'Gas Station'
         SPORTS = 'sports', 'Sports Store'
         ELECTRONICS = 'electronics', 'Electronics Store'
         CLOTHING = 'clothing', 'Clothing Store'
@@ -69,6 +70,10 @@ class DrugstoreManager(StoreTypeManager):
     store_type = KnownStore.StoreType.DRUGSTORE
 
 
+class GasStationStoreManager(StoreTypeManager):
+    store_type = KnownStore.StoreType.GAS_STATION
+
+
 class SportStoreManager(StoreTypeManager):
     store_type = KnownStore.StoreType.SPORTS
 
@@ -105,6 +110,15 @@ class Drugstore(KnownStore):
         proxy = True
         verbose_name = 'Drugstore'
         verbose_name_plural = 'Drugstores'
+
+
+class GasStationStore(KnownStore):
+    objects = GasStationStoreManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = 'Gas Station'
+        verbose_name_plural = 'Gas Stations'
 
 
 class SportStore(KnownStore):

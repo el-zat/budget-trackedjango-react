@@ -120,6 +120,10 @@ const ReceiptScanner = () => {
         setSelectedFile(file);
         setError(null);
         setScanResult(null);
+        setStoreConfirm(null);
+        setShowCategoryPicker(false);
+        setExpenseName('');
+        setExpenseDate('');
 
         // Create image preview
         const reader = new FileReader();

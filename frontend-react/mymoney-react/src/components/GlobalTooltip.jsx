@@ -19,6 +19,8 @@ const GlobalTooltip = () => {
   };
 
   const handleMouseEnter = useCallback((e) => {
+    // Disable tooltips on mobile/tablet (≤1279px)
+    if (window.innerWidth <= 1279) return;
     if (!e.target || typeof e.target.closest !== 'function') return;
     const target = e.target.closest('[data-tooltip]');
     if (!target) return;

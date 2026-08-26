@@ -1236,6 +1236,18 @@ select {
   margin-bottom: 8px;
 }
 
+@media (max-width: 1279px) {
+  [data-tooltip]::before,
+  [data-tooltip]::after {
+    display: none !important;
+  }
+
+  .tooltip-icon-text,
+  .tooltip-icon-container:hover .tooltip-icon-text {
+    display: none !important;
+  }
+}
+
 [data-tooltip] {
   position: relative;
   cursor: pointer;

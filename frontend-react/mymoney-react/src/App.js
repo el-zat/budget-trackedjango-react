@@ -19,6 +19,7 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [categories, setCategories] = useState([]);
   const [selectedExpense, setSelectedExpense] = useState('all');
+  const [customExpenseName, setCustomExpenseName] = useState('');
   const [expenses, setExpenses] = useState([]);
   const [paymentDate, setPaymentDate] = useState(getToday());
   const [price, setPrice] = useState('');
@@ -404,6 +405,7 @@ function App() {
   // Reset selectedExpense when category changes
   useEffect(() => {
       setSelectedExpense('all');
+      setCustomExpenseName('');
   }, [selectedCategory]);
 
 
@@ -799,7 +801,7 @@ function App() {
     );
 
     const isMisc = selectedCategoryObj?.name === "Miscellaneous";
-    const expenseName = isMisc ? miscExpense : selectedExpense;
+    const expenseName = isMisc ? miscExpense : (customExpenseName.trim() || selectedExpense);
 
     if (
         selectedCategory === 'all' ||
@@ -883,6 +885,7 @@ function App() {
     // Clear form
     setSelectedCategory('all');
     setSelectedExpense('all');
+    setCustomExpenseName('');
     setName('');
     setPrice('');
     setPaymentDate(getToday());
@@ -1862,6 +1865,8 @@ function App() {
       selectedCategoryObj: selectedCategoryObj,
       categories: categories,
       selectedExpense:selectedExpense,
+      customExpenseName: customExpenseName,
+      setCustomExpenseName: setCustomExpenseName,
       expenses: expenses,
       paymentDate: paymentDate,
       price: price,
