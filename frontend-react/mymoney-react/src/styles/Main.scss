@@ -397,7 +397,7 @@ h1 {
 }
 
 .stat-period {
-  font-size: 11px;
+  font-size: 14px;
   color: rgba(255, 255, 255, 0.5);
   white-space: nowrap;
   overflow: hidden;
@@ -434,18 +434,18 @@ h1 {
   }
 
   .stat-label {
-    font-size: 10px;
+    font-size: 12px;
     margin-bottom: 4px;
     letter-spacing: 0.3px;
   }
 
   .stat-value {
-    font-size: 18px;
+    font-size: 22px;
     margin-bottom: 2px;
   }
 
   .stat-period {
-    font-size: 9px;
+    font-size: 12px;
   }
 }
 
@@ -484,7 +484,7 @@ h1 {
   }
 
   .stat-label {
-    font-size: 9px;
+    font-size: 10px;
     margin-bottom: 4px;
     min-height: 24px;
     display: flex;
@@ -495,7 +495,7 @@ h1 {
   }
 
   .stat-value {
-    font-size: 16px;
+    font-size: 20px;
     margin-bottom: 2px;
     min-height: 20px;
     display: flex;
@@ -505,7 +505,7 @@ h1 {
   }
 
   .stat-period {
-    font-size: 8px;
+    font-size: 10px;
     min-height: 12px;
     display: flex;
     align-items: center;
@@ -523,20 +523,20 @@ h1 {
   }
 
   .stat-label {
-    font-size: 8px;
+    font-size: 10px;
     margin-bottom: 3px;
     min-height: 20px;
     letter-spacing: 0.2px;
   }
 
   .stat-value {
-    font-size: 14px;
+    font-size: 18px;
     margin-bottom: 1px;
     min-height: 18px;
   }
 
   .stat-period {
-    font-size: 7px;
+    font-size: 10px;
     min-height: 10px;
   }
 }

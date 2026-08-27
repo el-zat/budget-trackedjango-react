@@ -298,12 +298,13 @@ const Expenses = () => {
             
             <div className="expenses-table-container">
                 <div className="expenses-header">
-                    {authProviderValues.isLoggedIn && <div className="show-interval-spacer" aria-hidden="true" />}
+                    {/* {authProviderValues.isLoggedIn && <div className="show-interval-spacer" aria-hidden="true" />} */}
+                    {authProviderValues.isLoggedIn}
 
                     <h2 className="expenses-title">Expenses</h2>
 
                     <div className="header-actions">
-                        {authProviderValues.isLoggedIn && (
+                        {/* {authProviderValues.isLoggedIn && (
                             <div className="primary-actions">
                                 <ReceiptScanner />
                                 <button 
@@ -314,12 +315,12 @@ const Expenses = () => {
                                     <span>{isMobileAddOpen ? 'Cancel' : 'Add New Expense'}</span>
                                 </button>
                             </div>
-                        )}
+                        )} */}
                         {!modalProviderValues.isModalSortOpen  && authProviderValues.isLoggedIn &&                              
                             <button className="sort-btn" 
                                 onClick={() => modalProviderValues.setIsModalSortOpen(true)}>
                                 <i className="material-icons">swap_vert</i>
-                                Sort                   
+                                {/* Sort                    */}
                             </button>                                         
                         }
                         <SortContext.Provider value={sortProviderValues}>
@@ -330,7 +331,7 @@ const Expenses = () => {
                         <button className="filter-btn" 
                             onClick={() => filterProviderValues.setIsFilterOpen(true)}>
                             <i className="material-icons">filter_list</i>
-                            Filter                   
+                            {/* Filter                    */}
                         </button> 
                         }
                     </div>
@@ -913,7 +914,7 @@ const Expenses = () => {
                             {/* Mobile Add Expense Button - hidden, moved outside table */}
 
                             {/* Add New Expense Row */}
-                            {!isMobile && (
+                            {/* {!isMobile && (
                             <tr className="add-expense-row">
                                 <td>
                                     <select
@@ -1031,8 +1032,20 @@ const Expenses = () => {
                                     </button>
                                 </td>
                             </tr>
-                            )}
+                            )} */}
                         </tbody>
+                        {authProviderValues.isLoggedIn && (
+                            <div className="primary-actions">
+                                <ReceiptScanner />
+                                <button 
+                                    className="header-add-expense-btn"
+                                    onClick={handleAddExpenseClick}
+                                >
+                                    <i className="material-icons">add_circle</i>
+                                    <span>{isMobileAddOpen ? 'Cancel' : 'Add New Expense'}</span>
+                                </button>
+                            </div>
+                        )}
                     </table>
                     </div>
                 )}
