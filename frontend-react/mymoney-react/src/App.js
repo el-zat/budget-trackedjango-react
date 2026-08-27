@@ -90,6 +90,11 @@ function App() {
 
   //Filtering
   const [isFilterOpen, setIsFilterOpen] = useState(() => {
+      const isCompactViewport = window.matchMedia('(max-width: 1279px)').matches;
+      if (isCompactViewport) {
+        return false;
+      }
+
       const saved = localStorage.getItem('isFilterOpen');
       return saved !== null ? JSON.parse(saved) : false;
     });
@@ -267,6 +272,11 @@ function App() {
   };
 
   const deleteIncome = async (id) => {
+    const isConfirmed = window.confirm('Удалить этот доход?');
+    if (!isConfirmed) {
+      return;
+    }
+
     try {
       const response = await fetch(`/api/incomes/${id}/`, {
         method: 'DELETE',
@@ -371,6 +381,13 @@ function App() {
 
 
   useEffect(() => {
+      const isCompactViewport = window.matchMedia('(max-width: 1279px)').matches;
+      if (isCompactViewport) {
+        setIsFilterOpen(false);
+        localStorage.setItem('isFilterOpen', JSON.stringify(false));
+        return;
+      }
+
       const savedIsOpen = JSON.parse(localStorage.getItem('isFilterOpen'));
       if (savedIsOpen !== null) {
           setIsFilterOpen(savedIsOpen);
@@ -911,6 +928,12 @@ function App() {
       alert('Error: id undefined!');
       return;
     }
+
+    const isConfirmed = window.confirm('Удалить этот расход?');
+    if (!isConfirmed) {
+      return;
+    }
+
     try {
       // Find the expense to determine which endpoint to use
       const expense = rows.find(row => row.id === id);
@@ -1409,6 +1432,11 @@ function App() {
   };
 
   const removeReceipt = (expenseId) => {
+    const isConfirmed = window.confirm('Удалить прикреплённый чек?');
+    if (!isConfirmed) {
+      return;
+    }
+
     setReceipts(prev => {
       const updated = { ...prev };
       if (updated[expenseId]?.fileUrl) {

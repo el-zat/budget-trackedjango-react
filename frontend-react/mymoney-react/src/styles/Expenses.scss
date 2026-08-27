@@ -53,6 +53,56 @@
   }
 }
 
+.primary-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+
+  .receipt-scanner__trigger,
+  .header-add-expense-btn {
+    min-width: 168px;
+    height: 38px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1;
+    justify-content: center;
+
+    i,
+    svg {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+.header-add-expense-btn {
+  @extend %btn;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 14px;
+  height: 38px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: linear-gradient(135deg, rgba(88, 101, 242, 0.25), rgba(116, 79, 168, 0.25));
+  border: 1px solid rgba(88, 101, 242, 0.4);
+
+  i {
+    font-size: 18px;
+    color: rgba(88, 101, 242, 0.95);
+  }
+
+  &:hover {
+    background: linear-gradient(135deg, rgba(88, 101, 242, 0.35), rgba(116, 79, 168, 0.35));
+    border-color: rgba(88, 101, 242, 0.6);
+  }
+}
+
 .filter-btn,
 .sort-btn {
   @include flex(center, center, row);
@@ -539,38 +589,6 @@
   flex: 0 0 auto;
 }
 
-.mobile-fixed-add-btn {
-  display: none;
-
-  @media ($_mobile-max), ($_tablet-range) {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    padding: 12px 16px;
-    background: linear-gradient(135deg, rgba(88, 101, 242, 0.25), rgba(116, 79, 168, 0.25));
-    border: 1px dashed rgba(88, 101, 242, 0.5);
-    border-radius: 10px;
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-sizing: border-box;
-
-    i {
-      font-size: 22px;
-      color: rgba(88, 101, 242, 0.9);
-    }
-
-    &:hover {
-      background: linear-gradient(135deg, rgba(88, 101, 242, 0.35), rgba(116, 79, 168, 0.35));
-      border-color: rgba(88, 101, 242, 0.7);
-    }
-  }
-}
-
 .mobile-add-form-overlay {
   display: none;
 
@@ -969,16 +987,16 @@ select {
 .recurring-btn,
 .copy-btn {
   @extend %btn;
-  padding: 4px 8px;
-  height: 28px;
-  font-size: 11px;
+  padding: 6px 10px;
+  height: 34px;
+  font-size: 12px;
   font-weight: 500;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 
   i {
-    font-size: 14px;
+    font-size: 16px;
   }
 }
 
@@ -1059,10 +1077,10 @@ select {
 
 .remove-receipt-btn {
   @extend %btn;
-  padding: 4px;
-  height: 28px;
-  width: 28px;
-  font-size: 11px;
+  padding: 6px;
+  height: 34px;
+  width: 34px;
+  font-size: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1071,7 +1089,7 @@ select {
   border: 1px solid rgba(255, 107, 107, 0.3);
 
   i {
-    font-size: 16px;
+    font-size: 18px;
   }
 
   &:hover {
@@ -1083,7 +1101,7 @@ select {
 .receipt-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 
 .add-show-description-btn,
@@ -1223,91 +1241,8 @@ select {
   }
 }
 
-.show-interval {
-  font-size: 18px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
+.show-interval-spacer {
   flex: 1;
-
-  .calendar-icon {
-    font-size: 24px;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 8px;
-  }
-
-  .interval-select-field {
-    margin-left: 30px;
-    min-width: 180px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-
-    @media ($_mobile-max) {
-      min-width: 0;
-      margin-left: 0;
-      flex: 1;
-    }
-
-    label {
-      font-size: 13px;
-      font-weight: 500;
-      color: rgba(255, 255, 255, 0.7);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    select {
-      @extend %input_select;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid $borderColor;
-      transition: all 0.2s ease;
-      cursor: pointer;
-
-      &:focus {
-        outline: none;
-        border-color: $btnColor;
-        background: rgba(255, 255, 255, 0.08);
-      }
-
-      option {
-        background: #1a1d3f;
-        color: rgba(255, 255, 255, 0.9);
-        padding: 10px;
-      }
-    }
-  }
-
-  span {
-    color: rgba(255, 255, 255, 0.95);
-    margin-bottom: 8px;
-    min-width: 150px;
-
-    @media ($_mobile-max) {
-      min-width: 0;
-    }
-  }
-}
-
-.show-custom {
-  @include flex(flex-start, center, row);
-  gap: 8px;
-  font-size: 16px;
-
-  p {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 16px;
-    font-weight: 500;
-  }
-}
-
-.show-custom-interval {
-  @include flex(flex-start, center, row);
-  gap: 16px;
-  margin-left: 34px;
-  margin-bottom: 8px;
 }
 
 @media (max-width: 1279px) {
@@ -1732,7 +1667,7 @@ td:last-child [data-tooltip],
 
 @media ($_mobile-max) {
   .expenses-header {
-    padding: 12px 12px;
+    padding: 12px 6px 12px 10px;
     gap: 8px;
     flex-wrap: nowrap;
     align-items: center;
@@ -1750,11 +1685,47 @@ td:last-child [data-tooltip],
     flex: 0 0 auto;
     justify-content: flex-end;
     gap: 6px;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+
+  .primary-actions {
+    order: 1;
+    margin-left: auto;
+  }
+
+  .header-add-expense-btn {
+    padding: 6px 10px;
+    height: 34px;
+    font-size: 12px;
+    gap: 6px;
+
+    i {
+      font-size: 16px;
+    }
+  }
+
+  .primary-actions {
+    .receipt-scanner__trigger,
+    .header-add-expense-btn {
+      min-width: 148px;
+      height: 34px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+
+      i,
+      svg {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+    }
   }
 
   .filter-btn,
   .sort-btn {
+    order: 2;
     padding: 4px 8px;
     height: 28px;
     font-size: 11px;
@@ -1769,7 +1740,7 @@ td:last-child [data-tooltip],
     }
   }
 
-  .show-interval {
+  .show-interval-spacer {
     display: none;
   }
 
@@ -1921,7 +1892,7 @@ td:last-child [data-tooltip],
     flex-wrap: nowrap;
     justify-content: flex-end;
     align-items: center;
-    gap: 2px;
+    gap: 4px;
     width: auto;
     background: transparent;
     border-radius: 0;
@@ -1934,19 +1905,19 @@ td:last-child [data-tooltip],
   .recurring-btn,
   .copy-btn,
   .remove-receipt-btn {
-    padding: 2px 4px;
-    height: 22px;
-    min-width: 22px;
+    padding: 4px 6px;
+    height: 28px;
+    min-width: 28px;
 
     i {
-      font-size: 12px;
+      font-size: 14px;
     }
   }
 }
 
 @media ($_small-mobile) {
   .expenses-header {
-    padding: 12px 16px;
+    padding: 12px 6px 12px 10px;
     gap: 12px;
     justify-content: space-between;
     flex-wrap: nowrap;
@@ -1964,10 +1935,47 @@ td:last-child [data-tooltip],
     flex: 0 0 auto;
     gap: 6px;
     margin-left: auto;
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+
+  .primary-actions {
+    order: 1;
+    margin-left: auto;
+  }
+
+  .header-add-expense-btn {
+    padding: 4px 8px;
+    height: 32px;
+    font-size: 11px;
+    gap: 4px;
+
+    i {
+      font-size: 14px;
+    }
+  }
+
+  .primary-actions {
+    .receipt-scanner__trigger,
+    .header-add-expense-btn {
+      min-width: 136px;
+      height: 32px;
+      padding: 4px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+
+      i,
+      svg {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+      }
+    }
   }
 
   .filter-btn,
   .sort-btn {
+    order: 2;
     padding: 4px 8px;
     height: 28px;
     font-size: 11px;
@@ -1982,7 +1990,7 @@ td:last-child [data-tooltip],
     }
   }
 
-  .show-interval {
+  .show-interval-spacer {
     display: none;
   }
 
@@ -2017,12 +2025,12 @@ td:last-child [data-tooltip],
   .recurring-btn,
   .copy-btn,
   .remove-receipt-btn {
-    padding: 1px 3px;
-    height: 20px;
-    min-width: 20px;
+    padding: 3px 5px;
+    height: 26px;
+    min-width: 26px;
 
     i {
-      font-size: 11px;
+      font-size: 13px;
     }
   }
 }

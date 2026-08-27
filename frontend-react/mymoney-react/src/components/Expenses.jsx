@@ -188,6 +188,24 @@ const Expenses = () => {
         handleSort(value);  
     };
 
+    const handleAddExpenseClick = () => {
+        const isCompactLayout = typeof window !== 'undefined' && window.innerWidth <= 1279;
+
+        if (isCompactLayout) {
+            setIsMobileAddOpen(prev => !prev);
+            return;
+        }
+
+        const addExpenseRow = document.querySelector('.add-expense-row');
+        if (addExpenseRow) {
+            addExpenseRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const firstField = addExpenseRow.querySelector('select, input');
+            if (firstField) {
+                firstField.focus();
+            }
+        }
+    };
+
 
     //Pagination
     // Separate recurring and one-time expenses BEFORE pagination
@@ -280,36 +298,23 @@ const Expenses = () => {
             
             <div className="expenses-table-container">
                 <div className="expenses-header">
-                    {authProviderValues.isLoggedIn &&                
-                    <div className="show-interval">
-                        <i className="material-icons calendar-icon">event</i>
-                        {
-                        filterProviderValues.selectedInterval === "month" ? (
-                            <span>{filterProviderValues.customLabel || filterProviderValues.currentMonth}</span>
-                        ) : filterProviderValues.selectedInterval === "year" ? (
-                            <span>{filterProviderValues.customLabel || filterProviderValues.currentYear}</span>
-                        ) : filterProviderValues.selectedInterval === "today" ? (
-                            <span>{filterProviderValues.today}</span>
-                        ) : filterProviderValues.selectedInterval === "all" ? (
-                            <span>All</span>
-                        ) : filterProviderValues.selectedInterval === "custom" ? (
-                            <div className="show-custom-interval">
-                                <div className="show-custom">
-                                    {filterProviderValues.formatDate(filterProviderValues.startDate)}
-                                </div>-
-                                <div className="show-custom">
-                                    {filterProviderValues.formatDate(filterProviderValues.endDate)}
-                                </div>
-                            </div>             
-                        ) : null 
-                        }
-                    </div>  
-                    }
+                    {authProviderValues.isLoggedIn && <div className="show-interval-spacer" aria-hidden="true" />}
 
                     <h2 className="expenses-title">Expenses</h2>
 
                     <div className="header-actions">
-                        {authProviderValues.isLoggedIn && <ReceiptScanner />}
+                        {authProviderValues.isLoggedIn && (
+                            <div className="primary-actions">
+                                <ReceiptScanner />
+                                <button 
+                                    className="header-add-expense-btn"
+                                    onClick={handleAddExpenseClick}
+                                >
+                                    <i className="material-icons">add_circle</i>
+                                    <span>{isMobileAddOpen ? 'Cancel' : 'Add New Expense'}</span>
+                                </button>
+                            </div>
+                        )}
                         {!modalProviderValues.isModalSortOpen  && authProviderValues.isLoggedIn &&                              
                             <button className="sort-btn" 
                                 onClick={() => modalProviderValues.setIsModalSortOpen(true)}>
@@ -1161,13 +1166,6 @@ const Expenses = () => {
                             </div>
                         </div>
                     )}
-                    <button 
-                        className="mobile-fixed-add-btn"
-                        onClick={() => setIsMobileAddOpen(!isMobileAddOpen)}
-                    >
-                        <i className="material-icons">{isMobileAddOpen ? 'close' : 'add_circle'}</i>
-                        {isMobileAddOpen ? 'Cancel' : 'Add New Expense'}
-                    </button>
                 </>
             )}
                                         

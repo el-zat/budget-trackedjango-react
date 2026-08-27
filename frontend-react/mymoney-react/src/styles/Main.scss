@@ -134,11 +134,45 @@ main {
   }
 
   @media ($_mobile-max) {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand user"
+      "interval interval";
     align-items: center;
-    justify-content: center;
+    justify-content: stretch;
     margin-bottom: 20px;
     gap: 12px;
+
+    > h1 {
+      grid-area: brand;
+      justify-self: start;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    > .user-actions {
+      grid-area: user;
+      justify-self: end;
+      align-self: center;
+
+      .loggedin {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 6px;
+      }
+
+      .loggedout {
+        flex-wrap: nowrap;
+      }
+    }
+
+    > .interval-selector-wrap {
+      grid-area: interval;
+      justify-self: center;
+      width: fit-content;
+      margin: 0;
+    }
 
     .header-left {
       align-items: center;
@@ -218,7 +252,7 @@ h1 {
   }
 
   @media ($_small-mobile) {
-    font-size: 20px;
+    font-size: 18px;
     gap: 8px;
 
     svg {
@@ -228,7 +262,7 @@ h1 {
   }
 
   @media ($_extra-small-mobile) {
-    font-size: 18px;
+    font-size: 16px;
     gap: 6px;
 
     svg {
