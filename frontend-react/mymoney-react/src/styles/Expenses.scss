@@ -33,7 +33,7 @@
 
 .expenses-title {
   margin: 0;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
   text-align: center;
@@ -1676,7 +1676,7 @@ td:last-child [data-tooltip],
     flex: 0 0 100%;
     width: 100%;
     min-width: 0;
-    text-align: left;
+    text-align: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1931,7 +1931,7 @@ td:last-child [data-tooltip],
     font-size: 16px;
     flex: 0 0 100%;
     width: 100%;
-    text-align: left;
+    text-align: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

@@ -903,7 +903,7 @@ const Expenses = () => {
                         </tbody>
                         
                     </table>
-                    {authProviderValues.isLoggedIn && (
+                    {/* {authProviderValues.isLoggedIn && (
                             <div className="primary-actions">
                                 <ReceiptScanner />
                                 <button 
@@ -914,7 +914,20 @@ const Expenses = () => {
                                     <span>{isMobileAddOpen ? 'Cancel' : 'Add New Expense'}</span>
                                 </button>
                             </div>
-                        )}
+                        )} */}
+                    </div>
+                )}
+
+                {authProviderValues.isLoggedIn && (
+                    <div className="primary-actions">
+                        <ReceiptScanner />
+                        <button 
+                            className="header-add-expense-btn"
+                            onClick={handleAddExpenseClick}
+                        >
+                            <i className="material-icons">add_circle</i>
+                            <span>{isMobileAddOpen ? 'Cancel' : 'Add New Expense'}</span>
+                        </button>
                     </div>
                 )}
             </div>

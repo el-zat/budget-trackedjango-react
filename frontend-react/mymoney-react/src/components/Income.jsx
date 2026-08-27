@@ -83,7 +83,7 @@ export default function Income() {
     return (
         <div className="income-wrapper">
             <div className="income-header" onClick={() => setIsExpanded(!isExpanded)}>
-                <div className="header-left">
+                <div className="header-income">
                     <h2>Income</h2>
                 </div>
                 <button className="toggle-btn" data-tooltip={isExpanded ? "Collapse" : "Expand"}>

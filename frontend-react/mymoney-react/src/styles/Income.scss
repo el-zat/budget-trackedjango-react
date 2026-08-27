@@ -41,7 +41,7 @@
     outline-offset: 2px;
   }
 
-  .header-left {
+  .header-income {
     display: flex;
     gap: 16px;
     flex: 1;
@@ -54,7 +54,7 @@
 
   h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.9);
     text-align: center;
@@ -650,12 +650,9 @@
 
 @media ($_mobile-max) {
   .income-header {
-    .header-left {
-      justify-content: flex-start;
-    }
 
     h2 {
-      text-align: left;
+      text-align: center;
     }
   }
 
