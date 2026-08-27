@@ -304,18 +304,6 @@ const Expenses = () => {
                     <h2 className="expenses-title">Expenses</h2>
 
                     <div className="header-actions">
-                        {/* {authProviderValues.isLoggedIn && (
-                            <div className="primary-actions">
-                                <ReceiptScanner />
-                                <button 
-                                    className="header-add-expense-btn"
-                                    onClick={handleAddExpenseClick}
-                                >
-                                    <i className="material-icons">add_circle</i>
-                                    <span>{isMobileAddOpen ? 'Cancel' : 'Add New Expense'}</span>
-                                </button>
-                            </div>
-                        )} */}
                         {!modalProviderValues.isModalSortOpen  && authProviderValues.isLoggedIn &&                              
                             <button className="sort-btn" 
                                 onClick={() => modalProviderValues.setIsModalSortOpen(true)}>
@@ -911,130 +899,11 @@ const Expenses = () => {
                                 </tr>
                             ))}
                             
-                            {/* Mobile Add Expense Button - hidden, moved outside table */}
-
-                            {/* Add New Expense Row */}
-                            {/* {!isMobile && (
-                            <tr className="add-expense-row">
-                                <td>
-                                    <select
-                                        value={expensesProviderValues.selectedCategory}
-                                        onChange={e => expensesProviderValues.setSelectedCategory(e.target.value)}
-                                    >
-                                        <option value="all">Select Category</option>
-                                        {Array.isArray(expensesProviderValues.categories) ? (
-                                            expensesProviderValues.categories
-                                                .sort((a, b) => a.name.localeCompare(b.name))
-                                                .map(cat => (
-                                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                                ))
-                                        ) : (
-                                            <option>Loading...</option>
-                                        )}
-                                    </select>
-                                </td>
-                                <td>
-                                    {expensesProviderValues.selectedCategoryObj?.name === "Miscellaneous" ? (
-                                        <input
-                                            type="text"
-                                            placeholder="Enter expense name"
-                                            value={expensesProviderValues.miscExpense}
-                                            onChange={e => expensesProviderValues.setMiscExpense(e.target.value)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter') {
-                                                    expensesProviderValues.handleSave(e);
-                                                }
-                                            }}
-                                        />
-                                    ) : (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                            <select
-                                                value={expensesProviderValues.selectedExpense}
-                                                onChange={e => {
-                                                    expensesProviderValues.setSelectedExpense(e.target.value);
-                                                    expensesProviderValues.setCustomExpenseName(e.target.value === 'all' ? '' : e.target.value);
-                                                }}
-                                            >
-                                                <option value="all">Select Expense</option>
-                                                {(Array.isArray(expensesProviderValues.expenses) ? expensesProviderValues.expenses : [])
-                                                    .filter(exp =>
-                                                        expensesProviderValues.selectedCategory === 'all' ||
-                                                        String(exp.category) === String(expensesProviderValues.selectedCategory)
-                                                    )
-                                                    .sort((a, b) => a.name.localeCompare(b.name))
-                                                    .map(exp => (
-                                                        <option key={exp.id} value={exp.name}>{exp.name}</option>
-                                                    ))
-                                                }
-                                            </select>
-                                            {expensesProviderValues.selectedExpense !== 'all' && (
-                                                <input
-                                                    type="text"
-                                                    placeholder="Edit expense name..."
-                                                    value={expensesProviderValues.customExpenseName}
-                                                    onChange={e => expensesProviderValues.setCustomExpenseName(e.target.value)}
-                                                    onKeyDown={e => { if (e.key === 'Enter') expensesProviderValues.handleSave(e); }}
-                                                    style={{ fontSize: '12px' }}
-                                                />
-                                            )}
-                                        </div>
-                                    )}
-                                </td>
-                                <td>
-                                    <input
-                                        type="date"
-                                        value={expensesProviderValues.paymentDate}
-                                        onChange={e => expensesProviderValues.setPaymentDate(e.target.value)}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                expensesProviderValues.handleSave(e);
-                                            }
-                                        }}
-                                    />
-                                </td>
-                                <td>
-                                    <select
-                                        value={expensesProviderValues.expenseFrequency || 'once'}
-                                        onChange={(e) => {
-                                            expensesProviderValues.setExpenseFrequency(e.target.value);
-                                            expensesProviderValues.setIsExpenseRecurring(e.target.value !== 'once');
-                                        }}
-                                        className="frequency-select"
-                                    >
-                                        <option value="once">One-time</option>
-                                        <option value="monthly">Monthly</option>
-                                        <option value="quarterly">Quarterly</option>
-                                        <option value="yearly">Yearly</option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <CurrencyInput
-                                        placeholder="0,00"
-                                        decimalsLimit={2}
-                                        decimalSeparator=","
-                                        groupSeparator="."
-                                        prefix="€ "
-                                        allowDecimals={true}
-                                        inputMode="decimal"
-                                        value={expensesProviderValues.price}
-                                        onValueChange={(value) => expensesProviderValues.setPrice(value || '')}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                expensesProviderValues.handleSave(e);
-                                            }
-                                        }}
-                                    />
-                                </td>
-                                <td>
-                                    <button className="add-btn" onClick={expensesProviderValues.handleSave}>
-                                        <i className="material-icons">add</i>
-                                        Add
-                                    </button>
-                                </td>
-                            </tr>
-                            )} */}
+                   
                         </tbody>
-                        {authProviderValues.isLoggedIn && (
+                        
+                    </table>
+                    {authProviderValues.isLoggedIn && (
                             <div className="primary-actions">
                                 <ReceiptScanner />
                                 <button 
@@ -1046,7 +915,6 @@ const Expenses = () => {
                                 </button>
                             </div>
                         )}
-                    </table>
                     </div>
                 )}
             </div>

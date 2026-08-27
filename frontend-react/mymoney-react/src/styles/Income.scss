@@ -8,7 +8,7 @@
 }
 
 .income-header {
-  @include flex(space-between, center, row);
+  @include flex(none, center, row);
   gap: 16px;
   padding: 12px 20px;
   background: rgba(81, 207, 108, 0.1);
@@ -647,13 +647,6 @@
   }
 }
 
-@media ($_tablet) {
-  .income-header {
-    .header-left {
-      justify-content: center;
-    }
-  }
-}
 
 @media ($_mobile-max) {
   .income-header {
