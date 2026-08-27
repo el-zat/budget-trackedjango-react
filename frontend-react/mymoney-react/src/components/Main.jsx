@@ -132,7 +132,6 @@ function Main() {
                                 <div className="stat-content">
                                     <div className="stat-label">Total Income</div>
                                     <div className="stat-value">€ {intervalIncome.toFixed(2)}</div>
-                                    <div className="stat-period">{periodLabel}</div>
                                 </div>
                             </div>
                             
@@ -140,7 +139,6 @@ function Main() {
                                 <div className="stat-content">
                                     <div className="stat-label">Total Expenses</div>
                                     <div className="stat-value">€ {intervalExpenses.toFixed(2)}</div>
-                                    <div className="stat-period">{periodLabel}</div>
                                 </div>
                             </div>
                             
@@ -150,7 +148,6 @@ function Main() {
                                     <div className={`stat-value ${currentBalance >= 0 ? 'positive' : 'negative'}`}>
                                         € {currentBalance.toFixed(2)}
                                     </div>
-                                    <div className="stat-period">{periodLabel}</div>
                                 </div>
                             </div>
                         </div>

@@ -1,6 +1,7 @@
 @import './vars';
 @import './mixins';
 
+
 .login-container {
     width: 100%;
     max-width: 380px;
@@ -20,6 +21,7 @@
         gap: 18px;
     }
 }
+
 
 .loggedout,
 .loggedin {
@@ -43,13 +45,19 @@
     }
 }
 
+
+.loggedin {
+    position: relative;
+}
+
+
 .greeting {
     @include flex(center, center, row);
     gap: 8px;
     padding: 8px 16px;
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
     border: 1px solid $borderColor;
+    border-radius: 8px;
 
     .material-icons {
         font-size: 24px;
@@ -62,6 +70,93 @@
     }
 }
 
+
+/* greeting теперь является button */
+.account-menu-trigger {
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    transition: background 0.2s ease, border-color 0.2s ease;
+
+    &:hover,
+    &:focus-visible {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.22);
+        outline: none;
+    }
+
+    .account-menu-arrow {
+        margin-left: 2px;
+        font-size: 20px;
+        color: rgba(255, 255, 255, 0.7);
+    }
+}
+
+
+/* Выпадающее меню аккаунта */
+.account-menu {
+    position: absolute;
+    z-index: 1000;
+    top: calc(100% + 8px);
+    right: 0;
+
+    display: flex;
+    flex-direction: column;
+    min-width: 210px;
+    padding: 6px;
+
+    border: 1px solid $borderColor;
+    border-radius: 12px;
+    background: #282044;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+}
+
+
+.account-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    width: 100%;
+    padding: 10px 12px;
+    border: 0;
+    border-radius: 8px;
+
+    color: #ffffff;
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+    transition: background 0.2s ease;
+
+    .material-icons {
+        font-size: 20px;
+        color: $accentPurple;
+    }
+
+    &:hover,
+    &:focus-visible {
+        background: rgba(255, 255, 255, 0.1);
+        outline: none;
+    }
+}
+
+
+.logout-menu-item {
+    color: #ff9b9b;
+
+    .material-icons {
+        color: #ff9b9b;
+    }
+
+    &:hover,
+    &:focus-visible {
+        background: rgba(255, 81, 81, 0.12);
+    }
+}
+
+
 label {
     @extend %mainFont;
     font-size: 13px;
@@ -69,6 +164,7 @@ label {
     color: rgba(255, 255, 255, 0.7);
     margin-bottom: 8px;
 }
+
 
 input {
     @extend %input_select;
@@ -83,12 +179,14 @@ input {
     }
 }
 
+
 .form-group {
     position: relative;
     width: 100%;
     display: flex;
     flex-direction: column;
 }
+
 
 .show-password-btn {
     position: absolute;
@@ -107,6 +205,7 @@ input {
     }
 }
 
+
 .login-message {
     margin-top: 12px;
     padding: 12px;
@@ -124,12 +223,14 @@ input {
     }
 }
 
+
 .submit-login {
     @extend %btn;
     width: 100%;
     margin-top: 4px;
     margin-bottom: 12px;
 }
+
 
 .forgot-password-link {
     text-align: center;
@@ -146,6 +247,7 @@ input {
         }
     }
 }
+
 
 .resend-verification-block {
     margin-top: 8px;
@@ -172,6 +274,7 @@ input {
     }
 }
 
+
 // Tablets
 @media ($_tablet-range) {
     .login-container {
@@ -184,7 +287,12 @@ input {
         align-items: flex-end;
         gap: 8px;
     }
+
+    .account-menu {
+        min-width: 200px;
+    }
 }
+
 
 // Mobile styles
 @media ($_mobile-max) {
@@ -214,8 +322,23 @@ input {
     .greeting {
         padding: 6px 12px;
         font-size: 13px;
+
+        .material-icons {
+            font-size: 20px;
+        }
+    }
+
+    .account-menu {
+        min-width: 190px;
+        top: calc(100% + 6px);
+    }
+
+    .account-menu-item {
+        padding: 9px 10px;
+        font-size: 13px;
     }
 }
+
 
 @media ($_small-mobile) {
     .login-container {
@@ -242,5 +365,23 @@ input {
     .greeting {
         padding: 4px 8px;
         font-size: 12px;
+
+        .material-icons {
+            font-size: 18px;
+        }
+    }
+
+    .account-menu {
+        min-width: 180px;
+        padding: 5px;
+    }
+
+    .account-menu-item {
+        padding: 8px 9px;
+        font-size: 12px;
+
+        .material-icons {
+            font-size: 18px;
+        }
     }
 }
